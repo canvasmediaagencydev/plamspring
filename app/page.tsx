@@ -3,6 +3,8 @@ import HeroSection from "./components/HeroSection";
 import VideoSection from "./components/VideoSection";
 import HomeTypeSection from "./components/HomeTypeSection";
 import CoverSection from "./components/CoverSection";
+import LifestyleSlider from "./components/LifestyleSlider";
+import FeaturedVideoSection from "./components/FeaturedVideoSection";
 
 export default function Home() {
   return (
@@ -13,6 +15,8 @@ export default function Home() {
         <VideoSection />
         <HomeTypeSection />
         <CoverSection />
+        <LifestyleSlider />
+        <FeaturedVideoSection />
       </main>
     </>
   );

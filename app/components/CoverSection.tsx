@@ -6,9 +6,9 @@ export default function CoverSection() {
       <Image
         src="/img/Home/plam springs cover page 1.svg"
         alt="Palm Springs cover"
-        width={1920}
-        height={1080}
-        className="w-full"
+        width={1440}
+        height={548}
+        className="w-full h-auto"
         priority
       />
     </section>
