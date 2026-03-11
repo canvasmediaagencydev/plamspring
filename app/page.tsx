@@ -6,6 +6,7 @@ import CoverSection from "./components/CoverSection";
 import LifestyleSlider from "./components/LifestyleSlider";
 import FeaturedVideoSection from "./components/FeaturedVideoSection";
 import LoanCalculator from "./components/LoanCalculator";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
         <FeaturedVideoSection />
         <LoanCalculator />
       </main>
+      <Footer />
     </>
   );
 }
