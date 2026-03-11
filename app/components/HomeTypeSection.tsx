@@ -81,18 +81,18 @@ export default function HomeTypeSection() {
     homeTypes.length > 0 ? homeTypes : Array(SKELETON_COUNT).fill(undefined);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 pb-30">
+    <section className="mx-auto max-w-6xl px-4 py-10 md:py-16 md:pb-30">
       {/* Section header */}
-      <div className="mb-10 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between md:mb-10">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 md:text-sm">
             Home Type
           </p>
-          <h2 className="text-4xl font-bold text-primary">โครงการของเรา</h2>
+          <h2 className="text-2xl font-bold text-primary md:text-4xl">โครงการของเรา</h2>
         </div>
 
-        {/* Lottie icons — second animation absolute-positioned left of the house */}
-        <div className="relative h-32 w-56 shrink-0">
+        {/* Lottie icons — hidden on mobile */}
+        <div className="relative hidden h-32 w-56 shrink-0 md:block">
           {/* Left animation */}
           <div className="absolute -bottom-10 -left-30 h-59 w-59">
             <DotLottieReact

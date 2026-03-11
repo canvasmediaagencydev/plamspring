@@ -10,10 +10,7 @@ export default function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
 
   return (
-    <section
-      className="relative mt-[80px] w-full overflow-hidden"
-      style={{ height: "570px" }}
-    >
+    <section className="relative mt-16 h-[280px] w-full overflow-hidden sm:h-[380px] md:mt-20 md:h-[480px] lg:h-[570px]">
       {/* Background Hero Image */}
       <Image
         src="/img/Home/Hero.svg"
@@ -27,21 +24,21 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-l from-white/50 via-white/10 to-transparent" />
 
       {/* Branding overlay — bottom-right */}
-      <div className="absolute bottom-[30%] right-[10%] flex flex-col items-end gap-3">
+      <div className="absolute bottom-[25%] right-[5%] flex flex-col items-end gap-2 md:bottom-[30%] md:right-[10%] md:gap-3">
         {/* "PALM SPRINGS" + tree icon */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="text-right leading-tight">
-            <p className="text-5xl font-bold tracking-widest text-primary">PALM</p>
-            <p className="text-5xl font-bold tracking-widest text-primary">SPRINGS</p>
+            <p className="text-2xl font-bold tracking-widest text-primary sm:text-3xl md:text-5xl">PALM</p>
+            <p className="text-2xl font-bold tracking-widest text-primary sm:text-3xl md:text-5xl">SPRINGS</p>
           </div>
-          <PalmTreeIcon size={90} />
+          <PalmTreeIcon size={50} />
         </div>
 
         {/* Thai tagline */}
-        <p className="text-right text-2xl font-medium italic leading-snug text-primary">
-          "เลือกปาล์มสปริงส์
+        <p className="text-right text-sm font-medium italic leading-snug text-primary sm:text-base md:text-2xl">
+          &ldquo;เลือกปาล์มสปริงส์
           <br />
-          เพื่อชีวิตที่ดีกว่า"
+          เพื่อชีวิตที่ดีกว่า&rdquo;
         </p>
       </div>
 

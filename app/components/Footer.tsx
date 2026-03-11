@@ -24,16 +24,16 @@ const socials = [
 export default function Footer() {
   return (
     <footer className="w-full bg-[#1a3a8c] text-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-8 py-12 md:grid-cols-3">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-2 md:grid-cols-3 md:gap-10 md:px-8 md:py-12">
 
         {/* ── Col 1: Logo + Address ── */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <Image
             src="/img/Home/footer logo.svg"
             alt="Palm Springs logo"
             width={220}
             height={60}
-            className="h-auto w-52"
+            className="h-auto w-40 md:w-52"
           />
 
           <div className="flex items-start gap-2 text-sm leading-relaxed text-white/90">
@@ -49,7 +49,7 @@ export default function Footer() {
 
           <a
             href="#"
-            className="flex w-fit items-center gap-3 rounded-full border-2 border-white/40 bg-white/10 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20"
+            className="flex w-fit items-center gap-3 rounded-full border-2 border-white/40 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
           >
             ติดต่อเรา
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#5b3fd4]">
@@ -102,23 +102,25 @@ export default function Footer() {
         </div>
 
         {/* ── Col 3: Lottie + Tagline + Copyright ── */}
-        <div className="flex flex-col gap-3">
-          {/* Lottie beside tagline */}
-          <div className="flex-col items-center gap-2">
-              <p className="text-xl font-bold text-end italic leading-snug text-white">
-              "เลือกปาล์มสปริงส์
-              <br />
-              เพื่อชีวิตที่ดีกว่า"
-            </p>
-            <div className="w-100 shrink-0">
+        <div className="flex flex-col gap-3 sm:col-span-2 md:col-span-1">
+          <div className="flex items-center gap-2">
+            <div className="w-36 shrink-0 md:w-44">
               <DotLottieReact
                 src="https://lottie.host/02a7a704-14af-40fb-95d1-1b2e6cfa3029/kOD28GwRIf.lottie"
                 loop
                 autoplay
               />
             </div>
-          
+            <p className="text-lg font-bold italic leading-snug text-white md:text-xl">
+              &ldquo;เลือกปาล์มสปริงส์
+              <br />
+              เพื่อชีวิตที่ดีกว่า&rdquo;
+            </p>
           </div>
+
+          <p className="text-xs text-white/50">
+            &copy; 2019 - 2023 palm springs place co., ltd. all rights reserved.
+          </p>
         </div>
       </div>
     </footer>

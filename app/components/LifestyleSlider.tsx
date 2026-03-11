@@ -32,13 +32,13 @@ function SkeletonCard({ active }: { active: boolean }) {
       {/* Top image */}
       <div
         className={`w-full animate-pulse bg-gray-300 ${
-          active ? "h-72" : "h-52"
+          active ? "h-40 md:h-72" : "h-32 md:h-52"
         }`}
       />
       {/* Bottom image */}
       <div
         className={`w-full animate-pulse bg-gray-200 ${
-          active ? "h-80" : "h-60"
+          active ? "h-44 md:h-80" : "h-36 md:h-60"
         }`}
       />
       {/* Tags row */}
@@ -69,7 +69,7 @@ function SlideCardItem({
         src={card.lifestyleImage}
         alt="lifestyle"
         className={`w-full object-cover transition-all duration-500 ${
-          active ? "h-72" : "h-52"
+          active ? "h-40 md:h-72" : "h-32 md:h-52"
         }`}
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -77,7 +77,7 @@ function SlideCardItem({
         src={card.houseImage}
         alt="house"
         className={`w-full object-cover transition-all duration-500 ${
-          active ? "h-80" : "h-60"
+          active ? "h-44 md:h-80" : "h-36 md:h-60"
         }`}
       />
       {/* Tags */}
@@ -131,7 +131,7 @@ export default function LifestyleSlider() {
         </button>
 
         {/* 3 visible cards */}
-        <div className="flex w-full max-w-6xl items-end justify-center gap-6">
+        <div className="flex w-full max-w-6xl items-end justify-center gap-4 md:gap-6">
           {visibleIndices.map((itemIdx, pos) => {
             const isActive = pos === 1;
             const card = items[itemIdx];
@@ -142,8 +142,8 @@ export default function LifestyleSlider() {
                 onClick={() => setActive(itemIdx)}
                 className={`cursor-pointer transition-all duration-500 ${
                   isActive
-                    ? "z-10 w-[42%] -translate-y-8 scale-105"
-                    : "z-0 w-[29%] opacity-70"
+                    ? "z-10 w-[80%] -translate-y-4 scale-105 sm:w-[60%] md:w-[42%] md:-translate-y-8"
+                    : "z-0 hidden w-[20%] opacity-70 md:block md:w-[29%]"
                 }`}
               >
                 {card ? (
