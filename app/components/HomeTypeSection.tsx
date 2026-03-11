@@ -81,7 +81,7 @@ export default function HomeTypeSection() {
     homeTypes.length > 0 ? homeTypes : Array(SKELETON_COUNT).fill(undefined);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16">
+    <section className="mx-auto max-w-6xl px-4 py-16 pb-30">
       {/* Section header */}
       <div className="mb-10 flex items-center justify-between">
         <div>
