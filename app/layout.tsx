@@ -25,7 +25,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet" />
       </head>
-      <body className={`${montserrat.variable} ${montserrat.className} antialiased`}>{children}</body>
+      <body className={`${montserrat.variable} antialiased`}>{children}</body>
     </html>
   );
 }
