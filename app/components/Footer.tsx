@@ -48,12 +48,14 @@ export default function Footer() {
           <p className="text-sm text-white/80">ทุกวัน เวลา 9:00 - 18:00</p>
 
           <a
-            href="#"
-            className="flex w-fit items-center gap-3 rounded-full border-2 border-white/40 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            href="/contact"
+            className="flex w-fit items-center gap-3 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition hover:opacity-90"
           >
             ติดต่อเรา
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#5b3fd4]">
-              →
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white">
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="#09418C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </span>
           </a>
         </div>
