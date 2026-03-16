@@ -39,11 +39,11 @@ function BlogRow({ title, excerpt }: { title: string; excerpt: string }) {
 
       {/* Text — right */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-bold text-primary md:text-3xl">{title}</h2>
-        <p className="text-sm leading-relaxed text-gray-500 md:text-base">{excerpt}</p>
+        <h2 className="text-2xl font-bold text-primary md:text-4xl">{title}</h2>
+        <p className="text-base leading-relaxed text-gray-500 md:text-lg">{excerpt}</p>
         <Link
           href="#"
-          className="mt-1 w-fit rounded-full border border-primary px-7 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+          className="mt-1 w-fit rounded-full border border-primary px-7 py-2 text-base font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
         >
           See All
         </Link>

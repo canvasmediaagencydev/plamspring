@@ -80,7 +80,7 @@ export default function MilestoneSection() {
   return (
     <section className="w-full bg-white py-12 md:py-16">
       {/* Title */}
-      <h2 className="mb-10 text-center text-2xl font-bold tracking-widest text-primary md:text-3xl">
+      <h2 className="mb-10 text-center text-2xl font-bold tracking-widest text-primary md:text-4xl">
         MILESTONE
       </h2>
 
@@ -109,7 +109,7 @@ export default function MilestoneSection() {
                 >
                   {/* Year */}
                   <span
-                    className={`mb-2 text-center text-sm font-bold transition-colors md:text-base ${
+                    className={`mb-2 text-center text-base font-bold transition-colors md:text-lg ${
                       isActive ? "text-primary" : "text-primary/35"
                     }`}
                   >
@@ -146,7 +146,7 @@ export default function MilestoneSection() {
 
                   {/* Project name */}
                   <span
-                    className={`mt-2 px-1 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide transition-colors md:text-[10px] ${
+                    className={`mt-2 px-1 text-center text-xs font-semibold uppercase leading-tight tracking-wide transition-colors md:text-sm ${
                       isActive ? "text-primary" : "text-primary/35"
                     }`}
                   >

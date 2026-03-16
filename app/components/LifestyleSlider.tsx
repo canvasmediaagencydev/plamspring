@@ -113,7 +113,7 @@ export default function LifestyleSlider() {
   return (
     <section className="overflow-hidden py-16">
       {/* Heading */}
-      <h2 className="mb-30 text-center text-2xl font-bold text-primary">
+      <h2 className="mb-30 text-center text-2xl font-bold text-primary md:text-4xl">
         ทำเลศักยภาพ ตอบโจทย์ทุกไลฟ์สไตล์
       </h2>
 

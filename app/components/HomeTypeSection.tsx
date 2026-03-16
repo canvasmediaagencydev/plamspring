@@ -67,9 +67,9 @@ function HomeCard({ card }: { card: HomeTypeCard }) {
 
       {/* Name / logo area */}
       <div className="flex flex-col items-center gap-1 px-4 py-5 text-center">
-        <p className="text-sm font-bold tracking-widest text-primary">{card.name}</p>
+        <p className="text-sm font-bold tracking-widest text-primary md:text-base">{card.name}</p>
         {card.subtitle && (
-          <p className="text-xs text-gray-500">{card.subtitle}</p>
+          <p className="text-xs text-gray-500 md:text-sm">{card.subtitle}</p>
         )}
       </div>
     </div>
@@ -85,10 +85,10 @@ export default function HomeTypeSection() {
       {/* Section header */}
       <div className="mb-8 flex items-center justify-between md:mb-10">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 md:text-sm">
+          <p className="text-sm font-semibold uppercase tracking-widest text-gray-400 md:text-base">
             Home Type
           </p>
-          <h2 className="text-2xl font-bold text-primary md:text-4xl">โครงการของเรา</h2>
+          <h2 className="text-3xl font-bold text-primary md:text-5xl">โครงการของเรา</h2>
         </div>
 
         {/* Lottie icons — hidden on mobile */}

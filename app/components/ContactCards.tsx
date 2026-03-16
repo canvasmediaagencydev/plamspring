@@ -41,12 +41,12 @@ export default function ContactCards() {
             />
 
             {/* Label */}
-            <p className="text-lg font-bold text-white">{card.label}</p>
+            <p className="text-xl font-bold text-white md:text-2xl">{card.label}</p>
 
             {/* Button */}
             <Link
               href={card.href}
-              className="rounded-full border-2 border-white px-8 py-2 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-primary"
+              className="rounded-full border-2 border-white px-8 py-2.5 text-base font-semibold text-white transition-colors hover:bg-white hover:text-primary"
             >
               {card.btnText}
             </Link>

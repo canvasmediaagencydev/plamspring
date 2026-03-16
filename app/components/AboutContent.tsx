@@ -9,9 +9,9 @@ function SectionBlock({ title, children }: SectionBlockProps) {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
       <div className="rounded-full border-2 border-primary px-10 py-2">
-        <h2 className="text-lg font-bold tracking-widest text-primary">{title}</h2>
+        <h2 className="text-xl font-bold tracking-widest text-primary md:text-2xl">{title}</h2>
       </div>
-      <div className="max-w-2xl text-sm leading-relaxed text-primary md:text-base">
+      <div className="max-w-2xl text-base leading-relaxed text-primary md:text-lg">
         {children}
       </div>
     </div>

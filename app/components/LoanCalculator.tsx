@@ -43,7 +43,7 @@ function NumberInput({ label, value, unit, step, max, onChange, hint }: NumberIn
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-gray-600">{label}</p>
+      <p className="text-sm text-gray-600 md:text-base">{label}</p>
       <div className="flex items-center gap-3 border-b-2 border-gray-300 pb-2 focus-within:border-primary">
         {/* − button */}
         <button
@@ -78,9 +78,9 @@ function NumberInput({ label, value, unit, step, max, onChange, hint }: NumberIn
           <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
         </button>
 
-        <span className="shrink-0 text-sm text-gray-500">{unit}</span>
+        <span className="shrink-0 text-sm text-gray-500 md:text-base">{unit}</span>
       </div>
-      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="text-xs text-gray-400 md:text-sm">{hint}</p>}
     </div>
   );
 }
@@ -109,8 +109,8 @@ export default function LoanCalculator() {
     <section className="mx-auto max-w-6xl px-4 py-16">
       {/* Heading */}
       <div className="mb-10 text-center">
-        <h2 className="text-2xl font-bold text-primary">คำนวณวงเงินที่สามารถกู้ได้</h2>
-        <p className="mt-2 text-sm text-gray-500">
+        <h2 className="text-2xl font-bold text-primary md:text-4xl">คำนวณวงเงินที่สามารถกู้ได้</h2>
+        <p className="mt-2 text-sm text-gray-500 md:text-lg">
           ประมาณการยอดเงินกู้สูงสุด เพื่อที่อยู่อาศัยซึ่งแปรผันและขึ้นอยู่กับรายได้แต่ละบุคคล
         </p>
       </div>
@@ -145,12 +145,12 @@ export default function LoanCalculator() {
           {/* Result */}
           {result !== null && (
             <div className="rounded-xl bg-primary/10 px-5 py-4">
-              <p className="text-sm text-gray-600">วงเงินกู้สูงสุดที่ประมาณได้</p>
-              <p className="mt-1 text-3xl font-bold text-primary">
+              <p className="text-base text-gray-600 md:text-lg">วงเงินกู้สูงสุดที่ประมาณได้</p>
+              <p className="mt-1 text-3xl font-bold text-primary md:text-4xl">
                 {formatTHB(result)}
-                <span className="ml-2 text-lg font-normal">บาท</span>
+                <span className="ml-2 text-lg font-normal md:text-xl">บาท</span>
               </p>
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-gray-400 md:text-sm">
                 * คำนวณจากอัตราดอกเบี้ย {(ANNUAL_RATE * 100).toFixed(1)}% ต่อปี และ DSR {DSR_RATIO * 100}%
               </p>
             </div>
@@ -160,17 +160,17 @@ export default function LoanCalculator() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handleCalculate}
-              className="rounded-full bg-[#1a2e6e] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              className="rounded-full bg-[#1a2e6e] px-6 py-2.5 text-base font-semibold text-white transition hover:opacity-90 md:px-8 md:py-3"
             >
               คำนวณเงินกู้
             </button>
             <button
               onClick={handleReset}
-              className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              className="rounded-full border border-gray-300 px-6 py-2.5 text-base font-semibold text-gray-700 transition hover:bg-gray-50 md:px-8 md:py-3"
             >
               เริ่มใหม่
             </button>
-            <button className="rounded-full bg-[#e31e24] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">
+            <button className="rounded-full bg-[#e31e24] px-6 py-2.5 text-base font-semibold text-white transition hover:opacity-90 md:px-8 md:py-3">
               ติดต่อเรา
             </button>
           </div>

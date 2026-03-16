@@ -24,7 +24,7 @@ export default function ContactForm() {
   return (
     <section className="w-full bg-white py-14 md:py-20">
       <div className="mx-auto max-w-xl px-6 md:px-12">
-        <h2 className="mb-8 text-xl font-semibold text-primary">ข้อมูลติดต่อ</h2>
+        <h2 className="mb-8 text-2xl font-semibold text-primary md:text-3xl">ข้อมูลติดต่อ</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           {/* Name */}
@@ -36,7 +36,7 @@ export default function ContactForm() {
               onChange={handleChange}
               placeholder="*ชื่อ-นามสกุล"
               required
-              className="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none"
+              className="w-full bg-transparent text-base text-gray-700 placeholder-gray-400 outline-none md:text-lg"
             />
           </div>
 
@@ -49,7 +49,7 @@ export default function ContactForm() {
               onChange={handleChange}
               placeholder="*E*MAIL"
               required
-              className="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none"
+              className="w-full bg-transparent text-base text-gray-700 placeholder-gray-400 outline-none md:text-lg"
             />
           </div>
 
@@ -62,7 +62,7 @@ export default function ContactForm() {
               onChange={handleChange}
               placeholder="*เบอร์โทร"
               required
-              className="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none"
+              className="w-full bg-transparent text-base text-gray-700 placeholder-gray-400 outline-none md:text-lg"
             />
           </div>
 
@@ -74,7 +74,7 @@ export default function ContactForm() {
               onChange={handleChange}
               placeholder="รายละเอียดเรื่องที่ต้องการติดต่อ"
               rows={5}
-              className="w-full resize-none bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none"
+              className="w-full resize-none bg-transparent text-base text-gray-700 placeholder-gray-400 outline-none md:text-lg"
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function ContactForm() {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="rounded-full bg-primary px-12 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="rounded-full bg-primary px-12 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 md:text-lg"
             >
               ส่งข้อมูล
             </button>
