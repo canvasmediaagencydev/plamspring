@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 // ── Loan calculation ──────────────────────────────────────────────────────────
@@ -170,9 +171,12 @@ export default function LoanCalculator() {
             >
               เริ่มใหม่
             </button>
-            <button className="rounded-full bg-[#e31e24] px-6 py-2.5 text-base font-semibold text-white transition hover:opacity-90 md:px-8 md:py-3">
+            <Link
+              href="/contact/lead"
+              className="rounded-full bg-[#e31e24] px-6 py-2.5 text-base font-semibold text-white transition hover:opacity-90 md:px-8 md:py-3"
+            >
               ติดต่อเรา
-            </button>
+            </Link>
           </div>
         </div>
 
