@@ -173,6 +173,13 @@ export default function LoanCalculator() {
             </button>
             <Link
               href="/contact/lead"
+              onClick={() => {
+                fetch("/api/track-click", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ type: "loan_contact" }),
+                }).catch(() => {});
+              }}
               className="rounded-full bg-[#e31e24] px-6 py-2.5 text-base font-semibold text-white transition hover:opacity-90 md:px-8 md:py-3"
             >
               ติดต่อเรา

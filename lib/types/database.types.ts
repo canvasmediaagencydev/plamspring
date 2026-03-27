@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_clicks: {
+        Row: {
+          id: string
+          type: "facebook" | "line" | "loan_contact"
+          clicked_at: string
+        }
+        Insert: {
+          id?: string
+          type: "facebook" | "line" | "loan_contact"
+          clicked_at?: string
+        }
+        Update: {
+          id?: string
+          type?: "facebook" | "line" | "loan_contact"
+          clicked_at?: string
+        }
+        Relationships: []
+      }
       awards: {
         Row: {
           created_at: string | null

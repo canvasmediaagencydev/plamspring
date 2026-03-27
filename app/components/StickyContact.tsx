@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { FaFacebookMessenger, FaLine, FaCommentDots, FaTimes } from "react-icons/fa";
 
 interface StickyContactProps {
   facebookMessengerUrl?: string;
   lineUrl?: string;
+}
+
+async function trackClick(type: "facebook" | "line") {
+  try {
+    await fetch("/api/track-click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    });
+  } catch {
+    // fire-and-forget — never block the user's navigation
+  }
 }
 
 export default function StickyContact({
@@ -14,6 +26,9 @@ export default function StickyContact({
 }: StickyContactProps) {
   const [open, setOpen] = useState(false);
 
+  const handleLineClick = useCallback(() => trackClick("line"), []);
+  const handleFacebookClick = useCallback(() => trackClick("facebook"), []);
+
   const contacts = [
     {
       icon: FaLine,
@@ -21,6 +36,7 @@ export default function StickyContact({
       href: lineUrl,
       bg: "bg-[#06C755]",
       hoverBg: "hover:bg-[#05b34c]",
+      onClick: handleLineClick,
     },
     {
       icon: FaFacebookMessenger,
@@ -28,6 +44,7 @@ export default function StickyContact({
       href: facebookMessengerUrl,
       bg: "bg-[#0084FF]",
       hoverBg: "hover:bg-[#0073e0]",
+      onClick: handleFacebookClick,
     },
   ];
 
@@ -42,13 +59,14 @@ export default function StickyContact({
         }`}
         aria-hidden={!open}
       >
-        {contacts.map(({ icon: Icon, label, href, bg, hoverBg }) => (
+        {contacts.map(({ icon: Icon, label, href, bg, hoverBg, onClick }) => (
           <a
             key={label}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={label}
+            onClick={onClick}
             className={`flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-110 ${bg} ${hoverBg} text-white`}
           >
             <Icon size={22} />

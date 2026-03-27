@@ -7,7 +7,6 @@ import { ImageUploader } from "@/app/components/admin/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, ImageIcon, X, Layers } from "lucide-react";
 import { revalidatePages, REVALIDATE_PATHS } from "@/lib/revalidate";
@@ -55,8 +54,8 @@ export default function AdminLifestylePage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const payload = { lifestyle_image_url: form.lifestyle_image_url || "", tags: form.tags,
-      sort_order: form.sort_order, updated_at: new Date().toISOString() };
+    const payload = { lifestyle_image_url: form.lifestyle_image_url || "",
+      tags: form.tags, sort_order: form.sort_order, updated_at: new Date().toISOString() };
     if (modal?.mode === "new") {
       const { data } = await supabase.from("lifestyle_slides").insert({ ...payload, house_image_url: "" }).select().single();
       if (data) setSlides((prev) => [...prev, data]);
@@ -81,54 +80,85 @@ export default function AdminLifestylePage() {
         action={<Button onClick={openNew}><Plus size={16} />เพิ่ม Slide</Button>} />
 
       {loading ? (
-        <Card><CardContent className="pt-6 space-y-3">
-          {[1,2].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-100" />)}
-        </CardContent></Card>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+          {[1,2,3,4].map((i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="aspect-[4/3] animate-pulse bg-gray-100" />
+              <div className="p-4 space-y-2">
+                <div className="h-3 w-2/3 animate-pulse rounded bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : slides.length === 0 ? (
-        <Card><CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-            <Layers size={22} className="text-gray-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+            <Layers size={24} className="text-gray-400" />
           </div>
           <p className="text-sm font-medium text-gray-600">ยังไม่มี Slide</p>
           <Button variant="outline" size="sm" className="mt-4" onClick={openNew}><Plus size={14} />เพิ่ม Slide แรก</Button>
-        </CardContent></Card>
+        </div>
       ) : (
-        <Card><CardContent className="p-0">
-          <div className="divide-y divide-gray-100">
-            {slides.map((slide) => (
-              <div key={slide.id} className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/70">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+          {slides.map((slide, idx) => (
+            <div key={slide.id}
+              className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+              {/* Image */}
+              <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
                 {slide.lifestyle_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={slide.lifestyle_image_url} alt="" className="h-11 w-16 shrink-0 rounded-lg object-cover" />
+                  <img src={slide.lifestyle_image_url} alt=""
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 ) : (
-                  <div className="flex h-11 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                    <ImageIcon size={16} className="text-gray-300" />
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ImageIcon size={32} className="text-gray-200" />
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  {slide.tags.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {slide.tags.map((t) => (
-                        <span key={t} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{t}</span>
-                      ))}
-                    </div>
-                  ) : <p className="text-xs text-gray-400">ไม่มี Tags</p>}
-                  <p className="mt-0.5 text-xs text-gray-400">ลำดับ: {slide.sort_order}</p>
-                </div>
-                <div className="flex items-center">
+                {/* Slide number */}
+                <span className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-[10px] font-bold text-white">
+                  {idx + 1}
+                </span>
+              </div>
+
+              {/* Tags */}
+              <div className="p-4">
+                {slide.tags.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {slide.tags.map((t) => (
+                      <span key={t} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-medium text-blue-700">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-300">ไม่มี Tags</p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between border-t border-gray-50 px-4 py-2.5">
+                <span className="text-[10px] text-gray-300">ลำดับ {slide.sort_order}</span>
+                <div className="flex items-center gap-1">
                   <button onClick={() => openEdit(slide)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <Pencil size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                    <Pencil size={14} />
                   </button>
                   <button onClick={() => handleDelete(slide.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                    <Trash2 size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent></Card>
+            </div>
+          ))}
+
+          {/* Add card */}
+          <button onClick={openNew}
+            className="flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white text-gray-400 transition-colors hover:border-[#09418C]/40 hover:bg-blue-50/30 hover:text-[#09418C]">
+            <Plus size={24} />
+            <span className="text-xs font-medium">เพิ่ม Slide</span>
+          </button>
+        </div>
       )}
 
       <Dialog open={!!modal} onClose={() => setModal(null)}

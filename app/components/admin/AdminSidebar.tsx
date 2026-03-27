@@ -14,6 +14,7 @@ import {
   ChevronRight,
   BookOpen,
   ExternalLink,
+  LayoutDashboard,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -25,6 +26,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    label: "Dashboard",
+    href: "/admin/dashboard",
+    icon: <LayoutDashboard size={16} />,
+  },
   {
     label: "หน้าแรก",
     icon: <Home size={16} />,

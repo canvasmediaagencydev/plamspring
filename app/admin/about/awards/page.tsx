@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Eye, EyeOff, Award, ImageIcon } from "lucide-react";
 import { revalidatePages, REVALIDATE_PATHS } from "@/lib/revalidate";
@@ -93,54 +91,83 @@ export default function AdminAwardsPage() {
         action={<Button onClick={openNew}><Plus size={16} />เพิ่ม Award</Button>} />
 
       {loading ? (
-        <Card><CardContent className="pt-6 space-y-3">
-          {[1,2].map((i) => <div key={i} className="h-14 animate-pulse rounded-lg bg-gray-100" />)}
-        </CardContent></Card>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[1,2,3,4].map((i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="aspect-square animate-pulse bg-gray-100" />
+              <div className="p-4 space-y-2">
+                <div className="h-3 w-full animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-2/3 animate-pulse rounded bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : awards.length === 0 ? (
-        <Card><CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-            <Award size={22} className="text-gray-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50">
+            <Award size={24} className="text-amber-400" />
           </div>
           <p className="text-sm font-medium text-gray-600">ยังไม่มีรางวัล</p>
           <Button variant="outline" size="sm" className="mt-4" onClick={openNew}><Plus size={14} />เพิ่มแรก</Button>
-        </CardContent></Card>
+        </div>
       ) : (
-        <Card><CardContent className="p-0">
-          <div className="divide-y divide-gray-100">
-            {awards.map((award) => (
-              <div key={award.id} className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/70">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {awards.map((award) => (
+            <div key={award.id}
+              className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+              {/* Image */}
+              <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-gray-50 p-4">
                 {award.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={award.image_url} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain bg-gray-50 p-1" />
+                  <img src={award.image_url} alt=""
+                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" />
                 ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                    <ImageIcon size={16} className="text-gray-300" />
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ImageIcon size={32} className="text-gray-200" />
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-gray-700">{award.description || "—"}</p>
-                </div>
-                <Badge variant={award.is_published ? "success" : "secondary"}>
-                  {award.is_published ? "เผยแพร่" : "ซ่อน"}
-                </Badge>
-                <div className="flex items-center">
+                {/* Status dot */}
+                <span className={`absolute right-2 top-2 h-2.5 w-2.5 rounded-full shadow-sm ${
+                  award.is_published ? "bg-green-400" : "bg-gray-300"
+                }`} title={award.is_published ? "เผยแพร่" : "ซ่อน"} />
+              </div>
+
+              {/* Description */}
+              <div className="px-3 pb-2 pt-3">
+                <p className="line-clamp-2 text-xs leading-relaxed text-gray-600">
+                  {award.description || <span className="text-gray-300">ไม่มีคำอธิบาย</span>}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between border-t border-gray-50 px-3 py-2">
+                <span className="text-[10px] text-gray-300">#{award.sort_order}</span>
+                <div className="flex items-center gap-0.5">
                   <button onClick={() => togglePublish(award.id, award.is_published)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
-                    {award.is_published ? <EyeOff size={15} /> : <Eye size={15} />}
+                    title={award.is_published ? "ซ่อน" : "เผยแพร่"}
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+                    {award.is_published ? <EyeOff size={13} /> : <Eye size={13} />}
                   </button>
                   <button onClick={() => openEdit(award)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <Pencil size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                    <Pencil size={13} />
                   </button>
                   <button onClick={() => handleDelete(award.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                    <Trash2 size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+                    <Trash2 size={13} />
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent></Card>
+            </div>
+          ))}
+
+          {/* Add card */}
+          <button onClick={openNew}
+            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white text-gray-400 transition-colors hover:border-amber-300 hover:bg-amber-50/30 hover:text-amber-500">
+            <Plus size={22} />
+            <span className="text-xs font-medium">เพิ่ม Award</span>
+          </button>
+        </div>
       )}
 
       <Dialog open={!!modal} onClose={() => setModal(null)}

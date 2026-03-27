@@ -5,9 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { AdminHeader } from "@/app/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, Eye, EyeOff, FileText, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, FileText, ImageIcon, Calendar } from "lucide-react";
 import type { Tables } from "@/lib/types/database.types";
 
 type Post = Tables<"posts">;
@@ -17,6 +15,11 @@ const TABS = [
   { key: "blog" as const, label: "Blog" },
   { key: "csr" as const, label: "CSR Projects" },
 ];
+
+function formatDate(iso: string | null) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" });
+}
 
 export default function AdminPostsPage() {
   const supabase = createClient();
@@ -56,27 +59,25 @@ export default function AdminPostsPage() {
         }
       />
 
-      {/* Stats row */}
+      {/* Stats */}
       <div className="mb-5 grid grid-cols-3 gap-3">
         {[
-          { label: "ทั้งหมด", value: posts.length, color: "text-gray-900" },
-          { label: "Blog", value: count("blog"), color: "text-blue-600" },
-          { label: "CSR", value: count("csr"), color: "text-green-600" },
+          { label: "ทั้งหมด", value: posts.length, bg: "bg-gray-50", text: "text-gray-800" },
+          { label: "Blog", value: count("blog"), bg: "bg-blue-50", text: "text-blue-700" },
+          { label: "CSR", value: count("csr"), bg: "bg-green-50", text: "text-green-700" },
         ].map((s) => (
-          <Card key={s.label}>
-            <CardContent className="flex items-center justify-between p-4">
-              <span className="text-xs font-medium text-gray-500">{s.label}</span>
-              <span className={`text-2xl font-bold ${s.color}`}>{s.value}</span>
-            </CardContent>
-          </Card>
+          <div key={s.label} className={`flex items-center justify-between rounded-2xl ${s.bg} px-4 py-3`}>
+            <span className="text-xs font-medium text-gray-500">{s.label}</span>
+            <span className={`text-2xl font-bold ${s.text}`}>{s.value}</span>
+          </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex gap-0.5 rounded-lg bg-gray-100 p-1">
+      <div className="mb-5 flex gap-0.5 rounded-xl bg-gray-100 p-1">
         {TABS.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-all ${
+            className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-all ${
               activeTab === tab.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}>
             {tab.label}
@@ -85,66 +86,110 @@ export default function AdminPostsPage() {
       </div>
 
       {loading ? (
-        <Card><CardContent className="pt-6 space-y-3">
-          {[1,2,3].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-100" />)}
-        </CardContent></Card>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1,2,3,4,5,6].map((i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="aspect-video animate-pulse bg-gray-100" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-full animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-2/3 animate-pulse rounded bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : filtered.length === 0 ? (
-        <Card><CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-            <FileText size={22} className="text-gray-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+            <FileText size={24} className="text-gray-400" />
           </div>
           <p className="text-sm font-medium text-gray-600">ยังไม่มีบทความ</p>
           <Link href="/admin/posts/new" className="mt-4">
             <Button variant="outline" size="sm"><Plus size={14} />เขียนบทความแรก</Button>
           </Link>
-        </CardContent></Card>
+        </div>
       ) : (
-        <Card><CardContent className="p-0">
-          <div className="divide-y divide-gray-100">
-            {filtered.map((post) => (
-              <div key={post.id} className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/70">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((post) => (
+            <div key={post.id}
+              className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+              {/* Cover image */}
+              <div className="relative aspect-video overflow-hidden bg-gray-50">
                 {post.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.cover_image_url} alt="" className="h-11 w-16 shrink-0 rounded-lg object-cover" />
+                  <img src={post.cover_image_url} alt={post.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 ) : (
-                  <div className="flex h-11 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                    <ImageIcon size={16} className="text-gray-300" />
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-1">
+                    <ImageIcon size={28} className="text-gray-200" />
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                      post.type === "blog" ? "bg-blue-50 text-blue-700" : "bg-green-50 text-green-700"
-                    }`}>
-                      {post.type === "blog" ? "Blog" : "CSR"}
-                    </span>
-                    <p className="truncate text-sm font-semibold text-gray-900">{post.title}</p>
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-gray-400">/{post.slug}</p>
-                </div>
-                <Badge variant={post.is_published ? "success" : "secondary"}>
+
+                {/* Type badge */}
+                <span className={`absolute left-2.5 top-2.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-sm ${
+                  post.type === "blog"
+                    ? "bg-blue-500 text-white"
+                    : "bg-green-500 text-white"
+                }`}>
+                  {post.type === "blog" ? "Blog" : "CSR"}
+                </span>
+
+                {/* Published status */}
+                <span className={`absolute right-2.5 top-2.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold shadow-sm ${
+                  post.is_published ? "bg-white/90 text-green-700" : "bg-white/90 text-gray-400"
+                }`}>
                   {post.is_published ? "เผยแพร่" : "Draft"}
-                </Badge>
-                <div className="flex items-center">
+                </span>
+              </div>
+
+              {/* Content */}
+              <div className="p-4">
+                <h3 className="line-clamp-2 text-sm font-bold leading-snug text-gray-900">
+                  {post.title}
+                </h3>
+                {post.excerpt && (
+                  <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-gray-400">
+                    {post.excerpt}
+                  </p>
+                )}
+                {post.published_at && (
+                  <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-300">
+                    <Calendar size={9} />
+                    {formatDate(post.published_at)}
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between border-t border-gray-50 px-4 py-2.5">
+                <p className="max-w-[120px] truncate text-[10px] text-gray-300">/{post.slug}</p>
+                <div className="flex items-center gap-1">
                   <button onClick={() => togglePublish(post.id, post.is_published)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                    title={post.is_published ? "ซ่อน" : "เผยแพร่"}>
-                    {post.is_published ? <EyeOff size={15} /> : <Eye size={15} />}
+                    title={post.is_published ? "ซ่อน" : "เผยแพร่"}
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+                    {post.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <Link href={`/admin/posts/${post.id}`}>
-                    <button className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <Pencil size={15} />
+                    <button className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                      <Pencil size={14} />
                     </button>
                   </Link>
                   <button onClick={() => handleDelete(post.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                    <Trash2 size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent></Card>
+            </div>
+          ))}
+
+          {/* Add card */}
+          <Link href="/admin/posts/new"
+            className="flex aspect-video flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white text-gray-400 transition-colors hover:border-violet-300 hover:bg-violet-50/30 hover:text-violet-500">
+            <Plus size={24} />
+            <span className="text-xs font-medium">เขียนบทความใหม่</span>
+          </Link>
+        </div>
       )}
     </div>
   );

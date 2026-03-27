@@ -7,8 +7,6 @@ import { ImageUploader } from "@/app/components/admin/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Eye, EyeOff, ImageIcon, FolderOpen } from "lucide-react";
 import { revalidatePages, REVALIDATE_PATHS } from "@/lib/revalidate";
@@ -96,55 +94,92 @@ export default function AdminProjectsPage() {
         action={<Button onClick={openNew}><Plus size={16} />เพิ่มโครงการ</Button>} />
 
       {loading ? (
-        <Card><CardContent className="pt-6 space-y-3">
-          {[1,2,3].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-100" />)}
-        </CardContent></Card>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+          {[1,2,3,4,5,6].map((i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="aspect-video animate-pulse bg-gray-100" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : projects.length === 0 ? (
-        <Card><CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-            <FolderOpen size={22} className="text-gray-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
+            <FolderOpen size={24} className="text-gray-400" />
           </div>
           <p className="text-sm font-medium text-gray-600">ยังไม่มีโครงการ</p>
           <Button variant="outline" size="sm" className="mt-4" onClick={openNew}><Plus size={14} />เพิ่มโครงการแรก</Button>
-        </CardContent></Card>
+        </div>
       ) : (
-        <Card><CardContent className="p-0">
-          <div className="divide-y divide-gray-100">
-            {projects.map((project) => (
-              <div key={project.id} className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/70">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+          {projects.map((project) => (
+            <div key={project.id}
+              className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+              {/* Image */}
+              <div className="relative aspect-video overflow-hidden bg-gray-50">
                 {project.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={project.image_url} alt={project.name} className="h-11 w-16 shrink-0 rounded-lg object-cover" />
+                  <img src={project.image_url} alt={project.name}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 ) : (
-                  <div className="flex h-11 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-                    <ImageIcon size={16} className="text-gray-300" />
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ImageIcon size={32} className="text-gray-200" />
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-gray-900">{project.name}</p>
-                  {project.subtitle && <p className="truncate text-xs text-gray-500">{project.subtitle}</p>}
-                </div>
-                <Badge variant={project.is_published ? "success" : "secondary"}>
+                {/* Logo overlay */}
+                {project.logo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={project.logo_url} alt=""
+                    className="absolute bottom-2 left-2 h-8 w-auto rounded bg-white/90 px-1.5 py-0.5 object-contain shadow-sm" />
+                )}
+                {/* Status badge */}
+                <span className={`absolute right-2 top-2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold shadow-sm ${
+                  project.is_published ? "bg-green-500 text-white" : "bg-gray-400 text-white"
+                }`}>
                   {project.is_published ? "เผยแพร่" : "ซ่อน"}
-                </Badge>
-                <div className="flex items-center">
+                </span>
+              </div>
+
+              {/* Info */}
+              <div className="p-4">
+                <p className="truncate text-sm font-bold text-gray-900">{project.name}</p>
+                {project.subtitle && (
+                  <p className="mt-0.5 truncate text-xs text-gray-400">{project.subtitle}</p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between border-t border-gray-50 px-4 py-2.5">
+                <span className="text-[10px] text-gray-300">ลำดับ {project.sort_order}</span>
+                <div className="flex items-center gap-1">
                   <button onClick={() => togglePublish(project.id, project.is_published)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" title={project.is_published ? "ซ่อน" : "เผยแพร่"}>
-                    {project.is_published ? <EyeOff size={15} /> : <Eye size={15} />}
+                    title={project.is_published ? "ซ่อน" : "เผยแพร่"}
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+                    {project.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <button onClick={() => openEdit(project)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <Pencil size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                    <Pencil size={14} />
                   </button>
                   <button onClick={() => handleDelete(project.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                    <Trash2 size={15} />
+                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent></Card>
+            </div>
+          ))}
+
+          {/* Add card */}
+          <button onClick={openNew}
+            className="flex aspect-video flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white text-gray-400 transition-colors hover:border-[#09418C]/40 hover:bg-blue-50/30 hover:text-[#09418C]">
+            <Plus size={24} />
+            <span className="text-xs font-medium">เพิ่มโครงการ</span>
+          </button>
+        </div>
       )}
 
       <Dialog open={!!modal} onClose={() => setModal(null)}
