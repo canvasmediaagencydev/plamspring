@@ -86,15 +86,15 @@ export default function AdminOurFamilyPage() {
       <AdminHeader title="Our Family" description="จัดการรูปภาพและวิดีโอในหน้า Our Family" />
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200">
+      <div className="flex gap-1 mb-8 rounded-[14px] bg-gray-100/60 p-1.5 w-max">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex items-center gap-2 px-5 py-2 text-[13px] font-bold transition-all duration-300 rounded-[10px] ${
               activeTab === tab.key
-                ? "border-[#09418C] text-[#09418C]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "bg-white text-gray-900 shadow-[0_2px_10px_rgba(0,0,0,0.04)] scale-100"
+                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50 scale-[0.98]"
             }`}
           >
             {tab.icon}
@@ -105,22 +105,23 @@ export default function AdminOurFamilyPage() {
 
       {/* Slider Images */}
       {activeTab === "slider" && (
-        <div className="max-w-2xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">รูปภาพ Slider</CardTitle>
+        <div className="max-w-3xl">
+          <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+              <CardTitle className="text-[15px] font-black text-gray-800">รูปภาพ Slider</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-3 gap-4">
                 {sliderImages.map((img) => (
-                  <div key={img.id} className="relative group">
+                  <div key={img.id} className="relative group rounded-xl overflow-hidden shadow-sm border border-gray-100/50">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.image_url} alt="" className="w-full aspect-video object-cover rounded-lg" />
+                    <img src={img.image_url} alt="" className="w-full aspect-video object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
                     <button
                       onClick={() => deleteImage(img.id, "slider")}
-                      className="absolute top-1 right-1 bg-white rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                      className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
                     >
-                      <Trash2 size={14} className="text-red-500" />
+                      <Trash2 size={16} className="text-red-500" />
                     </button>
                   </div>
                 ))}
@@ -138,13 +139,13 @@ export default function AdminOurFamilyPage() {
       {/* Videos */}
       {activeTab === "videos" && (
         <div className="max-w-2xl space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-base">
-                <span className="flex items-center gap-2"><Video size={18} className="text-red-500" />วิดีโอ Our Family (2 วิดีโอ)</span>
-                <Button size="sm" onClick={saveVideos} disabled={savingVideos}>
-                  <Save size={14} />
-                  {videosSaved ? "บันทึกแล้ว!" : "บันทึก"}
+          <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+              <CardTitle className="flex items-center justify-between text-[15px] font-black text-gray-800">
+                <span className="flex items-center gap-2.5"><Video size={18} className="text-red-500" />วิดีโอ Our Family (2 วิดีโอ)</span>
+                <Button size="sm" onClick={saveVideos} disabled={savingVideos} className="rounded-lg shadow-sm">
+                  <Save size={14} className="mr-1.5" />
+                  {videosSaved ? "บันทึกแล้ว!" : "บันทึกข้อมูล"}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -177,22 +178,23 @@ export default function AdminOurFamilyPage() {
 
       {/* Grid Images */}
       {activeTab === "grid" && (
-        <div className="max-w-2xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">รูปภาพ Grid</CardTitle>
+        <div className="max-w-3xl">
+          <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+              <CardTitle className="text-[15px] font-black text-gray-800">รูปภาพ Grid</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-4 gap-4">
                 {gridImages.map((img) => (
-                  <div key={img.id} className="relative group">
+                  <div key={img.id} className="relative group rounded-xl overflow-hidden shadow-sm border border-gray-100/50">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.image_url} alt="" className="w-full aspect-square object-cover rounded-lg" />
+                    <img src={img.image_url} alt="" className="w-full aspect-square object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
                     <button
                       onClick={() => deleteImage(img.id, "grid")}
-                      className="absolute top-1 right-1 bg-white rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                      className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
                     >
-                      <Trash2 size={14} className="text-red-500" />
+                      <Trash2 size={16} className="text-red-500" />
                     </button>
                   </div>
                 ))}

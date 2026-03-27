@@ -68,20 +68,20 @@ export default function AdminAboutContentPage() {
         title="About Us — เนื้อหา"
         description="แก้ไขข้อความ History, Vision และ Mission"
         action={
-          <Button onClick={handleSave} disabled={saving}>
-            <Save size={16} />
-            {saved ? "บันทึกแล้ว!" : saving ? "กำลังบันทึก..." : "บันทึก"}
+          <Button onClick={handleSave} disabled={saving} className="rounded-xl shadow-sm font-bold px-5">
+            <Save size={16} className="mr-2" />
+            {saved ? "บันทึกข้อมูลเรียบร้อย!" : saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </Button>
         }
       />
 
-      <div className="max-w-2xl space-y-5">
+      <div className="max-w-2xl space-y-6">
         {fields.map(({ key, label, rows }) => (
-          <Card key={key}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">{label}</CardTitle>
+          <Card key={key} className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+              <CardTitle className="text-[15px] font-black text-gray-800">{label}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <Label className="sr-only">{label}</Label>
               <Textarea
                 rows={rows}

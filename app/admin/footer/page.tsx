@@ -95,23 +95,24 @@ export default function AdminFooterPage() {
         title="Footer & Contact"
         description="แก้ไขข้อมูล Footer และ Sticky Contact Button"
         action={
-          <Button onClick={handleSave} disabled={saving}>
-            <Save size={16} />
-            {saved ? "บันทึกแล้ว!" : saving ? "กำลังบันทึก..." : "บันทึก"}
+          <Button onClick={handleSave} disabled={saving} className="rounded-xl shadow-sm font-bold px-5">
+            <Save size={16} className="mr-2" />
+            {saved ? "บันทึกข้อมูลเรียบร้อย!" : saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </Button>
         }
       />
 
-      <div className="space-y-6 max-w-2xl">
-        {/* Address & Contact */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MapPin size={18} />
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 max-w-5xl">
+        <div className="space-y-6">
+          {/* Address & Contact */}
+        <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+          <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+            <CardTitle className="flex items-center gap-2.5 text-[15px] font-black text-gray-800">
+              <MapPin size={18} className="text-[#09418C]" />
               ที่อยู่ & เวลาทำการ
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-6">
             <div className="space-y-2">
               <Label>ที่อยู่</Label>
               <Textarea
@@ -133,14 +134,14 @@ export default function AdminFooterPage() {
         </Card>
 
         {/* Phone & Email */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Phone size={18} />
+        <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+          <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+            <CardTitle className="flex items-center gap-2.5 text-[15px] font-black text-gray-800">
+              <Phone size={18} className="text-[#09418C]" />
               ข้อมูลติดต่อ
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-6">
             <div className="space-y-2">
               <Label>เบอร์โทรศัพท์</Label>
               <Input
@@ -169,15 +170,18 @@ export default function AdminFooterPage() {
           </CardContent>
         </Card>
 
-        {/* Social Links */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Share2 size={18} />
+        </div>
+        
+        <div className="space-y-6">
+          {/* Social Links */}
+          <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+          <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+            <CardTitle className="flex items-center gap-2.5 text-[15px] font-black text-gray-800">
+              <Share2 size={18} className="text-[#09418C]" />
               Social Media Links
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-6">
             {[
               { key: "facebook_url" as const, label: "Facebook" },
               { key: "instagram_url" as const, label: "Instagram" },
@@ -198,14 +202,14 @@ export default function AdminFooterPage() {
         </Card>
 
         {/* Sticky Contact Button */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <MessageCircle size={18} />
+        <Card className="rounded-[1.5rem] border-gray-100/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm overflow-hidden">
+          <CardHeader className="border-b border-gray-100/60 bg-gray-50/30 pb-4">
+            <CardTitle className="flex items-center gap-2.5 text-[15px] font-black text-gray-800">
+              <MessageCircle size={18} className="text-[#09418C]" />
               Contact Sticker Button
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-6">
             <div className="space-y-2">
               <Label>Facebook Messenger URL</Label>
               <Input
@@ -224,6 +228,7 @@ export default function AdminFooterPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
