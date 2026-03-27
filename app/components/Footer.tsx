@@ -13,15 +13,48 @@ import {
   FaMapMarkerAlt,
 } from "react-icons/fa";
 
-const socials = [
-  { icon: FaFacebookF, href: "#", label: "Facebook" },
-  { icon: FaInstagram, href: "#", label: "Instagram" },
-  { icon: FaLine, href: "#", label: "Line" },
-  { icon: FaTiktok, href: "#", label: "TikTok" },
-  { icon: FaYoutube, href: "#", label: "YouTube" },
-];
+export interface FooterSettings {
+  company_name?: string;
+  address?: string;
+  hours?: string;
+  phone?: string;
+  email?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  line_url?: string;
+  tiktok_url?: string;
+  youtube_url?: string;
+  map_url?: string;
+}
 
-export default function Footer() {
+interface FooterProps {
+  settings?: FooterSettings;
+}
+
+const DEFAULT_SETTINGS: FooterSettings = {
+  company_name: "Palm Springs",
+  address: "199/1-2 หมู่ 5 ถ.มหิดล ต.หนองหอย\nอ.เมืองเชียงใหม่ จ.เชียงใหม่ 50000",
+  hours: "ทุกวัน เวลา 9:00 - 18:00",
+  phone: "053 105 000",
+  email: "info@palmsprings.co.th",
+  facebook_url: "#",
+  instagram_url: "#",
+  line_url: "#",
+  tiktok_url: "#",
+  youtube_url: "#",
+};
+
+export default function Footer({ settings }: FooterProps) {
+  const s = { ...DEFAULT_SETTINGS, ...settings };
+
+  const socials = [
+    { icon: FaFacebookF, href: s.facebook_url || "#", label: "Facebook" },
+    { icon: FaInstagram, href: s.instagram_url || "#", label: "Instagram" },
+    { icon: FaLine, href: s.line_url || "#", label: "Line" },
+    { icon: FaTiktok, href: s.tiktok_url || "#", label: "TikTok" },
+    { icon: FaYoutube, href: s.youtube_url || "#", label: "YouTube" },
+  ];
+
   return (
     <footer className="w-full bg-[#1a3a8c] text-white">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-2 md:grid-cols-3 md:gap-10 md:px-8 md:py-12">
@@ -36,16 +69,14 @@ export default function Footer() {
             className="h-auto w-40 md:w-52"
           />
 
-          <div className="flex items-start gap-2 text-sm leading-relaxed text-white/90">
-            <FaMapMarkerAlt className="mt-0.5 shrink-0 text-white" />
-            <span>
-              199/1-2 หมู่ 5 ถ.มหิดล ต.หนองหอย
-              <br />
-              อ.เมืองเชียงใหม่ จ.เชียงใหม่ 50000
-            </span>
-          </div>
+          {s.address && (
+            <div className="flex items-start gap-2 text-sm leading-relaxed text-white/90">
+              <FaMapMarkerAlt className="mt-0.5 shrink-0 text-white" />
+              <span style={{ whiteSpace: "pre-line" }}>{s.address}</span>
+            </div>
+          )}
 
-          <p className="text-sm text-white/80">ทุกวัน เวลา 9:00 - 18:00</p>
+          {s.hours && <p className="text-sm text-white/80">{s.hours}</p>}
 
           <a
             href="/contact"
@@ -67,20 +98,24 @@ export default function Footer() {
               Contact Information
             </p>
             <div className="space-y-2.5">
-              <a
-                href="tel:053105000"
-                className="flex items-center gap-3 text-sm text-white/90 transition hover:text-white"
-              >
-                <FaPhone className="shrink-0" />
-                053 105 000
-              </a>
-              <a
-                href="mailto:info@palmsprings.co.th"
-                className="flex items-center gap-3 text-sm text-white/90 transition hover:text-white"
-              >
-                <FaEnvelope className="shrink-0" />
-                info@palmsprings.co.th
-              </a>
+              {s.phone && (
+                <a
+                  href={`tel:${s.phone.replace(/\s/g, "")}`}
+                  className="flex items-center gap-3 text-sm text-white/90 transition hover:text-white"
+                >
+                  <FaPhone className="shrink-0" />
+                  {s.phone}
+                </a>
+              )}
+              {s.email && (
+                <a
+                  href={`mailto:${s.email}`}
+                  className="flex items-center gap-3 text-sm text-white/90 transition hover:text-white"
+                >
+                  <FaEnvelope className="shrink-0" />
+                  {s.email}
+                </a>
+              )}
             </div>
           </div>
 

@@ -1,25 +1,16 @@
 import Link from "next/link";
 
-const BLOG_POSTS = [
-  {
-    id: 1,
-    title: "Lorem ipsum",
-    excerpt:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  },
-  {
-    id: 2,
-    title: "Lorem ipsum",
-    excerpt:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  },
-  {
-    id: 3,
-    title: "Lorem ipsum",
-    excerpt:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  },
-];
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+}
+
+interface BlogListProps {
+  posts?: BlogPost[];
+}
 
 function SkeletonImage() {
   return (
@@ -29,36 +20,64 @@ function SkeletonImage() {
   );
 }
 
-function BlogRow({ title, excerpt }: { title: string; excerpt: string }) {
+function BlogRow({ post }: { post: BlogPost }) {
   return (
     <article className="flex flex-col gap-5 md:flex-row md:items-center md:gap-10">
       {/* Image — left */}
       <div className="w-full md:w-2/5 md:shrink-0">
-        <SkeletonImage />
+        {post.cover_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={post.cover_image_url}
+            alt={post.title}
+            className="h-52 w-full rounded-xl object-cover md:h-64"
+          />
+        ) : (
+          <SkeletonImage />
+        )}
       </div>
 
       {/* Text — right */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-bold text-primary md:text-4xl">{title}</h2>
-        <p className="text-base leading-relaxed text-gray-500 md:text-lg">{excerpt}</p>
+        <h2 className="text-2xl font-bold text-primary md:text-4xl">{post.title}</h2>
+        {post.excerpt && (
+          <p className="text-base leading-relaxed text-gray-500 md:text-lg">{post.excerpt}</p>
+        )}
         <Link
-          href="#"
+          href={`/blog/${post.slug}`}
           className="mt-1 w-fit rounded-full border border-primary px-7 py-2 text-base font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
         >
-          See All
+          อ่านต่อ
         </Link>
       </div>
     </article>
   );
 }
 
-export default function BlogList() {
+function SkeletonRow() {
+  return (
+    <article className="flex flex-col gap-5 md:flex-row md:items-center md:gap-10">
+      <div className="w-full md:w-2/5 md:shrink-0"><SkeletonImage /></div>
+      <div className="flex flex-col gap-3 flex-1">
+        <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
+        <div className="space-y-2">
+          <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-4/5 animate-pulse rounded bg-gray-200" />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export default function BlogList({ posts }: BlogListProps) {
+  const displayPosts = posts && posts.length > 0 ? posts : null;
+
   return (
     <section className="w-full bg-white pb-16 md:pb-24">
       <div className="mx-auto flex max-w-5xl flex-col gap-14 px-6 md:px-12">
-        {BLOG_POSTS.map((post) => (
-          <BlogRow key={post.id} title={post.title} excerpt={post.excerpt} />
-        ))}
+        {displayPosts
+          ? displayPosts.map((post) => <BlogRow key={post.id} post={post} />)
+          : [1, 2, 3].map((i) => <SkeletonRow key={i} />)}
       </div>
     </section>
   );

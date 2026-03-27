@@ -3,25 +3,33 @@
 import { useState } from "react";
 import { FaFacebookMessenger, FaLine, FaCommentDots, FaTimes } from "react-icons/fa";
 
-const CONTACTS = [
-  {
-    icon: FaLine,
-    label: "Line",
-    href: "https://line.me/ti/p/~@palmsprings",
-    bg: "bg-[#06C755]",
-    hoverBg: "hover:bg-[#05b34c]",
-  },
-  {
-    icon: FaFacebookMessenger,
-    label: "Facebook Messenger",
-    href: "https://m.me/palmsprings",
-    bg: "bg-[#0084FF]",
-    hoverBg: "hover:bg-[#0073e0]",
-  },
-];
+interface StickyContactProps {
+  facebookMessengerUrl?: string;
+  lineUrl?: string;
+}
 
-export default function StickyContact() {
+export default function StickyContact({
+  facebookMessengerUrl = "https://m.me/palmsprings",
+  lineUrl = "https://line.me/ti/p/~@palmsprings",
+}: StickyContactProps) {
   const [open, setOpen] = useState(false);
+
+  const contacts = [
+    {
+      icon: FaLine,
+      label: "Line",
+      href: lineUrl,
+      bg: "bg-[#06C755]",
+      hoverBg: "hover:bg-[#05b34c]",
+    },
+    {
+      icon: FaFacebookMessenger,
+      label: "Facebook Messenger",
+      href: facebookMessengerUrl,
+      bg: "bg-[#0084FF]",
+      hoverBg: "hover:bg-[#0073e0]",
+    },
+  ];
 
   return (
     <div className="fixed bottom-6 right-5 z-50 flex flex-col items-center gap-3">
@@ -34,7 +42,7 @@ export default function StickyContact() {
         }`}
         aria-hidden={!open}
       >
-        {CONTACTS.map(({ icon: Icon, label, href, bg, hoverBg }) => (
+        {contacts.map(({ icon: Icon, label, href, bg, hoverBg }) => (
           <a
             key={label}
             href={href}

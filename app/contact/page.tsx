@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-import HeroSection from "../components/HeroSection";
+import HeroSection from "../components/HeroSectionServer";
 import ContactHero from "../components/ContactHero";
 import ContactCards from "../components/ContactCards";
 import Footer from "../components/Footer";

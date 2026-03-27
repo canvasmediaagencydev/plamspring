@@ -5,50 +5,18 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 interface HomeTypeCard {
   id: string;
   name: string;
-  subtitle: string;
   image: string;
+  logo: string;
 }
-
-// เพิ่มข้อมูลที่นี่เมื่อพร้อม
-const homeTypes: HomeTypeCard[] = [
-  // {
-  //   id: "1",
-  //   name: "THE URBANA+ 6",
-  //   subtitle: "by Palm Springs",
-  //   image: "/img/homes/urbana6.jpg",
-  // },
-  // {
-  //   id: "2",
-  //   name: "PALM VILLE",
-  //   subtitle: "แยกช่วงสิงห์ - ก.โฉนา",
-  //   image: "/img/homes/palmville1.jpg",
-  // },
-  // {
-  //   id: "3",
-  //   name: "PALM VILLE",
-  //   subtitle: "ก.สันล้านช้างสารใหม่",
-  //   image: "/img/homes/palmville2.jpg",
-  // },
-  // {
-  //   id: "4",
-  //   name: "PALM SPRINGS PRIVATO",
-  //   subtitle: "",
-  //   image: "/img/homes/privato.jpg",
-  // },
-];
 
 const SKELETON_COUNT = 4;
 
 function HomeCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-3xl bg-white shadow-md">
-      {/* Image area skeleton */}
       <div className="aspect-[4/3] w-full animate-pulse bg-gray-200" />
-
-      {/* Logo / name area skeleton */}
-      <div className="flex flex-col items-center gap-2 px-4 py-5">
-        <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-        <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+      <div className="flex items-center justify-center px-4 py-5">
+        <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
       </div>
     </div>
   );
@@ -57,26 +25,46 @@ function HomeCardSkeleton() {
 function HomeCard({ card }: { card: HomeTypeCard }) {
   return (
     <div className="group flex cursor-pointer flex-col overflow-hidden rounded-3xl bg-white shadow-md transition-shadow duration-300 hover:shadow-xl">
-      {/* House image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={card.image}
         alt={card.name}
         className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
-
-      {/* Name / logo area */}
-      <div className="flex flex-col items-center gap-1 px-4 py-5 text-center">
-        <p className="text-sm font-bold tracking-widest text-primary md:text-base">{card.name}</p>
-        {card.subtitle && (
-          <p className="text-xs text-gray-500 md:text-sm">{card.subtitle}</p>
-        )}
+      {/* Logo area */}
+      <div className="flex items-center justify-center px-4 py-5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={card.logo}
+          alt={card.name}
+          className="h-10 max-w-full object-contain"
+        />
       </div>
     </div>
   );
 }
 
-export default function HomeTypeSection() {
+interface DbProject {
+  id: string;
+  name: string;
+  subtitle: string | null;
+  image_url: string;
+  logo_url?: string | null;
+  sort_order: number;
+  is_published: boolean;
+}
+
+interface HomeTypeSectionProps {
+  projects?: DbProject[];
+}
+
+export default function HomeTypeSection({ projects = [] }: HomeTypeSectionProps) {
+  const homeTypes: HomeTypeCard[] = projects.map((p) => ({
+    id: p.id,
+    name: p.name,
+    image: p.image_url,
+    logo: p.logo_url ?? "",
+  }));
   const displayItems =
     homeTypes.length > 0 ? homeTypes : Array(SKELETON_COUNT).fill(undefined);
 

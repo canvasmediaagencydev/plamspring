@@ -2,24 +2,42 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 
-interface Milestone {
+interface DbMilestone {
+  id: string;
   year: string;
-  name: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
 }
 
-const MILESTONES: Milestone[] = [
-  { year: "1989", name: "PALMSPRINGS PLACE" },
-  { year: "1994", name: "PALMSPRINGS GARDEN HOME" },
-  { year: "1996", name: "PALMSPRINGS VILLA" },
-  { year: "1999", name: "PALMSPRINGS TOWNHOME" },
-  { year: "2006", name: "PALMSPRINGS PLAZA" },
-  { year: "2007", name: "PALMSPRINGS COUNTRY HOME" },
+interface MilestoneSectionProps {
+  milestones?: DbMilestone[];
+}
+
+// Hardcoded fallback shown when no DB data yet
+const FALLBACK_MILESTONES: DbMilestone[] = [
+  { id: "1", year: "1989", title: "PALMSPRINGS PLACE", description: null, image_url: null },
+  { id: "2", year: "1994", title: "PALMSPRINGS GARDEN HOME", description: null, image_url: null },
+  { id: "3", year: "1996", title: "PALMSPRINGS VILLA", description: null, image_url: null },
+  { id: "4", year: "1999", title: "PALMSPRINGS TOWNHOME", description: null, image_url: null },
+  { id: "5", year: "2006", title: "PALMSPRINGS PLAZA", description: null, image_url: null },
+  { id: "6", year: "2007", title: "PALMSPRINGS COUNTRY HOME", description: null, image_url: null },
 ];
 
-// Card width must match the column width exactly
 const CARD_W = "w-64 md:w-72";
 
-function SkeletonCard({ label }: { label: string }) {
+function MilestoneCard({ milestone, label }: { milestone: DbMilestone; label: string }) {
+  if (milestone.image_url) {
+    return (
+      <div className="relative h-48 w-full overflow-hidden rounded-lg md:h-56">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={milestone.image_url} alt={milestone.title} className="h-full w-full object-cover" />
+        <div className="absolute bottom-0 w-full bg-black/30 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-white">{label}</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gray-200 md:h-56">
       <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
@@ -30,7 +48,9 @@ function SkeletonCard({ label }: { label: string }) {
   );
 }
 
-export default function MilestoneSection() {
+export default function MilestoneSection({ milestones }: MilestoneSectionProps) {
+  const items = milestones && milestones.length > 0 ? milestones : FALLBACK_MILESTONES;
+
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const colRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -46,7 +66,6 @@ export default function MilestoneSection() {
     }
   }, []);
 
-  // IntersectionObserver on columns to sync activeIndex when scrolling
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -65,98 +84,57 @@ export default function MilestoneSection() {
 
     colRefs.current.forEach((col) => { if (col) observer.observe(col); });
     return () => observer.disconnect();
-  }, []);
+  }, [items]);
 
-  const scrubberValue = Math.round((activeIndex / (MILESTONES.length - 1)) * 100);
+  const scrubberValue = Math.round((activeIndex / (items.length - 1)) * 100);
 
   const handleScrubber = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const index = Math.round((Number(e.target.value) / 100) * (MILESTONES.length - 1));
+      const index = Math.round((Number(e.target.value) / 100) * (items.length - 1));
       goTo(index);
     },
-    [goTo]
+    [goTo, items.length]
   );
 
   return (
     <section className="w-full bg-white py-12 md:py-16">
-      {/* Title */}
       <h2 className="mb-10 text-center text-2xl font-bold tracking-widest text-primary md:text-4xl">
         MILESTONE
       </h2>
 
-      {/* ── Single scroll container: timeline + cards in the same columns ── */}
       <div
         ref={scrollRef}
         className="overflow-x-auto px-6 pb-2 md:px-12"
         style={{ scrollbarWidth: "none", scrollSnapType: "x mandatory" } as React.CSSProperties}
       >
         <div className="flex">
-          {MILESTONES.map((m, i) => {
+          {items.map((m, i) => {
             const isActive = i === activeIndex;
             const isPast = i < activeIndex;
 
             return (
               <div
-                key={m.year}
+                key={m.id}
                 ref={(el) => { colRefs.current[i] = el; }}
                 className={`flex shrink-0 flex-col ${CARD_W}`}
                 style={{ scrollSnapAlign: "start" }}
               >
-                {/* ── Timeline row ── */}
-                <button
-                  onClick={() => goTo(i)}
-                  className="flex flex-col items-center pb-3"
-                >
-                  {/* Year */}
-                  <span
-                    className={`mb-2 text-center text-base font-bold transition-colors md:text-lg ${
-                      isActive ? "text-primary" : "text-primary/35"
-                    }`}
-                  >
+                <button onClick={() => goTo(i)} className="flex flex-col items-center pb-3">
+                  <span className={`mb-2 text-center text-base font-bold transition-colors md:text-lg ${isActive ? "text-primary" : "text-primary/35"}`}>
                     {m.year}
                   </span>
-
-                  {/* Left line + Dot + Right line — spans full column width */}
                   <div className="flex w-full items-center">
-                    {/* Left half-line */}
-                    <div
-                      className={`h-0.5 flex-1 transition-colors ${
-                        i === 0 ? "invisible" : isPast || isActive ? "bg-primary" : "bg-primary/25"
-                      }`}
-                    />
-                    {/* Dot */}
-                    <div
-                      className={`z-10 shrink-0 rounded-full border-2 transition-all duration-300 ${
-                        isActive
-                          ? "h-4 w-4 border-primary bg-primary"
-                          : "h-3 w-3 border-primary/40 bg-white"
-                      }`}
-                    />
-                    {/* Right half-line */}
-                    <div
-                      className={`h-0.5 flex-1 transition-colors ${
-                        i === MILESTONES.length - 1
-                          ? "invisible"
-                          : isPast
-                          ? "bg-primary"
-                          : "bg-primary/25"
-                      }`}
-                    />
+                    <div className={`h-0.5 flex-1 transition-colors ${i === 0 ? "invisible" : isPast || isActive ? "bg-primary" : "bg-primary/25"}`} />
+                    <div className={`z-10 shrink-0 rounded-full border-2 transition-all duration-300 ${isActive ? "h-4 w-4 border-primary bg-primary" : "h-3 w-3 border-primary/40 bg-white"}`} />
+                    <div className={`h-0.5 flex-1 transition-colors ${i === items.length - 1 ? "invisible" : isPast ? "bg-primary" : "bg-primary/25"}`} />
                   </div>
-
-                  {/* Project name */}
-                  <span
-                    className={`mt-2 px-1 text-center text-xs font-semibold uppercase leading-tight tracking-wide transition-colors md:text-sm ${
-                      isActive ? "text-primary" : "text-primary/35"
-                    }`}
-                  >
-                    {m.name}
+                  <span className={`mt-2 px-1 text-center text-xs font-semibold uppercase leading-tight tracking-wide transition-colors md:text-sm ${isActive ? "text-primary" : "text-primary/35"}`}>
+                    {m.title}
                   </span>
                 </button>
 
-                {/* ── Image card — same column, perfectly aligned ── */}
                 <div className="px-1.5">
-                  <SkeletonCard label={`${m.year} — ${m.name}`} />
+                  <MilestoneCard milestone={m} label={`${m.year} — ${m.title}`} />
                 </div>
               </div>
             );
@@ -164,7 +142,6 @@ export default function MilestoneSection() {
         </div>
       </div>
 
-      {/* ── Scrubber ── */}
       <div className="mx-auto mt-5 max-w-xs px-6 md:max-w-sm">
         <input
           type="range"

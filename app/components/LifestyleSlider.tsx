@@ -1,23 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const AUTO_SLIDE_INTERVAL = 4000;
 
 interface SlideCard {
   id: string;
-  lifestyleImage: string;
-  houseImage: string;
+  image: string;
   tags: string[];
 }
-
-// เพิ่มข้อมูลที่นี่เมื่อพร้อม
-const slides: SlideCard[] = [
-  // {
-  //   id: "1",
-  //   lifestyleImage: "/img/lifestyle/1-lifestyle.jpg",
-  //   houseImage: "/img/lifestyle/1-house.jpg",
-  //   tags: ["Lifestyle Hub", "Urban Living"],
-  // },
-];
 
 const SKELETON_COUNT = 5;
 
@@ -29,19 +20,11 @@ function SkeletonCard({ active }: { active: boolean }) {
         active ? "shadow-2xl" : "shadow-md"
       }`}
     >
-      {/* Top image */}
       <div
         className={`w-full animate-pulse bg-gray-300 ${
-          active ? "h-40 md:h-72" : "h-32 md:h-52"
+          active ? "h-96 md:h-[480px]" : "h-72 md:h-[360px]"
         }`}
       />
-      {/* Bottom image */}
-      <div
-        className={`w-full animate-pulse bg-gray-200 ${
-          active ? "h-44 md:h-80" : "h-36 md:h-60"
-        }`}
-      />
-      {/* Tags row */}
       <div className="flex gap-2 bg-white px-3 py-3">
         <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
         <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
@@ -51,13 +34,7 @@ function SkeletonCard({ active }: { active: boolean }) {
 }
 
 // ── Real Card ─────────────────────────────────────────────────────────────────
-function SlideCardItem({
-  card,
-  active,
-}: {
-  card: SlideCard;
-  active: boolean;
-}) {
+function SlideCardItem({ card, active }: { card: SlideCard; active: boolean }) {
   return (
     <div
       className={`flex flex-col overflow-hidden rounded-3xl transition-all duration-500 ${
@@ -66,21 +43,12 @@ function SlideCardItem({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={card.lifestyleImage}
+        src={card.image}
         alt="lifestyle"
         className={`w-full object-cover transition-all duration-500 ${
-          active ? "h-40 md:h-72" : "h-32 md:h-52"
+          active ? "h-96 md:h-[480px]" : "h-72 md:h-[360px]"
         }`}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={card.houseImage}
-        alt="house"
-        className={`w-full object-cover transition-all duration-500 ${
-          active ? "h-44 md:h-80" : "h-36 md:h-60"
-        }`}
-      />
-      {/* Tags */}
       <div className="flex flex-wrap gap-2 bg-white px-3 py-3">
         {card.tags.map((tag) => (
           <span
@@ -95,15 +63,37 @@ function SlideCardItem({
   );
 }
 
-export default function LifestyleSlider() {
-  const items = slides.length > 0 ? slides : Array(SKELETON_COUNT).fill(undefined);
+interface DbSlide {
+  id: string;
+  lifestyle_image_url: string;
+  house_image_url: string;
+  tags: string[];
+}
+
+interface LifestyleSliderProps {
+  slides?: DbSlide[];
+}
+
+export default function LifestyleSlider({ slides = [] }: LifestyleSliderProps) {
+  const mappedSlides: SlideCard[] = slides.map((s) => ({
+    id: s.id,
+    image: s.lifestyle_image_url,
+    tags: s.tags,
+  }));
+  const items = mappedSlides.length > 0 ? mappedSlides : Array(SKELETON_COUNT).fill(undefined);
   const count = items.length;
   const [active, setActive] = useState(Math.floor(count / 2));
 
   const prev = () => setActive((a) => (a - 1 + count) % count);
   const next = () => setActive((a) => (a + 1) % count);
 
-  // Which indices to show: active-1, active, active+1 (wrapped)
+  // Auto-slide
+  useEffect(() => {
+    if (mappedSlides.length === 0) return;
+    const id = setInterval(() => setActive((a) => (a + 1) % count), AUTO_SLIDE_INTERVAL);
+    return () => clearInterval(id);
+  }, [mappedSlides.length, count]);
+
   const visibleIndices = [
     (active - 1 + count) % count,
     active,
@@ -112,12 +102,10 @@ export default function LifestyleSlider() {
 
   return (
     <section className="overflow-hidden py-16">
-      {/* Heading */}
       <h2 className="mb-30 text-center text-2xl font-bold text-primary md:text-4xl">
         ทำเลศักยภาพ ตอบโจทย์ทุกไลฟ์สไตล์
       </h2>
 
-      {/* Slider */}
       <div className="relative flex items-center justify-center gap-4 px-4">
         {/* Prev arrow */}
         <button
@@ -152,7 +140,6 @@ export default function LifestyleSlider() {
                   <SkeletonCard active={isActive} />
                 )}
 
-                {/* Dot indicator — only on active card */}
                 {isActive && (
                   <div className="mt-3 flex justify-center gap-1.5">
                     {items.map((_, i) => (
@@ -164,9 +151,7 @@ export default function LifestyleSlider() {
                         }}
                         aria-label={`Go to slide ${i + 1}`}
                         className={`h-2 rounded-full transition-all duration-300 ${
-                          i === active
-                            ? "w-5 bg-primary"
-                            : "w-2 bg-gray-300"
+                          i === active ? "w-5 bg-primary" : "w-2 bg-gray-300"
                         }`}
                       />
                     ))}
