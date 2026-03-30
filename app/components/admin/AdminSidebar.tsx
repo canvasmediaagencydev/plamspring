@@ -49,6 +49,13 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    label: "ฟอร์มที่ดิน",
+    icon: <FileText size={16} />,
+    children: [
+      { label: "แบบฟอร์มที่ดิน", href: "/admin/land-inquiries" },
+    ],
+  },
+  {
     label: "About Us",
     icon: <BookOpen size={16} />,
     children: [

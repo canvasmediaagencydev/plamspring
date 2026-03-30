@@ -1,0 +1,22 @@
+[  243843ms] [ERROR] ./plamspring/app/admin/projects/page.tsx:6:1
+Module not found: Can't resolve './NewProjectButton'
+  4 | import { ImageIcon } from "lucide-react";
+  5 | import { Button } from "@/components/ui/button";
+> 6 | import NewProjectButton from "./NewProjectButton";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 |
+  8 | export default async function AdminProjectsDetailPage() {
+  9 |   const supabase = await createClient();
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:3127
+[  244032ms] [ERROR] ./plamspring/app/admin/projects/page.tsx:6:1
+Module not found: Can't resolve './NewProjectButton'
+  4 | import { ImageIcon } from "lucide-react";
+  5 | import { Button } from "@/components/ui/button";
+> 6 | import NewProjectButton from "./NewProjectButton";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 |
+  8 | export default async function AdminProjectsDetailPage() {
+  9 |   const supabase = await createClient();
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:3127

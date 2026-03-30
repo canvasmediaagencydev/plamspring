@@ -62,6 +62,63 @@ export type Database = {
         }
         Relationships: []
       }
+      land_inquiries: {
+        Row: {
+          area_ngan: number | null
+          area_rai: number | null
+          area_wa: number | null
+          asking_price: number | null
+          created_at: string | null
+          district: string | null
+          email: string | null
+          first_name: string
+          id: string
+          land_address: string | null
+          last_name: string
+          notes: string | null
+          phone: string
+          province: string | null
+          status: string
+          title_deed_type: string | null
+        }
+        Insert: {
+          area_ngan?: number | null
+          area_rai?: number | null
+          area_wa?: number | null
+          asking_price?: number | null
+          created_at?: string | null
+          district?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          land_address?: string | null
+          last_name: string
+          notes?: string | null
+          phone: string
+          province?: string | null
+          status?: string
+          title_deed_type?: string | null
+        }
+        Update: {
+          area_ngan?: number | null
+          area_rai?: number | null
+          area_wa?: number | null
+          asking_price?: number | null
+          created_at?: string | null
+          district?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          land_address?: string | null
+          last_name?: string
+          notes?: string | null
+          phone?: string
+          province?: string | null
+          status?: string
+          title_deed_type?: string | null
+        }
+        Relationships: []
+      }
       lifestyle_slides: {
         Row: {
           created_at: string | null
