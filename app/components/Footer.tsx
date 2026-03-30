@@ -141,7 +141,7 @@ export default function Footer({ settings }: FooterProps) {
         {/* ── Col 3: Lottie + Tagline + Copyright ── */}
         <div className="flex flex-col gap-3 sm:col-span-2 md:col-span-1">
           <div className="flex items-center gap-2">
-            <div className="w-36 shrink-0 md:w-44">
+            <div className="w-36 shrink-0 md:w-80">
               <DotLottieReact
                 src="https://lottie.host/02a7a704-14af-40fb-95d1-1b2e6cfa3029/kOD28GwRIf.lottie"
                 loop

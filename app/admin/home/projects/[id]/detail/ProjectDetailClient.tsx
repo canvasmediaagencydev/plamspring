@@ -102,6 +102,9 @@ export function ProjectDetailClient({
   const [projectSubtitle, setProjectSubtitle] = useState(project.subtitle ?? "");
   const [projectSlug, setProjectSlug] = useState(project.slug ?? "");
 
+  // ── Publish state ──
+  const [isPublished, setIsPublished] = useState(project.is_published ?? false);
+
   // ── Hero tab state ──
   const [heroImageUrl, setHeroImageUrl] = useState(project.hero_image_url ?? "");
   const [facebookUrl, setFacebookUrl] = useState(project.facebook_url ?? "");
@@ -182,10 +185,7 @@ export function ProjectDetailClient({
       subtitle: projectSubtitle || null,
       slug: projectSlug.trim() || null,
       hero_image_url: heroImageUrl || null,
-      facebook_url: facebookUrl || null,
-      line_url: lineUrl || null,
-      youtube_url: youtubeUrl || null,
-      website_url: websiteUrl || null,
+      is_published: isPublished,
     });
 
   const saveInfo = () =>
@@ -302,19 +302,28 @@ export function ProjectDetailClient({
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Social Links</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {[
-            { label: "Facebook URL", value: facebookUrl, set: setFacebookUrl },
-            { label: "Line URL", value: lineUrl, set: setLineUrl },
-            { label: "YouTube URL", value: youtubeUrl, set: setYoutubeUrl },
-            { label: "Website URL", value: websiteUrl, set: setWebsiteUrl },
-          ].map(({ label, value, set }) => (
-            <div key={label} className="space-y-1.5">
-              <Label>{label}</Label>
-              <Input value={value} onChange={(e) => set(e.target.value)} placeholder="https://" />
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-800">สถานะการแสดงผล</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {isPublished ? "เผยแพร่บนเว็บไซต์แล้ว" : "ซ่อนจากเว็บไซต์"}
+              </p>
             </div>
-          ))}
+            <button
+              type="button"
+              onClick={() => setIsPublished((v) => !v)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                isPublished ? "bg-[#09418C]" : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ${
+                  isPublished ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
         </CardContent>
       </Card>
 

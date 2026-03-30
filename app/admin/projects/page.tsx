@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewProjectButton from "./NewProjectButton";
+import { DeleteProjectButton } from "./DeleteProjectButton";
 
 export default async function AdminProjectsDetailPage() {
   const supabase = await createClient();
@@ -64,7 +65,7 @@ export default async function AdminProjectsDetailPage() {
                 )}
               </div>
 
-              {/* Status + action */}
+              {/* Status + actions */}
               <div className="flex shrink-0 flex-col items-end gap-2">
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
@@ -75,11 +76,14 @@ export default async function AdminProjectsDetailPage() {
                 >
                   {project.is_published ? "เผยแพร่" : "ซ่อน"}
                 </span>
-                <Link href={`/admin/projects/${project.id}`}>
-                  <Button size="sm" className="h-7 gap-1 px-3 text-xs">
-                    แก้ไข
-                  </Button>
-                </Link>
+                <div className="flex items-center gap-1.5">
+                  <DeleteProjectButton id={project.id} name={project.name} />
+                  <Link href={`/admin/projects/${project.id}`}>
+                    <Button size="sm" className="h-7 gap-1 px-3 text-xs">
+                      แก้ไข
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

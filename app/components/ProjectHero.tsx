@@ -54,17 +54,6 @@ export default function ProjectHero({
         <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
 
-        {/* Project branding overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-wider text-primary drop-shadow-sm sm:text-5xl md:text-6xl lg:text-7xl">
-              {name}
-            </h1>
-            <p className="mt-2 text-sm font-medium tracking-[0.3em] text-primary/70 md:text-base lg:text-lg">
-              {subtitle}
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );
