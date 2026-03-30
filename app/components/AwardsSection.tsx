@@ -19,26 +19,33 @@ interface AwardsSectionProps {
   csrPosts?: CsrPost[];
 }
 
-function AwardCard({ award }: { award?: Award }) {
+function AwardCard({ award, reverse = false }: { award?: Award; reverse?: boolean }) {
   if (award) {
     return (
-      <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="mb-4 flex h-44 items-center justify-center rounded-xl bg-gray-50">
+      <div
+        className={`overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-sm md:flex ${
+          reverse ? "md:flex-row-reverse" : "md:flex-row"
+        }`}
+      >
+        <div className="relative h-72 bg-[#F5F7FA] md:h-auto md:w-1/2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={award.image_url} alt="" className="h-28 w-28 object-contain" />
+          <img src={award.image_url} alt="" className="h-full w-full object-cover" />
         </div>
-        <p className="text-sm leading-relaxed text-gray-500 md:text-base">{award.description}</p>
+        <div className="flex items-center p-6 md:w-1/2 md:p-10">
+          <p className="text-sm leading-relaxed text-gray-500 md:text-base">{award.description}</p>
+        </div>
       </div>
     );
   }
   return (
-    <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex h-44 items-center justify-center rounded-xl bg-gray-50">
+    <div className={`overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-sm md:flex ${reverse ? "md:flex-row-reverse" : "md:flex-row"}`}>
+      <div className="flex h-72 items-center justify-center bg-gray-50 md:h-auto md:w-1/2">
         <Image src="/icon/awardsicon.svg" alt="Award" width={120} height={120} className="h-28 w-28 object-contain" />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 p-6 md:flex md:w-1/2 md:flex-col md:justify-center md:p-10">
         <div className="h-3 w-full animate-pulse rounded bg-gray-200" />
         <div className="h-3 w-4/5 animate-pulse rounded bg-gray-200" />
+        <div className="h-3 w-3/5 animate-pulse rounded bg-gray-200" />
       </div>
     </div>
   );
@@ -85,9 +92,9 @@ export default function AwardsSection({ awards, csrPosts }: AwardsSectionProps) 
           <h2 className="mb-10 text-center text-2xl font-bold tracking-widest text-primary md:text-4xl">
             AWARDS &amp; RECOGNITION
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="space-y-6">
             {displayAwards.map((award, i) => (
-              <AwardCard key={award?.id ?? i} award={award} />
+              <AwardCard key={award?.id ?? i} award={award} reverse={i % 2 === 1} />
             ))}
           </div>
         </div>
