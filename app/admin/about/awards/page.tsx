@@ -58,14 +58,20 @@ export default function AdminAwardsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const payload = { image_url: form.image_url || null, description: form.description || null,
+    const payload = { image_url: form.image_url || undefined, description: form.description || undefined,
       sort_order: form.sort_order, is_published: form.is_published };
     if (modal?.mode === "new") {
       const { data } = await supabase.from("awards").insert(payload).select().single();
       if (data) setAwards((prev) => [...prev, data]);
     } else {
       await supabase.from("awards").update(payload).eq("id", modal!.item!.id);
-      setAwards((prev) => prev.map((a) => a.id === modal!.item!.id ? { ...a, ...payload } : a));
+      setAwards((prev) => prev.map((a) => a.id === modal!.item!.id ? {
+        ...a,
+        image_url: payload.image_url ?? a.image_url,
+        description: payload.description ?? a.description,
+        sort_order: payload.sort_order,
+        is_published: payload.is_published,
+      } : a));
     }
     await revalidatePages([...REVALIDATE_PATHS.about]);
     setSaving(false);
