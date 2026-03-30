@@ -1,6 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/lib/types/database.types";
+
+/**
+ * Lightweight Supabase client for use outside request scope
+ * (e.g. generateStaticParams, generateMetadata at build time).
+ * Does not use cookies — read-only / public data only.
+ */
+export function createStaticClient() {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 /**
  * Creates a Supabase client for use in Server Components and Route Handlers.

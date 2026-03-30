@@ -14,24 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      contact_clicks: {
-        Row: {
-          id: string
-          type: "facebook" | "line" | "loan_contact"
-          clicked_at: string
-        }
-        Insert: {
-          id?: string
-          type: "facebook" | "line" | "loan_contact"
-          clicked_at?: string
-        }
-        Update: {
-          id?: string
-          type?: "facebook" | "line" | "loan_contact"
-          clicked_at?: string
-        }
-        Relationships: []
-      }
       awards: {
         Row: {
           created_at: string | null
@@ -59,6 +41,24 @@ export type Database = {
           is_published?: boolean
           sort_order?: number
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contact_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          type: string
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          type: string
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          type?: string
         }
         Relationships: []
       }
@@ -200,6 +200,87 @@ export type Database = {
         }
         Relationships: []
       }
+      project_pages: {
+        Row: {
+          brochure_url: string | null
+          created_at: string | null
+          description: string | null
+          facebook_url: string | null
+          facilities: Json
+          facility_image_1: string | null
+          facility_image_2: string | null
+          gallery_images: Json
+          hero_image_url: string | null
+          highlights: Json
+          house_types: Json
+          id: string
+          is_published: boolean
+          line_url: string | null
+          map_embed_url: string | null
+          map_image_url: string | null
+          name: string
+          nearby_places: Json
+          slug: string | null
+          sort_order: number
+          subtitle: string | null
+          updated_at: string | null
+          website_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          brochure_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          facebook_url?: string | null
+          facilities?: Json
+          facility_image_1?: string | null
+          facility_image_2?: string | null
+          gallery_images?: Json
+          hero_image_url?: string | null
+          highlights?: Json
+          house_types?: Json
+          id?: string
+          is_published?: boolean
+          line_url?: string | null
+          map_embed_url?: string | null
+          map_image_url?: string | null
+          name: string
+          nearby_places?: Json
+          slug?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          brochure_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          facebook_url?: string | null
+          facilities?: Json
+          facility_image_1?: string | null
+          facility_image_2?: string | null
+          gallery_images?: Json
+          hero_image_url?: string | null
+          highlights?: Json
+          house_types?: Json
+          id?: string
+          is_published?: boolean
+          line_url?: string | null
+          map_embed_url?: string | null
+          map_image_url?: string | null
+          name?: string
+          nearby_places?: Json
+          slug?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           created_at: string | null
@@ -271,6 +352,7 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
@@ -351,3 +433,43 @@ export type TablesUpdate<
       ? U
       : never
     : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

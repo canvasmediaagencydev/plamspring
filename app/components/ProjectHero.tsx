@@ -1,0 +1,71 @@
+"use client";
+
+import { FaFacebookF, FaLine, FaYoutube, FaGlobe } from "react-icons/fa";
+
+interface ProjectHeroProps {
+  name: string;
+  subtitle: string;
+  heroImageUrl?: string;
+  socialLinks?: {
+    facebook?: string;
+    line?: string;
+    youtube?: string;
+    website?: string;
+  };
+}
+
+export default function ProjectHero({
+  name,
+  subtitle,
+  heroImageUrl,
+  socialLinks = {},
+}: ProjectHeroProps) {
+  const socials = [
+    { icon: FaGlobe, href: socialLinks.website, label: "Website", bg: "bg-gray-600" },
+    { icon: FaFacebookF, href: socialLinks.facebook, label: "Facebook", bg: "bg-[#1877F2]" },
+    { icon: FaLine, href: socialLinks.line, label: "Line", bg: "bg-[#06C755]" },
+    { icon: FaYoutube, href: socialLinks.youtube, label: "YouTube", bg: "bg-[#FF0000]" },
+  ].filter((s) => s.href);
+
+  return (
+    <section className="relative mt-16 w-full overflow-hidden md:mt-20">
+      {/* Hero image */}
+      <div className="relative h-[320px] w-full sm:h-[420px] md:h-[520px] lg:h-[620px]">
+        {heroImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={heroImageUrl}
+            alt={name}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <>
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200" />
+            {/* Decorative skeleton pattern overlay */}
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute left-[10%] top-[20%] h-40 w-60 rounded-2xl bg-gray-300/50 sm:h-52 sm:w-80" />
+              <div className="absolute bottom-[15%] right-[8%] h-32 w-44 rounded-2xl bg-gray-300/50 sm:h-44 sm:w-56" />
+              <div className="absolute bottom-[30%] left-[30%] h-24 w-36 rounded-xl bg-gray-300/50" />
+            </div>
+          </>
+        )}
+
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
+
+        {/* Project branding overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold tracking-wider text-primary drop-shadow-sm sm:text-5xl md:text-6xl lg:text-7xl">
+              {name}
+            </h1>
+            <p className="mt-2 text-sm font-medium tracking-[0.3em] text-primary/70 md:text-base lg:text-lg">
+              {subtitle}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

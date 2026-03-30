@@ -52,25 +52,31 @@ export default function AdminProjectsPage() {
 
   const openNew = () => { setForm(EMPTY); setModal({ mode: "new" }); };
   const openEdit = (item: Project) => {
-    setForm({ name: item.name, subtitle: item.subtitle ?? "", image_url: item.image_url ?? "",
-      logo_url: item.logo_url ?? "", sort_order: item.sort_order ?? 0, is_published: item.is_published ?? true });
+    setForm({ name: item.name, subtitle: item.subtitle ?? "",
+      image_url: item.image_url ?? "", logo_url: item.logo_url ?? "",
+      sort_order: item.sort_order ?? 0, is_published: item.is_published ?? true });
     setModal({ mode: "edit", item });
   };
 
   const handleSave = async () => {
     if (!form.name.trim()) return;
     setSaving(true);
-    const payload = { name: form.name, subtitle: form.subtitle || null, image_url: form.image_url || null,
-      logo_url: form.logo_url || null, sort_order: form.sort_order, is_published: form.is_published,
-      updated_at: new Date().toISOString() };
+    const payload = {
+      name: form.name,
+      subtitle: form.subtitle || null,
+      image_url: form.image_url || undefined,
+      logo_url: form.logo_url || null,
+      sort_order: form.sort_order,
+      is_published: form.is_published,
+      updated_at: new Date().toISOString(),
+    };
     if (modal?.mode === "new") {
-      const { data } = await supabase.from("projects").insert(payload).select().single();
-      if (data) setProjects((prev) => [...prev, data]);
+      await supabase.from("projects").insert(payload);
     } else {
       await supabase.from("projects").update(payload).eq("id", modal!.item!.id);
-      setProjects((prev) => prev.map((p) => p.id === modal!.item!.id ? { ...p, ...payload } : p));
     }
     await revalidatePages([...REVALIDATE_PATHS.home]);
+    await load();
     setSaving(false);
     setModal(null);
   };
@@ -161,6 +167,7 @@ export default function AdminProjectsPage() {
                     {project.is_published ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <button onClick={() => openEdit(project)}
+                    title="แก้ไข"
                     className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
                     <Pencil size={14} />
                   </button>

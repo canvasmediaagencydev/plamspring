@@ -11,10 +11,10 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  ChevronRight,
   BookOpen,
   ExternalLink,
   LayoutDashboard,
+  Building2,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -39,6 +39,13 @@ const NAV_ITEMS: NavItem[] = [
       { label: "วิดีโอ", href: "/admin/home/videos" },
       { label: "โครงการของเรา", href: "/admin/home/projects" },
       { label: "ทำเลศักยภาพ", href: "/admin/home/lifestyle" },
+    ],
+  },
+  {
+    label: "โครงการ",
+    icon: <Building2 size={16} />,
+    children: [
+      { label: "จัดการโครงการ", href: "/admin/projects" },
     ],
   },
   {
