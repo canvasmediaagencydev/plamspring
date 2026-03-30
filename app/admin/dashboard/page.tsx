@@ -2,25 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import {
   MessageCircle,
   FileText,
   FolderOpen,
   Trophy,
   Milestone,
-  TrendingUp,
   Users,
   Eye,
   EyeOff,
   RefreshCw,
   Calculator,
+  MapPin,
+  ArrowUpRight,
+  Activity,
+  Inbox,
 } from "lucide-react";
 import { FaFacebookMessenger, FaLine } from "react-icons/fa";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface ClicksByDay {
-  date: string; // "YYYY-MM-DD"
+  date: string;
   facebook: number;
   line: number;
   loan_contact: number;
@@ -42,6 +46,9 @@ interface DashboardData {
   awardsCount: number;
   milestonesCount: number;
   familyImagesCount: number;
+
+  totalLandInquiries: number;
+  newLandInquiries: number;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -63,174 +70,304 @@ function getLast7Days(): string[] {
   return days;
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
 
-function StatCard({
+function KpiCard({
   icon,
   label,
   value,
   sub,
-  color,
-  bg,
+  accent = false,
+  badge,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number | string;
   sub?: string;
-  color: string;
-  bg: string;
+  accent?: boolean;
+  badge?: React.ReactNode;
 }) {
   return (
-    <div className="group flex items-center gap-5 rounded-3xl border border-gray-100/60 bg-white/80 backdrop-blur-sm p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
-      <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${bg} transition-transform duration-300 group-hover:scale-110`}>
-        <span className={color}>{icon}</span>
+    <div
+      className={`relative flex flex-col gap-4 rounded-2xl border p-6 transition-shadow hover:shadow-md ${
+        accent
+          ? "border-[#09418C]/20 bg-[#09418C] text-white"
+          : "border-gray-100 bg-white text-gray-900"
+      }`}
+    >
+      <div className="flex items-start justify-between">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+            accent ? "bg-white/15" : "bg-gray-50"
+          }`}
+        >
+          <span className={accent ? "text-white" : "text-[#09418C]"}>{icon}</span>
+        </div>
+        {badge}
       </div>
-      <div className="min-w-0">
-        <p className="text-[13px] font-semibold text-gray-400">{label}</p>
-        <p className="mt-1 text-3xl font-black tracking-tight text-gray-800">{value}</p>
-        {sub && <p className="mt-1 text-xs font-medium text-gray-400">{sub}</p>}
+      <div>
+        <p className={`text-[13px] font-medium ${accent ? "text-white/70" : "text-gray-400"}`}>
+          {label}
+        </p>
+        <p className={`mt-1 text-3xl font-bold tracking-tight ${accent ? "text-white" : "text-gray-900"}`}>
+          {value}
+        </p>
+        {sub && (
+          <p className={`mt-1 text-xs ${accent ? "text-white/60" : "text-gray-400"}`}>{sub}</p>
+        )}
       </div>
     </div>
   );
 }
 
-function MiniBar({
-  value,
-  max,
-  color,
-}: {
-  value: number;
-  max: number;
+// ─── Line Chart ───────────────────────────────────────────────────────────────
+
+const W = 520;   // SVG viewBox width
+const H = 140;   // SVG viewBox height
+const PAD = { top: 16, right: 16, bottom: 8, left: 8 };
+
+interface LineConfig {
+  key: keyof ClicksByDay;
   color: string;
-}) {
-  const pct = max === 0 ? 0 : Math.round((value / max) * 100);
-  return (
-    <div className="h-full w-full rounded-sm bg-gray-100">
-      <div
-        className={`h-full rounded-sm transition-all duration-500 ${color}`}
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
+  label: string;
+  gradId: string;
+}
+
+const LINES: LineConfig[] = [
+  { key: "facebook",     color: "#0084FF", label: "Facebook", gradId: "grad-fb" },
+  { key: "line",         color: "#06C755", label: "LINE",     gradId: "grad-line" },
+  { key: "loan_contact", color: "#09418C", label: "ติดต่อขอกู้", gradId: "grad-loan" },
+];
+
+function toPoints(data: ClicksByDay[], key: keyof ClicksByDay, maxVal: number) {
+  const n = data.length;
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
+  return data.map((d, i) => {
+    const x = PAD.left + (i / (n - 1)) * chartW;
+    const v = (d[key] as number) ?? 0;
+    const y = PAD.top + chartH - (maxVal === 0 ? 0 : (v / maxVal) * chartH);
+    return { x, y, v };
+  });
+}
+
+function smoothPath(pts: { x: number; y: number }[]) {
+  if (pts.length < 2) return "";
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const cp1x = pts[i - 1].x + (pts[i].x - pts[i - 1].x) / 2;
+    const cp2x = pts[i - 1].x + (pts[i].x - pts[i - 1].x) / 2;
+    d += ` C ${cp1x} ${pts[i - 1].y}, ${cp2x} ${pts[i].y}, ${pts[i].x} ${pts[i].y}`;
+  }
+  return d;
+}
+
+function areaPath(pts: { x: number; y: number }[], bottom: number) {
+  const line = smoothPath(pts);
+  if (!line) return "";
+  return `${line} L ${pts[pts.length - 1].x} ${bottom} L ${pts[0].x} ${bottom} Z`;
 }
 
 function ClickChart({ data }: { data: ClicksByDay[] }) {
-  const maxTotal = Math.max(...data.map((d) => d.facebook + d.line), 1);
+  const maxVal = Math.max(...LINES.flatMap(({ key }) => data.map((d) => (d[key] as number) ?? 0)), 1);
+  const bottom = H - PAD.bottom;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
+    <div>
+      {/* Header */}
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-gray-700">ยอดคลิก 7 วันล่าสุด</h3>
-          <p className="mt-0.5 text-xs text-gray-400">Facebook Messenger + LINE</p>
+          <h3 className="text-sm font-semibold text-gray-800">ยอดคลิกติดต่อ 7 วันล่าสุด</h3>
+          <p className="mt-0.5 text-xs text-gray-400">แยกตามช่องทาง</p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-gray-500">
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#0084FF]" />
-            Facebook
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#06C755]" />
-            LINE
-          </span>
+        <div className="flex items-center gap-4 text-[11px] font-medium text-gray-400">
+          {LINES.map(({ color, label }) => (
+            <span key={label} className="flex items-center gap-1.5">
+              <span className="h-2 w-5 rounded-full" style={{ background: color }} />
+              {label}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* Chart bars */}
-      <div className="flex h-36 items-end gap-2">
-        {data.map((day) => {
-          const total = day.facebook + day.line;
-          const fbPct = total === 0 ? 0 : (day.facebook / total) * 100;
-          const linePct = total === 0 ? 0 : (day.line / total) * 100;
-          const barHeightPct = maxTotal === 0 ? 0 : (total / maxTotal) * 100;
+      {/* SVG Chart */}
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="w-full"
+          style={{ height: 180 }}
+          overflow="visible"
+        >
+          <defs>
+            {LINES.map(({ color, gradId }) => (
+              <linearGradient key={gradId} id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor={color} stopOpacity="0.18" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </linearGradient>
+            ))}
+          </defs>
 
-          return (
-            <div
-              key={day.date}
-              className="group relative flex flex-1 flex-col items-center gap-1"
-            >
-              {/* Tooltip */}
-              <div className="absolute -top-8 left-1/2 hidden -translate-x-1/2 rounded-lg bg-gray-800 px-2 py-1 text-[10px] text-white shadow-md group-hover:flex whitespace-nowrap">
-                FB: {day.facebook} · LINE: {day.line}
-              </div>
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((t) => {
+            const y = PAD.top + (H - PAD.top - PAD.bottom) * (1 - t);
+            return (
+              <line
+                key={t}
+                x1={PAD.left} y1={y}
+                x2={W - PAD.right} y2={y}
+                stroke="#f0f0f0"
+                strokeWidth="1"
+              />
+            );
+          })}
 
-              {/* Stacked bar */}
-              <div
-                className="w-full overflow-hidden rounded-t-md"
-                style={{ height: `${barHeightPct}%`, minHeight: total > 0 ? 4 : 0 }}
+          {/* Area fills */}
+          {LINES.map(({ key, gradId }) => {
+            const pts = toPoints(data, key, maxVal);
+            return (
+              <path
+                key={gradId}
+                d={areaPath(pts, bottom)}
+                fill={`url(#${gradId})`}
+              />
+            );
+          })}
+
+          {/* Lines */}
+          {LINES.map(({ key, color }) => {
+            const pts = toPoints(data, key, maxVal);
+            return (
+              <path
+                key={color}
+                d={smoothPath(pts)}
+                fill="none"
+                stroke={color}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            );
+          })}
+
+          {/* Dots + Tooltip trigger */}
+          {data.map((day, i) => (
+            <g key={day.date}>
+              {LINES.map(({ key, color }) => {
+                const pts = toPoints(data, key, maxVal);
+                const { x, y } = pts[i];
+                const v = (day[key] as number) ?? 0;
+                if (v === 0) return null;
+                return (
+                  <circle
+                    key={key as string}
+                    cx={x} cy={y} r={3.5}
+                    fill="white"
+                    stroke={color}
+                    strokeWidth="2"
+                  />
+                );
+              })}
+            </g>
+          ))}
+
+          {/* X-axis labels */}
+          {data.map((day, i) => {
+            const n = data.length;
+            const x = PAD.left + (i / (n - 1)) * (W - PAD.left - PAD.right);
+            return (
+              <text
+                key={day.date}
+                x={x} y={H + 14}
+                textAnchor="middle"
+                fontSize="9"
+                fill="#bbb"
               >
-                {total > 0 ? (
-                  <div className="flex h-full flex-col">
-                    <div
-                      className="w-full bg-[#0084FF]"
-                      style={{ height: `${fbPct}%` }}
-                    />
-                    <div
-                      className="w-full bg-[#06C755]"
-                      style={{ height: `${linePct}%` }}
-                    />
-                  </div>
-                ) : (
-                  <div className="h-1 w-full rounded-t-md bg-gray-100" />
-                )}
-              </div>
+                {formatDate(day.date)}
+              </text>
+            );
+          })}
 
-              {/* Total label */}
-              {total > 0 && (
-                <span className="text-[9px] font-medium text-gray-500">{total}</span>
-              )}
-
-              {/* Date label */}
-              <span className="mt-1 text-[9px] text-gray-400">{formatDate(day.date)}</span>
-            </div>
-          );
-        })}
+          {/* Value labels on top of each line's last point */}
+          {LINES.map(({ key, color }) => {
+            const pts = toPoints(data, key, maxVal);
+            const last = pts[pts.length - 1];
+            const v = (data[data.length - 1][key] as number) ?? 0;
+            if (v === 0) return null;
+            return (
+              <text
+                key={key as string}
+                x={last.x + 6} y={last.y + 4}
+                fontSize="9"
+                fontWeight="600"
+                fill={color}
+              >
+                {v}
+              </text>
+            );
+          })}
+        </svg>
       </div>
     </div>
   );
 }
+
+// ─── Content Row ──────────────────────────────────────────────────────────────
 
 function ContentRow({
   icon,
   label,
   published,
   draft,
-  color,
 }: {
   icon: React.ReactNode;
   label: string;
   published: number;
   draft: number;
-  color: string;
 }) {
   const total = published + draft;
   const pct = total === 0 ? 0 : Math.round((published / total) * 100);
   return (
-    <div className="group flex items-center gap-4 py-3.5 border-b border-gray-50/80 last:border-0 hover:bg-gray-50/30 rounded-xl px-2 -mx-2 transition-colors">
-      <span className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 transition-colors group-hover:bg-white ${color}`}>{icon}</span>
+    <div className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500">
+        {icon}
+      </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[13px] font-semibold text-gray-700">{label}</span>
-          <span className="text-xs font-medium text-gray-400">{published}/{total}</span>
+          <span className="text-[13px] font-medium text-gray-700">{label}</span>
+          <span className="text-xs text-gray-400">{published}/{total}</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100/80">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-gray-100">
           <div
-            className={`h-full rounded-full transition-all duration-700 ${color.replace("text-", "bg-")}`}
+            className="h-full rounded-full bg-[#09418C] transition-all duration-700"
             style={{ width: `${pct}%` }}
           />
         </div>
       </div>
-      <div className="shrink-0 flex items-center gap-3 text-[11px] font-medium">
-        <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-          <Eye size={12} /> {published}
+      <div className="shrink-0 flex items-center gap-1.5 text-[11px] font-medium">
+        <span className="flex items-center gap-1 text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+          <Eye size={10} /> {published}
         </span>
         {draft > 0 && (
-          <span className="flex items-center gap-1 text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-            <EyeOff size={12} /> {draft}
+          <span className="flex items-center gap-1 text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+            <EyeOff size={10} /> {draft}
           </span>
         )}
       </div>
     </div>
+  );
+}
+
+// ─── Quick Link ───────────────────────────────────────────────────────────────
+
+function QuickLink({ label, href }: { label: string; href: string }) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3 text-[13px] font-medium text-gray-700 transition-all hover:border-[#09418C]/20 hover:bg-[#09418C]/5 hover:text-[#09418C]"
+    >
+      <span>{label}</span>
+      <ArrowUpRight size={14} className="text-gray-300 transition-colors group-hover:text-[#09418C]" />
+    </Link>
   );
 }
 
@@ -257,41 +394,30 @@ export default function DashboardPage() {
       { data: awards },
       { data: milestones },
       { data: familyImages },
+      { data: landInquiries },
     ] = await Promise.all([
       supabase.from("contact_clicks").select("type"),
       supabase.from("contact_clicks").select("type, clicked_at").gte("clicked_at", weekAgo),
-      supabase
-        .from("contact_clicks")
-        .select("type")
-        .gte("clicked_at", `${today}T00:00:00.000Z`),
+      supabase.from("contact_clicks").select("type").gte("clicked_at", `${today}T00:00:00.000Z`),
       supabase.from("posts").select("is_published"),
       supabase.from("projects").select("is_published"),
       supabase.from("awards").select("id"),
       supabase.from("milestones").select("id"),
       supabase.from("our_family_images").select("id"),
+      supabase.from("land_inquiries").select("id, status"),
     ]);
 
-    // Click breakdowns
     const totalClicks = allClicks?.length ?? 0;
     const facebookClicks = allClicks?.filter((c) => c.type === "facebook").length ?? 0;
     const lineClicks = allClicks?.filter((c) => c.type === "line").length ?? 0;
     const loanContactClicks = allClicks?.filter((c) => c.type === "loan_contact").length ?? 0;
-    const weekTotal = weeklyClicks?.length ?? 0;
-    const todayTotal = todayClicks?.length ?? 0;
 
-    // Build clicks-by-day for the chart (weeklyClicks already has clicked_at)
     const weeklyRaw = weeklyClicks ?? [];
     const clicksByDayFull: ClicksByDay[] = last7Days.map((date) => ({
       date,
-      facebook: weeklyRaw.filter(
-        (c) => c.type === "facebook" && c.clicked_at.startsWith(date)
-      ).length,
-      line: weeklyRaw.filter(
-        (c) => c.type === "line" && c.clicked_at.startsWith(date)
-      ).length,
-      loan_contact: weeklyRaw.filter(
-        (c) => c.type === "loan_contact" && c.clicked_at.startsWith(date)
-      ).length,
+      facebook: weeklyRaw.filter((c) => c.type === "facebook" && c.clicked_at.startsWith(date)).length,
+      line: weeklyRaw.filter((c) => c.type === "line" && c.clicked_at.startsWith(date)).length,
+      loan_contact: weeklyRaw.filter((c) => c.type === "loan_contact" && c.clicked_at.startsWith(date)).length,
     }));
 
     setData({
@@ -299,8 +425,8 @@ export default function DashboardPage() {
       facebookClicks,
       lineClicks,
       loanContactClicks,
-      todayClicks: todayTotal,
-      weekClicks: weekTotal,
+      todayClicks: todayClicks?.length ?? 0,
+      weekClicks: weeklyClicks?.length ?? 0,
       clicksByDay: clicksByDayFull,
 
       publishedPosts: posts?.filter((p) => p.is_published).length ?? 0,
@@ -310,6 +436,9 @@ export default function DashboardPage() {
       awardsCount: awards?.length ?? 0,
       milestonesCount: milestones?.length ?? 0,
       familyImagesCount: familyImages?.length ?? 0,
+
+      totalLandInquiries: landInquiries?.length ?? 0,
+      newLandInquiries: (landInquiries ?? []).filter((i) => i.status === "new").length,
     });
 
     setRefreshedAt(new Date());
@@ -318,14 +447,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-gray-400">
-          <RefreshCw size={28} className="animate-spin" />
-          <span className="text-sm">กำลังโหลดข้อมูล...</span>
+      <div className="flex h-64 items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-300">
+          <RefreshCw size={24} className="animate-spin" />
+          <span className="text-sm">กำลังโหลด...</span>
         </div>
       </div>
     );
@@ -339,245 +469,163 @@ export default function DashboardPage() {
   const loanPct = contactTotal === 0 ? 0 : 100 - fbPct - linePct;
 
   return (
-    <div className="min-h-full pb-10">
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between">
+    <div className="min-h-full space-y-6 pb-12">
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900 drop-shadow-sm">Dashboard</h1>
-          <p className="mt-1.5 text-sm font-medium text-gray-500">
-            ภาพรวมการใช้งานเว็บไซต์ Palm Springs
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-400">ภาพรวมการใช้งานเว็บไซต์ Palm Springs</p>
         </div>
         <button
           onClick={fetchData}
-          className="flex items-center gap-2 rounded-xl border border-gray-200/60 bg-white/80 backdrop-blur-sm px-4 py-2.5 text-xs font-semibold text-gray-600 shadow-[0_4px_12px_rgba(0,0,0,0.03)] transition-all hover:bg-white hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]"
+          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-500 shadow-sm transition-all hover:border-gray-300 hover:text-gray-700"
         >
-          <RefreshCw size={14} className="hover:animate-spin" />
-          รีเฟรชข้อมูล
+          <RefreshCw size={13} />
+          รีเฟรช
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard
-          icon={<MessageCircle size={22} />}
+      {/* ── KPI Row ────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <KpiCard
+          icon={<Activity size={20} />}
           label="คลิกติดต่อทั้งหมด"
           value={data.totalClicks.toLocaleString()}
           sub="ตั้งแต่เริ่มต้น"
-          color="text-[#09418C]"
-          bg="bg-blue-50"
+          accent
         />
-        <StatCard
-          icon={<TrendingUp size={22} />}
+        <KpiCard
+          icon={<MessageCircle size={20} />}
           label="คลิกสัปดาห์นี้"
           value={data.weekClicks}
           sub="7 วันล่าสุด"
-          color="text-violet-600"
-          bg="bg-violet-50"
         />
-        <StatCard
-          icon={<FaFacebookMessenger size={20} />}
-          label="Facebook Messenger"
-          value={data.facebookClicks}
-          sub={`${fbPct}% ของทั้งหมด`}
-          color="text-[#0084FF]"
-          bg="bg-blue-50"
+        <KpiCard
+          icon={<Inbox size={20} />}
+          label="แบบฟอร์มที่ดิน"
+          value={data.totalLandInquiries}
+          sub={`รอดำเนินการ ${data.newLandInquiries} รายการ`}
+          badge={
+            data.newLandInquiries > 0 ? (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#09418C] px-1.5 text-[10px] font-bold text-white">
+                {data.newLandInquiries}
+              </span>
+            ) : undefined
+          }
         />
-        <StatCard
-          icon={<FaLine size={20} />}
-          label="LINE"
-          value={data.lineClicks}
-          sub={`${linePct}% ของทั้งหมด`}
-          color="text-[#06C755]"
-          bg="bg-green-50"
+        <KpiCard
+          icon={<Calculator size={20} />}
+          label="ติดต่อขอกู้"
+          value={data.loanContactClicks}
+          sub={`${loanPct}% ของการติดต่อ`}
         />
       </div>
 
-      {/* Loan Contact Card */}
-      <div className="mb-8">
-        <div className="group flex items-center gap-5 rounded-3xl border border-red-100/60 bg-gradient-to-r from-red-50/50 to-white/80 backdrop-blur-sm p-6 shadow-[0_8px_30px_rgb(227,30,36,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(227,30,36,0.12)]">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-            <Calculator size={24} className="text-[#e31e24]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-gray-500">ปุ่มติดต่อเรา (หน้าคำนวณวงเงินกู้)</p>
-            <div className="flex items-baseline gap-3 mt-1">
-              <p className="text-3xl font-black tracking-tight text-gray-900">{data.loanContactClicks.toLocaleString()}</p>
-              <p className="text-xs font-semibold text-[#e31e24] bg-red-50 px-2.5 py-1 rounded-full">{loanPct}% ของการติดต่อทั้งหมด</p>
-            </div>
-          </div>
-          <div className="shrink-0 text-right">
-            <div className="h-3 w-40 overflow-hidden rounded-full bg-gray-100 shadow-inner">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#e31e24] to-[#ff4d4f] transition-all duration-1000 ease-out"
-                style={{ width: `${loanPct}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── Chart + Channel Breakdown ───────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 
-      {/* Charts Row */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* 7-day bar chart — takes 2 columns */}
-        <div className="lg:col-span-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] bg-white/80 backdrop-blur-sm border border-gray-100/60 overflow-hidden p-1">
+        {/* Bar Chart */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
           <ClickChart data={data.clicksByDay} />
         </div>
 
-        {/* FB vs LINE breakdown */}
-        <div className="rounded-[2rem] border border-gray-100/60 bg-white/80 backdrop-blur-sm p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col">
-          <h3 className="mb-5 text-base font-bold text-gray-800">สัดส่วนช่องทาง</h3>
-
-          {/* Donut-style bar */}
-          <div className="mb-6 overflow-hidden rounded-full h-4 flex bg-gray-100 shadow-inner">
-            <div className="h-full bg-gradient-to-r from-[#0084FF] to-[#00b4ff] transition-all duration-1000" style={{ width: `${fbPct}%` }} />
-            <div className="h-full bg-gradient-to-r from-[#06C755] to-[#2ce075] transition-all duration-1000" style={{ width: `${linePct}%` }} />
-            <div className="h-full bg-gradient-to-r from-[#e31e24] to-[#ff4d4f] transition-all duration-1000" style={{ width: `${loanPct}%` }} />
+        {/* Channel Breakdown */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm flex flex-col gap-5">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-800">ช่องทางการติดต่อ</h3>
+            <p className="mt-0.5 text-xs text-gray-400">สัดส่วนช่องทางทั้งหมด</p>
           </div>
 
-          <div className="space-y-4 flex-1">
-            <div className="flex items-center justify-between group">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 transition-colors group-hover:bg-[#0084FF] group-hover:text-white text-[#0084FF]">
-                  <FaFacebookMessenger size={18} />
-                </div>
-                <span className="text-[13px] font-semibold text-gray-600">Facebook</span>
-              </div>
-              <div className="text-right">
-                <div className="text-[15px] font-bold text-gray-900">{data.facebookClicks}</div>
-                <div className="text-[11px] font-medium text-gray-400">{fbPct}%</div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between group">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 transition-colors group-hover:bg-[#06C755] group-hover:text-white text-[#06C755]">
-                  <FaLine size={18} />
-                </div>
-                <span className="text-[13px] font-semibold text-gray-600">LINE</span>
-              </div>
-              <div className="text-right">
-                <div className="text-[15px] font-bold text-gray-900">{data.lineClicks}</div>
-                <div className="text-[11px] font-medium text-gray-400">{linePct}%</div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between group">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 transition-colors group-hover:bg-[#e31e24] group-hover:text-white text-[#e31e24]">
-                  <Calculator size={18} />
-                </div>
-                <span className="text-[13px] font-semibold text-gray-600">ติดต่อ (กู้)</span>
-              </div>
-              <div className="text-right">
-                <div className="text-[15px] font-bold text-gray-900">{data.loanContactClicks}</div>
-                <div className="text-[11px] font-medium text-gray-400">{loanPct}%</div>
-              </div>
-            </div>
+          {/* Proportion bar */}
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 flex">
+            <div className="h-full bg-[#0084FF] transition-all duration-700" style={{ width: `${fbPct}%` }} />
+            <div className="h-full bg-[#06C755] transition-all duration-700" style={{ width: `${linePct}%` }} />
+            <div className="h-full bg-[#09418C] transition-all duration-700" style={{ width: `${loanPct}%` }} />
           </div>
 
-          {/* Today highlight */}
-          <div className="mt-6 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100/50 px-5 py-4 border border-gray-100 flex items-center justify-between shadow-sm">
+          <div className="space-y-3">
+            {[
+              { Icon: FaFacebookMessenger, label: "Facebook Messenger", value: data.facebookClicks, pct: fbPct, color: "text-[#0084FF]", bg: "bg-[#0084FF]/8" },
+              { Icon: FaLine, label: "LINE", value: data.lineClicks, pct: linePct, color: "text-[#06C755]", bg: "bg-[#06C755]/8" },
+              { Icon: Calculator, label: "ติดต่อขอกู้", value: data.loanContactClicks, pct: loanPct, color: "text-[#09418C]", bg: "bg-[#09418C]/8" },
+            ].map(({ Icon, label, value, pct, color, bg }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+                  <Icon size={15} className={color} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-medium text-gray-600 truncate">{label}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[13px] font-bold text-gray-800">{value.toLocaleString()}</p>
+                  <p className="text-[10px] text-gray-400">{pct}%</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Today */}
+          <div className="mt-auto rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">คลิกวันนี้</p>
-              <p className="text-3xl font-black text-gray-900 mt-0.5">{data.todayClicks}</p>
+              <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">วันนี้</p>
+              <p className="text-2xl font-bold text-gray-900 mt-0.5">{data.todayClicks}</p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#09418C] opacity-40"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#09418C]"></span>
-              </span>
-            </div>
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#09418C] opacity-40" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#09418C]" />
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Content Overview */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Posts & Projects */}
-        <div className="rounded-[2rem] border border-gray-100/60 bg-white/80 backdrop-blur-sm p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <h3 className="mb-2 text-base font-bold text-gray-800">เนื้อหาเว็บไซต์</h3>
-          <p className="mb-5 text-[13px] font-medium text-gray-400">
-            แสดงสถานะ (เผยแพร่ / กำหนดการ) จำนวนรายการทั้งหมด
-          </p>
-          <div className="space-y-1">
-            <ContentRow
-              icon={<FileText size={16} />}
-              label="Blog & CSR Posts"
-              published={data.publishedPosts}
-              draft={data.draftPosts}
-              color="text-violet-500"
-            />
-            <ContentRow
-              icon={<FolderOpen size={16} />}
-              label="โครงการของเรา"
-              published={data.publishedProjects}
-              draft={data.draftProjects}
-              color="text-[#09418C]"
-            />
-            <ContentRow
-              icon={<Trophy size={16} />}
-              label="รางวัล (Awards)"
-              published={data.awardsCount}
-              draft={0}
-              color="text-amber-500"
-            />
-            <ContentRow
-              icon={<Milestone size={16} />}
-              label="เส้นทาง (Milestones)"
-              published={data.milestonesCount}
-              draft={0}
-              color="text-teal-500"
-            />
-            <ContentRow
-              icon={<Users size={16} />}
-              label="Our Family รูปภาพ"
-              published={data.familyImagesCount}
-              draft={0}
-              color="text-pink-500"
-            />
+      {/* ── Content Overview + Quick Links ─────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+        {/* Content status */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <h3 className="mb-1 text-sm font-semibold text-gray-800">สถานะเนื้อหา</h3>
+          <p className="mb-5 text-xs text-gray-400">รายการที่เผยแพร่และแบบร่าง</p>
+          <div className="space-y-0.5">
+            <ContentRow icon={<FileText size={15} />} label="Blog & CSR" published={data.publishedPosts} draft={data.draftPosts} />
+            <ContentRow icon={<FolderOpen size={15} />} label="โครงการ" published={data.publishedProjects} draft={data.draftProjects} />
+            <ContentRow icon={<Trophy size={15} />} label="รางวัล" published={data.awardsCount} draft={0} />
+            <ContentRow icon={<Milestone size={15} />} label="Milestones" published={data.milestonesCount} draft={0} />
+            <ContentRow icon={<Users size={15} />} label="Our Family" published={data.familyImagesCount} draft={0} />
+            <ContentRow icon={<MapPin size={15} />} label="แบบฟอร์มที่ดิน" published={data.totalLandInquiries} draft={0} />
           </div>
         </div>
 
         {/* Quick Links */}
-        <div className="rounded-[2rem] border border-gray-100/60 bg-white/80 backdrop-blur-sm p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col">
-          <h3 className="mb-2 text-base font-bold text-gray-800">จัดการเนื้อหา</h3>
-          <p className="mb-5 text-[13px] font-medium text-gray-400">ลิงก์ด่วนไปยังหน้าจัดการต่างๆ</p>
-          <div className="grid grid-cols-2 gap-3 flex-1">
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm flex flex-col gap-3">
+          <div className="mb-1">
+            <h3 className="text-sm font-semibold text-gray-800">จัดการเนื้อหา</h3>
+            <p className="mt-0.5 text-xs text-gray-400">ลิงก์ด่วน</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 flex-1">
             {[
-              { label: "Hero Slideshow", href: "/admin/home/hero", color: "bg-blue-50/70 text-blue-700 hover:bg-blue-600 hover:text-white" },
-              { label: "วิดีโอหน้าแรก", href: "/admin/home/videos", color: "bg-violet-50/70 text-violet-700 hover:bg-violet-600 hover:text-white" },
-              { label: "โครงการของเรา", href: "/admin/home/projects", color: "bg-[#09418C]/5 text-[#09418C] hover:bg-[#09418C] hover:text-white" },
-              { label: "Blog & CSR", href: "/admin/posts", color: "bg-pink-50/70 text-pink-700 hover:bg-pink-600 hover:text-white" },
-              { label: "About Us", href: "/admin/about/content", color: "bg-amber-50/70 text-amber-700 hover:bg-amber-500 hover:text-white" },
-              { label: "Footer & Contact", href: "/admin/footer", color: "bg-teal-50/70 text-teal-700 hover:bg-teal-600 hover:text-white" },
-              { label: "Our Family", href: "/admin/our-family", color: "bg-rose-50/70 text-rose-700 hover:bg-rose-600 hover:text-white" },
-              { label: "Awards", href: "/admin/about/awards", color: "bg-orange-50/70 text-orange-700 hover:bg-orange-500 hover:text-white" },
-            ].map(({ label, href, color }) => (
-              <a
-                key={href}
-                href={href}
-                className={`flex items-center justify-center text-center rounded-2xl px-3 py-4 text-[13px] font-bold transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${color}`}
-              >
-                {label}
-              </a>
+              { label: "Hero Slideshow", href: "/admin/home/hero" },
+              { label: "วิดีโอหน้าแรก", href: "/admin/home/videos" },
+              { label: "โครงการของเรา", href: "/admin/home/projects" },
+              { label: "Blog & CSR", href: "/admin/posts" },
+              { label: "About Us", href: "/admin/about/content" },
+              { label: "Footer & Contact", href: "/admin/footer" },
+              { label: "Our Family", href: "/admin/our-family" },
+              { label: "แบบฟอร์มที่ดิน", href: "/admin/land-inquiries" },
+            ].map(({ label, href }) => (
+              <QuickLink key={href} label={label} href={href} />
             ))}
           </div>
 
-          <div className="mt-6 flex items-center justify-between rounded-2xl bg-gray-50/80 px-5 py-4 border border-gray-100/80">
+          <div className="mt-1 flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
             <div>
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">อัปเดตข้อมูลล่าสุดเมื่อ</p>
-              <p className="mt-1 text-[13px] font-semibold text-gray-700">
-                {refreshedAt.toLocaleTimeString("th-TH", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })} น.
+              <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">อัปเดตเมื่อ</p>
+              <p className="mt-0.5 text-[13px] font-semibold text-gray-700">
+                {refreshedAt.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} น.
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 shadow-inner">
-              <div className="h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-            </div>
+            <div className="h-2 w-2 rounded-full bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />
           </div>
         </div>
       </div>

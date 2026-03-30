@@ -9,12 +9,6 @@ const CARDS = [
     href: "/contact/form",
   },
   {
-    icon: "/icon/aboutus/_x31_.svg",
-    label: "ร่วมงานกับเรา",
-    btnText: "สมัครงาน",
-    href: "#careers-form",
-  },
-  {
     icon: "/icon/aboutus/Frame.svg",
     label: "เสนอขายที่ดิน",
     btnText: "กรอกข้อมูล",
