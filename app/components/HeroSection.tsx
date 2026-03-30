@@ -46,20 +46,7 @@ export default function HeroSection({ images = [] }: HeroSectionProps) {
       <div className="absolute inset-0 bg-gradient-to-l from-white/50 via-white/10 to-transparent" />
 
       {/* Branding overlay */}
-      <div className="absolute bottom-[25%] right-[5%] flex flex-col items-end gap-2 md:bottom-[30%] md:right-[10%] md:gap-3">
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="text-right leading-tight">
-            <p className="text-2xl font-bold tracking-widest text-primary sm:text-3xl md:text-5xl">PALM</p>
-            <p className="text-2xl font-bold tracking-widest text-primary sm:text-3xl md:text-5xl">SPRINGS</p>
-          </div>
-          <PalmTreeIcon size={50} />
-        </div>
-        <p className="text-right text-sm font-medium italic leading-snug text-primary sm:text-base md:text-2xl">
-          &ldquo;เลือกปาล์มสปริงส์
-          <br />
-          เพื่อชีวิตที่ดีกว่า&rdquo;
-        </p>
-      </div>
+     
 
       {/* Dots — only show if more than 1 slide */}
       {count > 1 && (
