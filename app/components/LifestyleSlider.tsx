@@ -21,9 +21,7 @@ function SkeletonCard({ active }: { active: boolean }) {
       }`}
     >
       <div
-        className={`w-full animate-pulse bg-gray-300 ${
-          active ? "h-96 md:h-[480px]" : "h-72 md:h-[360px]"
-        }`}
+        className="h-96 w-full animate-pulse bg-gray-300 md:h-[480px]"
       />
       <div className="flex gap-2 bg-white px-3 py-3">
         <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
@@ -45,9 +43,7 @@ function SlideCardItem({ card, active }: { card: SlideCard; active: boolean }) {
       <img
         src={card.image}
         alt="lifestyle"
-        className={`w-full object-cover transition-all duration-500 ${
-          active ? "h-96 md:h-[480px]" : "h-72 md:h-[360px]"
-        }`}
+        className="h-96 w-full object-cover transition-all duration-500 md:h-[480px]"
       />
       <div className="flex flex-wrap gap-2 bg-white px-3 py-3">
         {card.tags.map((tag) => (
@@ -102,16 +98,16 @@ export default function LifestyleSlider({ slides = [] }: LifestyleSliderProps) {
 
   return (
     <section className="overflow-hidden py-16">
-      <h2 className="mb-30 text-center text-2xl font-bold text-primary md:text-4xl">
+      <h2 className="mb-12 text-center text-2xl font-bold text-primary md:text-4xl">
         ทำเลศักยภาพ ตอบโจทย์ทุกไลฟ์สไตล์
       </h2>
 
-      <div className="relative flex items-center justify-center gap-4 px-4">
+      <div className="relative px-4">
         {/* Prev arrow */}
         <button
           onClick={prev}
           aria-label="Previous"
-          className="absolute left-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-gray-100 sm:left-6"
+          className="absolute top-[42%] left-2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-gray-100 sm:left-6"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5 fill-primary">
             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
@@ -119,54 +115,51 @@ export default function LifestyleSlider({ slides = [] }: LifestyleSliderProps) {
         </button>
 
         {/* 3 visible cards */}
-        <div className="flex w-full max-w-6xl items-end justify-center gap-4 md:gap-6">
-          {visibleIndices.map((itemIdx, pos) => {
-            const isActive = pos === 1;
-            const card = items[itemIdx];
+        <div className="mx-auto max-w-6xl">
+          <div className="flex min-h-[470px] items-end justify-center gap-4 md:min-h-[590px] md:gap-6">
+            {visibleIndices.map((itemIdx, pos) => {
+              const isActive = pos === 1;
+              const card = items[itemIdx];
 
-            return (
-              <div
-                key={itemIdx}
-                onClick={() => setActive(itemIdx)}
-                className={`cursor-pointer transition-all duration-500 ${
-                  isActive
-                    ? "z-10 w-[80%] -translate-y-4 scale-105 sm:w-[60%] md:w-[42%] md:-translate-y-8"
-                    : "z-0 hidden w-[20%] opacity-70 md:block md:w-[29%]"
+              return (
+                <div
+                  key={itemIdx}
+                  onClick={() => setActive(itemIdx)}
+                  className={`cursor-pointer transition-all duration-500 ${
+                    isActive
+                      ? "z-10 w-[80%] -translate-y-4 scale-105 sm:w-[60%] md:w-[42%] md:-translate-y-8"
+                      : "z-0 hidden w-[20%] opacity-70 md:block md:w-[29%]"
+                  }`}
+                >
+                  {card ? (
+                    <SlideCardItem card={card} active={isActive} />
+                  ) : (
+                    <SkeletonCard active={isActive} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 flex min-h-2 justify-center gap-1.5">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === active ? "w-5 bg-primary" : "w-2 bg-gray-300"
                 }`}
-              >
-                {card ? (
-                  <SlideCardItem card={card} active={isActive} />
-                ) : (
-                  <SkeletonCard active={isActive} />
-                )}
-
-                {isActive && (
-                  <div className="mt-3 flex justify-center gap-1.5">
-                    {items.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActive(i);
-                        }}
-                        aria-label={`Go to slide ${i + 1}`}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          i === active ? "w-5 bg-primary" : "w-2 bg-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Next arrow */}
         <button
           onClick={next}
           aria-label="Next"
-          className="absolute right-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-gray-100 sm:right-6"
+          className="absolute top-[42%] right-2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-gray-100 sm:right-6"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5 fill-primary">
             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
