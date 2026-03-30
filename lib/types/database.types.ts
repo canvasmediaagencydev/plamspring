@@ -78,6 +78,7 @@ export type Database = {
           notes: string | null
           phone: string
           province: string | null
+          images: Json
           status: string
           title_deed_type: string | null
         }
@@ -91,6 +92,7 @@ export type Database = {
           email?: string | null
           first_name: string
           id?: string
+          images?: Json
           land_address?: string | null
           last_name: string
           notes?: string | null
@@ -109,6 +111,7 @@ export type Database = {
           email?: string | null
           first_name?: string
           id?: string
+          images?: Json
           land_address?: string | null
           last_name?: string
           notes?: string | null
