@@ -139,23 +139,19 @@ export default function Footer({ settings }: FooterProps) {
         </div>
 
         {/* ── Col 3: Lottie + Tagline + Copyright ── */}
-        <div className="flex flex-col gap-3 sm:col-span-2 md:col-span-1">
-          <div className="flex items-center gap-2">
-            <div className="w-36 shrink-0 md:w-80">
-              <DotLottieReact
-                src="https://lottie.host/02a7a704-14af-40fb-95d1-1b2e6cfa3029/kOD28GwRIf.lottie"
-                loop
-                autoplay
-              />
-            </div>
-            <p className="text-lg font-bold italic leading-snug text-white md:text-xl">
-              &ldquo;เลือกปาล์มสปริงส์
-              <br />
-              เพื่อชีวิตที่ดีกว่า&rdquo;
-            </p>
-          </div>
-
-          <p className="text-xs text-white/50">
+        <div className="relative sm:col-span-2 md:col-span-1">
+          {/* Tagline overlaid top-right above the animation */}
+          <p className="absolute right-0 top-0 z-10 text-right text-lg font-bold italic leading-snug text-white md:text-xl">
+            &ldquo;เลือกปาล์มสปริงส์<br />เพื่อชีวิตที่ดีกว่า&rdquo;
+          </p>
+          {/* Lottie fills the block */}
+          <DotLottieReact
+            src="https://lottie.host/02a7a704-14af-40fb-95d1-1b2e6cfa3029/kOD28GwRIf.lottie"
+            loop
+            autoplay
+          />
+          {/* Copyright below the animation */}
+          <p className="mt-1 text-xs text-white/50">
             &copy; 2019 - 2023 palm springs place co., ltd. all rights reserved.
           </p>
         </div>
