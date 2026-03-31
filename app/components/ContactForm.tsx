@@ -1,24 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ContactForm() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
+  const router = useRouter();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire up form submission
+    setLoading(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from("contact_submissions").insert({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      message: form.message,
+    });
+
+    if (dbError) {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setLoading(false);
+      return;
+    }
+
+    router.push("/contact/success");
   };
 
   return (
@@ -47,7 +62,7 @@ export default function ContactForm() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="*E*MAIL"
+              placeholder="*E-MAIL"
               required
               className="w-full bg-transparent text-base text-gray-700 placeholder-gray-400 outline-none md:text-lg"
             />
@@ -78,13 +93,18 @@ export default function ContactForm() {
             />
           </div>
 
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
           {/* Submit */}
           <div className="flex justify-end">
             <button
               type="submit"
-              className="rounded-full bg-primary px-12 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 md:text-lg"
+              disabled={loading}
+              className="rounded-full bg-primary px-12 py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 md:text-lg"
             >
-              ส่งข้อมูล
+              {loading ? "กำลังส่ง..." : "ส่งข้อมูล"}
             </button>
           </div>
         </form>

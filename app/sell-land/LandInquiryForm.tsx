@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ImagePlus, X, Loader2 } from "lucide-react";
+import { CheckCircle2, ImagePlus, X, Loader2, FileText } from "lucide-react";
 
 const TITLE_DEED_OPTIONS = ["โฉนดที่ดิน", "น.ส.3", "น.ส.3ก", "ส.ป.ก.", "อื่นๆ"];
 const MAX_IMAGES = 5;
@@ -105,7 +105,10 @@ function ImageUploadField({
 export default function LandInquiryForm() {
   const [values, setValues] = useState<FormValues>(INITIAL);
   const [images, setImages] = useState<string[]>([]);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfName, setPdfName] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -138,6 +141,25 @@ export default function LandInquiryForm() {
 
   const handleRemoveImage = (url: string) => setImages((prev) => prev.filter((u) => u !== url));
 
+  const handleAddPdf = async (file: File) => {
+    setUploadingPdf(true);
+    const path = `pdf/${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
+    const { error: upErr } = await supabase.storage
+      .from("land-inquiry-images")
+      .upload(path, file, { cacheControl: "3600", upsert: false });
+
+    if (upErr) {
+      setError("อัปโหลด PDF ไม่สำเร็จ กรุณาลองใหม่");
+      setUploadingPdf(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from("land-inquiry-images").getPublicUrl(path);
+    setPdfUrl(data.publicUrl);
+    setPdfName(file.name);
+    setUploadingPdf(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -158,6 +180,7 @@ export default function LandInquiryForm() {
       title_deed_type: values.title_deed_type || null,
       notes: values.notes.trim() || null,
       images: images,
+      pdf_url: pdfUrl,
       status: "new",
     });
 
@@ -181,7 +204,7 @@ export default function LandInquiryForm() {
         <p className="max-w-sm text-sm text-gray-500">
           ขอบคุณที่สนใจขายที่ดินกับเรา ทีมงาน Palm Springs จะติดต่อกลับหาคุณโดยเร็วที่สุด
         </p>
-        <Button variant="outline" className="mt-2" onClick={() => { setValues(INITIAL); setImages([]); setSubmitted(false); }}>
+        <Button variant="outline" className="mt-2" onClick={() => { setValues(INITIAL); setImages([]); setPdfUrl(null); setPdfName(null); setSubmitted(false); }}>
           ส่งแบบฟอร์มอีกครั้ง
         </Button>
       </div>
@@ -294,6 +317,44 @@ export default function LandInquiryForm() {
           onAdd={handleAddImage}
           onRemove={handleRemoveImage}
         />
+
+        {/* PDF Upload */}
+        <div className="space-y-1.5">
+          <Label>เอกสารประกอบ <span className="text-gray-400 font-normal">(PDF ไม่เกิน 10 MB)</span></Label>
+          {pdfUrl && pdfName ? (
+            <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+              <FileText size={18} className="shrink-0 text-red-500" />
+              <span className="flex-1 truncate text-sm text-gray-700">{pdfName}</span>
+              <button
+                type="button"
+                onClick={() => { setPdfUrl(null); setPdfName(null); }}
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-gray-300"
+              >
+                <X size={10} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-4 text-gray-400 transition hover:border-primary hover:text-primary">
+              {uploadingPdf ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <FileText size={18} />
+              )}
+              <span className="text-sm">{uploadingPdf ? "กำลังอัปโหลด..." : "คลิกเพื่อเลือกไฟล์ PDF"}</span>
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                disabled={uploadingPdf}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleAddPdf(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          )}
+        </div>
 
         {/* Notes */}
         <div className="space-y-1.5">

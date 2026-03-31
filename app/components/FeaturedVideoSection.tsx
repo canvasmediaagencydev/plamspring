@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { VideoModal } from "./VideoModal";
+import YouTubeThumbnail from "./YouTubeThumbnail";
 
 interface FeaturedVideo {
   youtubeId: string;
@@ -41,15 +42,13 @@ function FeaturedVideoPlayer({
   video: FeaturedVideo;
   onPlay: () => void;
 }) {
-  const thumbnail = `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
-
   return (
     <button
       onClick={onPlay}
       className="group relative block aspect-video w-full overflow-hidden rounded-2xl"
     >
-      <Image
-        src={thumbnail}
+      <YouTubeThumbnail
+        videoId={video.youtubeId}
         alt={video.title}
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-105"

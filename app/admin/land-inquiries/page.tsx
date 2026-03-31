@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminHeader } from "@/app/components/admin/AdminHeader";
 import LandInquiriesClient from "./LandInquiriesClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "แบบฟอร์มที่ดิน | Admin",
 };

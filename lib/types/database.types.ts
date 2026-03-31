@@ -62,6 +62,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
       land_inquiries: {
         Row: {
           area_ngan: number | null
@@ -73,12 +103,13 @@ export type Database = {
           email: string | null
           first_name: string
           id: string
+          images: Json
           land_address: string | null
           last_name: string
           notes: string | null
+          pdf_url: string | null
           phone: string
           province: string | null
-          images: Json
           status: string
           title_deed_type: string | null
         }
@@ -96,6 +127,7 @@ export type Database = {
           land_address?: string | null
           last_name: string
           notes?: string | null
+          pdf_url?: string | null
           phone: string
           province?: string | null
           status?: string
@@ -115,6 +147,7 @@ export type Database = {
           land_address?: string | null
           last_name?: string
           notes?: string | null
+          pdf_url?: string | null
           phone?: string
           province?: string | null
           status?: string
@@ -385,7 +418,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "project_pages"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       site_settings: {

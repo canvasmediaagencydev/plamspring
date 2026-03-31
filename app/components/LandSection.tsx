@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function LandSection() {
   const [form, setForm] = useState({
@@ -17,6 +20,7 @@ export default function LandSection() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const set = (key: keyof typeof form) => (
     e: ChangeEvent<HTMLInputElement>
@@ -25,9 +29,69 @@ export default function LandSection() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
+    setError(null);
+
+    const supabase = createClient();
+
+    // Upload files
+    const imageUrls: string[] = [];
+    let pdfUrl: string | null = null;
+
+    if (files && files.length > 0) {
+      for (const file of Array.from(files)) {
+        const ext = file.name.split(".").pop();
+        const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("land-inquiry-images")
+          .upload(path, file, { cacheControl: "3600", upsert: false });
+
+        if (upErr) {
+          setError("อัปโหลดไฟล์ไม่สำเร็จ กรุณาลองใหม่");
+          setSubmitting(false);
+          return;
+        }
+
+        const { data } = supabase.storage.from("land-inquiry-images").getPublicUrl(path);
+        if (IMAGE_TYPES.includes(file.type)) {
+          imageUrls.push(data.publicUrl);
+        } else if (!pdfUrl) {
+          // First non-image file (PDF, zip, rar) stored as pdf_url
+          pdfUrl = data.publicUrl;
+        }
+      }
+    }
+
+    // Split fullName into first/last
+    const nameParts = form.fullName.trim().split(/\s+/);
+    const firstName = nameParts[0] ?? form.fullName.trim();
+    const lastName = nameParts.slice(1).join(" ") || "-";
+
+    const saleLabel = form.saleType === "split" ? "แบ่งขาย" : form.saleType === "whole" ? "ขายเหมา" : "";
+    const notes = saleLabel ? `ประเภทการขาย: ${saleLabel}` : null;
+
+    const { error: insertError } = await supabase.from("land_inquiries").insert({
+      first_name: firstName,
+      last_name: lastName,
+      phone: form.phone.trim(),
+      email: form.email.trim() || null,
+      land_address: form.location.trim() || null,
+      area_rai: form.rai ? Number(form.rai) : null,
+      area_ngan: form.ngan ? Number(form.ngan) : null,
+      area_wa: form.sqWa ? Number(form.sqWa) : null,
+      asking_price: form.price ? Number(form.price.replace(/[^0-9]/g, "")) : null,
+      images: imageUrls,
+      pdf_url: pdfUrl,
+      notes,
+      status: "new",
+    });
+
     setSubmitting(false);
+
+    if (insertError) {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      return;
+    }
+
     setSubmitted(true);
   };
 
@@ -229,6 +293,10 @@ export default function LandSection() {
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-700 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
+
+        {error && (
+          <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+        )}
 
         {/* Submit */}
         <button

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { Tables } from "@/lib/types/database.types";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Download,
@@ -14,6 +15,8 @@ import {
   DollarSign,
   StickyNote,
   Loader2,
+  X,
+  ExternalLink,
 } from "lucide-react";
 
 type LandInquiry = Tables<"land_inquiries">;
@@ -58,7 +61,49 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// ── PDF export (html2canvas + jspdf) ─────────────────────────────────────────
+// ── Image Lightbox ────────────────────────────────────────────────────────────
+
+function ImageLightbox({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+      >
+        <X size={18} />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt="รูปที่ดิน"
+        style={{ maxHeight: "90vh", maxWidth: "90vw", width: "auto", height: "auto" }}
+        className="rounded-xl shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
+// ── PDF export (html2canvas + jspdf, multi-page) ──────────────────────────────
+
+function loadImageAsDataURL(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      c.getContext("2d")!.drawImage(img, 0, 0);
+      resolve(c.toDataURL("image/jpeg", 0.92));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
 async function exportInquiryPDF(inq: LandInquiry, templateEl: HTMLElement) {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
@@ -66,7 +111,7 @@ async function exportInquiryPDF(inq: LandInquiry, templateEl: HTMLElement) {
     import("jspdf"),
   ]);
 
-  // Temporarily show the hidden template
+  // ── Page(s): text info ────────────────────────────────────────────────────
   templateEl.style.display = "block";
   const canvas = await html2canvas(templateEl, {
     scale: 2,
@@ -75,20 +120,58 @@ async function exportInquiryPDF(inq: LandInquiry, templateEl: HTMLElement) {
   });
   templateEl.style.display = "none";
 
-  const imgData = canvas.toDataURL("image/png");
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const imgW = pageW - 20;
-  const imgH = (canvas.height * imgW) / canvas.width;
+  const pageW = pdf.internal.pageSize.getWidth();   // 210
+  const pageH = pdf.internal.pageSize.getHeight();  // 297
+  const margin = 10;
+  const contentW = pageW - margin * 2;
+  const scale = canvas.width / contentW; // px per mm
+  const pageH_px = (pageH - margin * 2) * scale;
 
-  pdf.addImage(imgData, "PNG", 10, 10, imgW, Math.min(imgH, pageH - 20));
+  let yPx = 0;
+  while (yPx < canvas.height) {
+    if (yPx > 0) pdf.addPage();
+    const sliceH_px = Math.min(canvas.height - yPx, pageH_px);
+    const slice = document.createElement("canvas");
+    slice.width = canvas.width;
+    slice.height = sliceH_px;
+    slice.getContext("2d")!.drawImage(canvas, 0, -yPx);
+    pdf.addImage(slice.toDataURL("image/png"), "PNG", margin, margin, contentW, sliceH_px / scale);
+    yPx += pageH_px;
+  }
+
+  // ── 1 full A4 page per image ──────────────────────────────────────────────
+  const imgs = (inq.images as string[] | null) ?? [];
+  for (const url of imgs) {
+    try {
+      const dataUrl = await loadImageAsDataURL(url);
+      pdf.addPage();
+
+      // Scale to fit A4 maintaining aspect ratio, centered
+      const tmpImg = new Image();
+      await new Promise<void>((res) => { tmpImg.onload = () => res(); tmpImg.src = dataUrl; });
+      const ratio = tmpImg.naturalWidth / tmpImg.naturalHeight;
+      let w = pageW, h = pageH;
+      if (ratio > pageW / pageH) {
+        h = pageW / ratio;
+      } else {
+        w = pageH * ratio;
+      }
+      const x = (pageW - w) / 2;
+      const y = (pageH - h) / 2;
+      pdf.addImage(dataUrl, "JPEG", x, y, w, h);
+    } catch {
+      // skip image if load fails
+    }
+  }
+
   pdf.save(`land-inquiry-${inq.first_name}-${inq.last_name}.pdf`);
 }
 
 // ── Hidden PDF template ───────────────────────────────────────────────────────
 
 function PdfTemplate({ inq, templateRef }: { inq: LandInquiry; templateRef: React.RefObject<HTMLDivElement | null> }) {
+  const imgs = (inq.images as string[] | null) ?? [];
   return (
     <div
       ref={templateRef}
@@ -154,21 +237,13 @@ function PdfTemplate({ inq, templateRef }: { inq: LandInquiry; templateRef: Reac
         </div>
       </div>
 
-      {/* Images */}
-      {(() => {
-        const imgs = (inq as LandInquiry & { images?: string[] }).images ?? [];
-        return imgs.length > 0 ? (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#09418C", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>รูปภาพที่ดิน</div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {imgs.map((url: string, i: number) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={url} alt={`ที่ดิน ${i + 1}`} style={{ width: 160, height: 120, objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }} />
-              ))}
-            </div>
-          </div>
-        ) : null;
-      })()}
+      {/* Images note */}
+      {imgs.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#09418C", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>รูปภาพที่ดิน</div>
+          <div style={{ fontSize: 12, color: "#888" }}>มีรูปภาพ {imgs.length} รูป — แสดงในหน้าถัดไป</div>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16, marginTop: 8, fontSize: 11, color: "#aaa", display: "flex", justifyContent: "space-between" }}>
@@ -192,10 +267,25 @@ function Field({ label, value, full }: { label: string; value: string; full?: bo
 
 // ── InquiryCard ───────────────────────────────────────────────────────────────
 
-function InquiryCard({ inquiry }: { inquiry: LandInquiry }) {
+function InquiryCard({ inquiry: initial }: { inquiry: LandInquiry }) {
+  const [inquiry, setInquiry] = useState(initial);
   const [expanded, setExpanded] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const templateRef = useRef<HTMLDivElement>(null);
+
+  const handleToggleStatus = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = inquiry.status === "new" ? "contacted" : "new";
+    setUpdatingStatus(true);
+    const supabase = createClient();
+    await supabase.from("land_inquiries").update({ status: next }).eq("id", inquiry.id);
+    setInquiry((prev) => ({ ...prev, status: next }));
+    setUpdatingStatus(false);
+  };
+
+  const imgs = (inquiry.images as string[] | null) ?? [];
 
   const handleExport = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -209,85 +299,121 @@ function InquiryCard({ inquiry }: { inquiry: LandInquiry }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
-      {/* Hidden PDF template */}
-      <PdfTemplate inq={inquiry} templateRef={templateRef} />
+    <>
+      {lightboxUrl && (
+        <ImageLightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+      )}
 
-      {/* Summary row */}
-      <button
-        onClick={() => setExpanded((p) => !p)}
-        className="flex w-full items-start justify-between gap-4 px-6 py-4 text-left"
-      >
-        <div className="min-w-0 flex-1 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">ชื่อ-นามสกุล</p>
-            <p className="mt-0.5 truncate text-sm font-bold text-gray-900">{inquiry.first_name} {inquiry.last_name}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">โทรศัพท์</p>
-            <p className="mt-0.5 text-sm font-medium text-gray-700">{inquiry.phone}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">จังหวัด</p>
-            <p className="mt-0.5 text-sm font-medium text-gray-700">{inquiry.province ?? "-"}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">เนื้อที่</p>
-            <p className="mt-0.5 text-sm font-medium text-gray-700">{formatArea(inquiry)}</p>
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <StatusBadge status={inquiry.status} />
-          <span className="text-[11px] text-gray-400">{formatDate(inquiry.created_at)}</span>
-          {expanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
-        </div>
-      </button>
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+        {/* Hidden PDF template */}
+        <PdfTemplate inq={inquiry} templateRef={templateRef} />
 
-      {/* Expanded detail */}
-      {expanded && (
-        <div className="border-t border-gray-100 bg-gray-50/60 px-6 py-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {inquiry.email && <Detail icon={<Mail size={14} />} label="อีเมล" value={inquiry.email} />}
-            {inquiry.district && <Detail icon={<MapPin size={14} />} label="อำเภอ/เขต" value={inquiry.district} />}
-            {inquiry.land_address && <Detail icon={<MapPin size={14} />} label="ที่อยู่ที่ดิน" value={inquiry.land_address} className="sm:col-span-2 lg:col-span-3" />}
-            <Detail icon={<DollarSign size={14} />} label="ราคาที่ต้องการขาย" value={formatPrice(inquiry.asking_price)} />
-            {inquiry.title_deed_type && <Detail icon={<FileText size={14} />} label="ประเภทเอกสารสิทธิ์" value={inquiry.title_deed_type} />}
-            <Detail icon={<Phone size={14} />} label="เนื้อที่รวม" value={formatArea(inquiry)} />
-            {inquiry.notes && <Detail icon={<StickyNote size={14} />} label="หมายเหตุ" value={inquiry.notes} className="sm:col-span-2 lg:col-span-3" />}
+        {/* Summary row */}
+        <button
+          onClick={() => setExpanded((p) => !p)}
+          className="flex w-full items-start justify-between gap-4 px-6 py-4 text-left"
+        >
+          <div className="min-w-0 flex-1 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">ชื่อ-นามสกุล</p>
+              <p className="mt-0.5 truncate text-sm font-bold text-gray-900">{inquiry.first_name} {inquiry.last_name}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">โทรศัพท์</p>
+              <p className="mt-0.5 text-sm font-medium text-gray-700">{inquiry.phone}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">จังหวัด</p>
+              <p className="mt-0.5 text-sm font-medium text-gray-700">{inquiry.province ?? "-"}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">เนื้อที่</p>
+              <p className="mt-0.5 text-sm font-medium text-gray-700">{formatArea(inquiry)}</p>
+            </div>
           </div>
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <StatusBadge status={inquiry.status} />
+            <span className="text-[11px] text-gray-400">{formatDate(inquiry.created_at)}</span>
+            {expanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+          </div>
+        </button>
 
-          {/* Images */}
-          {(() => {
-            const imgs = (inquiry as LandInquiry & { images?: string[] }).images ?? [];
-            return imgs.length > 0 ? (
+        {/* Expanded detail */}
+        {expanded && (
+          <div className="border-t border-gray-100 bg-gray-50/60 px-6 py-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {inquiry.email && <Detail icon={<Mail size={14} />} label="อีเมล" value={inquiry.email} />}
+              {inquiry.district && <Detail icon={<MapPin size={14} />} label="อำเภอ/เขต" value={inquiry.district} />}
+              {inquiry.land_address && <Detail icon={<MapPin size={14} />} label="ที่อยู่ที่ดิน" value={inquiry.land_address} className="sm:col-span-2 lg:col-span-3" />}
+              <Detail icon={<DollarSign size={14} />} label="ราคาที่ต้องการขาย" value={formatPrice(inquiry.asking_price)} />
+              {inquiry.title_deed_type && <Detail icon={<FileText size={14} />} label="ประเภทเอกสารสิทธิ์" value={inquiry.title_deed_type} />}
+              <Detail icon={<Phone size={14} />} label="เนื้อที่รวม" value={formatArea(inquiry)} />
+              {inquiry.notes && <Detail icon={<StickyNote size={14} />} label="หมายเหตุ" value={inquiry.notes} className="sm:col-span-2 lg:col-span-3" />}
+            </div>
+
+            {/* Images */}
+            {imgs.length > 0 && (
               <div className="mt-4">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">รูปภาพที่ดิน</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">รูปภาพที่ดิน ({imgs.length} รูป)</p>
                 <div className="flex flex-wrap gap-2">
                   {imgs.map((url: string, i: number) => (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img key={i} src={url} alt={`ที่ดิน ${i + 1}`} className="h-24 w-32 rounded-lg object-cover border border-gray-200" />
+                    <img
+                      key={i}
+                      src={url}
+                      alt={`ที่ดิน ${i + 1}`}
+                      className="h-28 w-36 cursor-pointer rounded-lg object-cover border border-gray-200 transition hover:opacity-90 hover:ring-2 hover:ring-[#09418C]/40"
+                      onClick={() => setLightboxUrl(url)}
+                    />
                   ))}
                 </div>
               </div>
-            ) : null;
-          })()}
+            )}
 
-          {/* Per-record export button */}
-          <div className="mt-5 flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              disabled={exporting}
-              className="gap-2 text-xs"
-            >
-              {exporting ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-              {exporting ? "กำลังสร้าง PDF..." : "Export PDF รายนี้"}
-            </Button>
+            {/* PDF document link */}
+            {inquiry.pdf_url && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400">เอกสารประกอบ</p>
+                <a
+                  href={inquiry.pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                >
+                  <FileText size={15} />
+                  เปิดเอกสาร PDF
+                  <ExternalLink size={13} className="opacity-60" />
+                </a>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <Button
+                variant={inquiry.status === "new" ? "default" : "outline"}
+                size="sm"
+                onClick={handleToggleStatus}
+                disabled={updatingStatus}
+                className="gap-2 text-xs"
+              >
+                {updatingStatus && <Loader2 size={13} className="animate-spin" />}
+                {inquiry.status === "new" ? "ทำเครื่องหมายว่าติดต่อแล้ว" : "ทำเครื่องหมายว่ายังไม่ได้ติดต่อ"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={exporting}
+                className="gap-2 text-xs"
+              >
+                {exporting ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                {exporting ? "กำลังสร้าง PDF..." : "Export PDF รายนี้"}
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 

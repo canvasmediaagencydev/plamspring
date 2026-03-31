@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { VideoModal } from "./VideoModal";
+import YouTubeThumbnail from "./YouTubeThumbnail";
 
 interface Video {
   id: string;
@@ -27,17 +27,13 @@ function VideoCardSkeleton() {
 }
 
 function VideoCard({ video, onPlay }: { video: Video; onPlay: (id: string) => void }) {
-  const thumbnailUrl =
-    video.thumbnail ??
-    `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
-
   return (
     <button
       onClick={() => onPlay(video.youtubeId)}
       className="group relative block aspect-video w-full overflow-hidden rounded-xl"
     >
-      <Image
-        src={thumbnailUrl}
+      <YouTubeThumbnail
+        videoId={video.youtubeId}
         alt={video.title}
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-105"
