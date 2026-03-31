@@ -31,6 +31,19 @@ const NAV_ITEMS: NavItem[] = [
     href: "/admin/dashboard",
     icon: <LayoutDashboard size={16} />,
   },
+    {
+    label: "ฟอร์มติดต่อ",
+    icon: <FileText size={16} />,
+    children: [
+      { label: "ข้อมูลติดต่อ", href: "/admin/contact" },
+      { label: "แบบฟอร์มที่ดิน", href: "/admin/land-inquiries" },
+    ],
+  },
+  {
+    label: "Blog & CSR",
+    href: "/admin/posts",
+    icon: <FileText size={16} />,
+  },
   {
     label: "หน้าแรก",
     icon: <Home size={16} />,
@@ -49,14 +62,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "จัดการโครงการ", href: "/admin/projects" },
     ],
   },
-  {
-    label: "ฟอร์มติดต่อ",
-    icon: <FileText size={16} />,
-    children: [
-      { label: "ข้อมูลติดต่อ", href: "/admin/contact" },
-      { label: "แบบฟอร์มที่ดิน", href: "/admin/land-inquiries" },
-    ],
-  },
+
   {
     label: "About Us",
     icon: <BookOpen size={16} />,
@@ -70,11 +76,6 @@ const NAV_ITEMS: NavItem[] = [
     label: "Our Family",
     href: "/admin/our-family",
     icon: <Users size={16} />,
-  },
-  {
-    label: "Blog & CSR",
-    href: "/admin/posts",
-    icon: <FileText size={16} />,
   },
   {
     label: "Footer & Contact",

@@ -18,6 +18,7 @@ import {
   ArrowUpRight,
   Activity,
   Inbox,
+  Mail,
 } from "lucide-react";
 import { FaFacebookMessenger, FaLine } from "react-icons/fa";
 
@@ -49,6 +50,8 @@ interface DashboardData {
 
   totalLandInquiries: number;
   newLandInquiries: number;
+  totalContactSubmissions: number;
+  newContactSubmissions: number;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -395,6 +398,7 @@ export default function DashboardPage() {
       { data: milestones },
       { data: familyImages },
       { data: landInquiries },
+      { data: contactSubmissions },
     ] = await Promise.all([
       supabase.from("contact_clicks").select("type"),
       supabase.from("contact_clicks").select("type, clicked_at").gte("clicked_at", weekAgo),
@@ -405,6 +409,7 @@ export default function DashboardPage() {
       supabase.from("milestones").select("id"),
       supabase.from("our_family_images").select("id"),
       supabase.from("land_inquiries").select("id, status"),
+      supabase.from("contact_submissions").select("id, status"),
     ]);
 
     const totalClicks = allClicks?.length ?? 0;
@@ -439,6 +444,8 @@ export default function DashboardPage() {
 
       totalLandInquiries: landInquiries?.length ?? 0,
       newLandInquiries: (landInquiries ?? []).filter((i) => i.status === "new").length,
+      totalContactSubmissions: contactSubmissions?.length ?? 0,
+      newContactSubmissions: (contactSubmissions ?? []).filter((i) => i.status === "new").length,
     });
 
     setRefreshedAt(new Date());
@@ -496,10 +503,17 @@ export default function DashboardPage() {
           accent
         />
         <KpiCard
-          icon={<MessageCircle size={20} />}
-          label="คลิกสัปดาห์นี้"
-          value={data.weekClicks}
-          sub="7 วันล่าสุด"
+          icon={<Mail size={20} />}
+          label="คนที่ติดต่อเข้ามา"
+          value={data.totalContactSubmissions}
+          sub={`รอดำเนินการ ${data.newContactSubmissions} รายการ`}
+          badge={
+            data.newContactSubmissions > 0 ? (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#09418C] px-1.5 text-[10px] font-bold text-white">
+                {data.newContactSubmissions}
+              </span>
+            ) : undefined
+          }
         />
         <KpiCard
           icon={<Inbox size={20} />}
