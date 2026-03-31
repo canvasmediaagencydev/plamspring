@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { VideoModal } from "./VideoModal";
+import YouTubeThumbnail from "./YouTubeThumbnail";
 
 interface VideoConfig {
   youtube_url?: string;
@@ -18,6 +19,7 @@ function extractYouTubeId(input: string): string {
     /[?&]v=([^&#]+)/,
     /youtu\.be\/([^?&#]+)/,
     /youtube\.com\/embed\/([^?&#]+)/,
+    /youtube\.com\/shorts\/([^?&#]+)/,
   ];
   for (const pattern of patterns) {
     const match = input.match(pattern);
@@ -26,33 +28,22 @@ function extractYouTubeId(input: string): string {
   return input.trim();
 }
 
-function PlayButton() {
+function VideoCardSkeleton() {
   return (
-    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-600 shadow-lg md:h-20 md:w-20">
-      <svg viewBox="0 0 24 24" fill="white" className="ml-1 h-7 w-7 md:h-9 md:w-9" aria-hidden="true">
-        <path d="M8 5v14l11-7z" />
-      </svg>
-    </div>
-  );
-}
-
-function SkeletonVideoCard() {
-  return (
-    <div className="relative w-full overflow-hidden rounded-2xl bg-gray-800 shadow-md">
-      <div className="relative h-52 w-full bg-gray-300 md:h-72">
-        <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300" />
-      </div>
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-gray-200 animate-pulse">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <PlayButton />
+        <div className="h-14 w-14 rounded-full bg-gray-400/60" />
       </div>
-      <div className="flex items-center bg-gray-900/80 px-4 py-2">
-        <span className="text-sm font-semibold text-white/50">Loading...</span>
+      <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 bg-black/40 px-3 py-2">
+        <div className="h-4 w-4 rounded bg-gray-400/60" />
+        <div className="h-3 w-20 rounded bg-gray-400/60" />
       </div>
     </div>
   );
 }
 
-function RealVideoCard({
+function VideoCard({
   video,
   onPlay,
 }: {
@@ -60,30 +51,36 @@ function RealVideoCard({
   onPlay: (id: string) => void;
 }) {
   const youtubeId = video.youtube_url ? extractYouTubeId(video.youtube_url) : "";
-  const thumbnail = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
 
   return (
     <button
       onClick={() => onPlay(youtubeId)}
-      className="group relative block w-full overflow-hidden rounded-2xl bg-gray-800 shadow-md"
+      className="group relative block aspect-video w-full overflow-hidden rounded-xl"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={thumbnail}
+      <YouTubeThumbnail
+        videoId={youtubeId}
         alt={video.title ?? ""}
-        className="h-52 w-full object-cover transition-transform duration-300 group-hover:scale-105 md:h-72"
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/30" />
+      <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
+
+      {/* Play button */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="transition-transform duration-200 group-hover:scale-110">
-          <PlayButton />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FF0000] shadow-lg transition-transform duration-200 group-hover:scale-110">
+          <svg viewBox="0 0 24 24" className="ml-1 h-6 w-6 fill-white">
+            <path d="M8 5v14l11-7z" />
+          </svg>
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 bg-gray-900/80 px-4 py-2">
-        <svg viewBox="0 0 24 24" fill="white" className="h-5 w-5 shrink-0" aria-hidden="true">
-          <path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.6 19 12 19 12 19s4.8 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM10 15V9l5.5 3-5.5 3z" />
+
+      {/* Bottom bar */}
+      <div className="absolute bottom-0 left-0 right-0 flex items-center gap-1.5 bg-black/50 px-3 py-2">
+        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#FF0000]">
+          <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8z" />
+          <path d="M9.7 15.5V8.5l6.3 3.5-6.3 3.5z" className="fill-white" />
         </svg>
-        <span className="text-sm font-semibold text-white">{video.title || "ดูวิดีโอ"}</span>
+        <span className="text-xs font-medium text-white">{video.title || "ดูวิดีโอ"}</span>
       </div>
     </button>
   );
@@ -93,17 +90,22 @@ export default function OurFamilyVideos({ video1, video2 }: OurFamilyVideosProps
   const [activeId, setActiveId] = useState<string | null>(null);
 
   return (
-    <section className="w-full bg-white py-6 md:py-10">
-      <div className="mx-auto flex max-w-4xl flex-col gap-6 px-6 md:px-12">
+    <section className="mx-auto max-w-6xl px-4 py-16">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-bold text-primary">วิดีโอครอบครัวของเรา</h2>
+        <p className="mt-2 text-gray-500">ชมประสบการณ์และเรื่องราวจากครอบครัว Palm Springs</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {video1?.youtube_url ? (
-          <RealVideoCard video={video1} onPlay={setActiveId} />
+          <VideoCard video={video1} onPlay={setActiveId} />
         ) : (
-          <SkeletonVideoCard />
+          <VideoCardSkeleton />
         )}
         {video2?.youtube_url ? (
-          <RealVideoCard video={video2} onPlay={setActiveId} />
+          <VideoCard video={video2} onPlay={setActiveId} />
         ) : (
-          <SkeletonVideoCard />
+          <VideoCardSkeleton />
         )}
       </div>
 
