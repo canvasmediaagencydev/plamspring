@@ -39,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "วิดีโอ", href: "/admin/home/videos" },
       { label: "โครงการของเรา", href: "/admin/home/projects" },
       { label: "ทำเลศักยภาพ", href: "/admin/home/lifestyle" },
+      { label: "Social Reels", href: "/admin/home/social-reels" },
     ],
   },
   {

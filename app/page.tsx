@@ -5,6 +5,7 @@ import HomeTypeSection from "./components/HomeTypeSection";
 import CoverSection from "./components/CoverSection";
 import LifestyleSlider from "./components/LifestyleSlider";
 import FeaturedVideoSection from "./components/FeaturedVideoSection";
+import HomeCommunitySection from "./components/HomeCommunitySection";
 import LoanCalculator from "./components/LoanCalculator";
 import FooterServer from "./components/FooterServer";
 import { createClient } from "@/lib/supabase/server";
@@ -57,6 +58,7 @@ export default async function Home() {
         <CoverSection />
         <LifestyleSlider slides={lifestyleRes.data ?? []} />
         <FeaturedVideoSection video={featuredVideo} />
+        <HomeCommunitySection />
         <LoanCalculator />
       </main>
       <FooterServer />
