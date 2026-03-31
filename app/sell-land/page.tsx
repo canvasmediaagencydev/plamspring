@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import FooterServer from "../components/FooterServer";
 import LandInquiryForm from "./LandInquiryForm";
 
 export const metadata = {
@@ -32,7 +32,7 @@ export default function SellLandPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

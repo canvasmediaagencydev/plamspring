@@ -2,7 +2,7 @@ import Navbar from "../../components/Navbar";
 import HeroSection from "../../components/HeroSectionServer";
 import ContactForm from "../../components/ContactForm";
 import ContactMap from "../../components/ContactMap";
-import Footer from "../../components/Footer";
+import FooterServer from "../../components/FooterServer";
 
 export const metadata = {
   title: "ติดต่อเรา | Palm Springs",
@@ -18,7 +18,7 @@ export default function ContactFormPage() {
         <ContactForm />
         <ContactMap />
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

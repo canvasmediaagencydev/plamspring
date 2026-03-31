@@ -6,7 +6,7 @@ import CoverSection from "./components/CoverSection";
 import LifestyleSlider from "./components/LifestyleSlider";
 import FeaturedVideoSection from "./components/FeaturedVideoSection";
 import LoanCalculator from "./components/LoanCalculator";
-import Footer from "./components/Footer";
+import FooterServer from "./components/FooterServer";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -14,7 +14,11 @@ export default async function Home() {
 
   const [settingsRes, projectsRes, lifestyleRes] = await Promise.all([
     supabase.from("site_settings").select("key, value"),
-    supabase.from("projects").select("*").eq("is_published", true).order("sort_order"),
+    supabase
+      .from("projects")
+      .select("*, project_pages(slug)")
+      .eq("is_published", true)
+      .order("sort_order"),
     supabase.from("lifestyle_slides").select("*").eq("is_published", true).order("sort_order"),
   ]);
 
@@ -23,8 +27,6 @@ export default async function Home() {
 
   const homeVideosSetting = getSetting("home_videos") as { video1?: { youtube_url?: string; title?: string }; video2?: { youtube_url?: string; title?: string } } | undefined;
   const featuredVideoSetting = getSetting("featured_video") as { youtube_url?: string; title?: string } | undefined;
-  const footerSetting = getSetting("footer");
-
   // Map to component-expected shape
   const homeVideos = [
     homeVideosSetting?.video1,
@@ -57,7 +59,7 @@ export default async function Home() {
         <FeaturedVideoSection video={featuredVideo} />
         <LoanCalculator />
       </main>
-      <Footer settings={footerSetting as Parameters<typeof Footer>[0]["settings"]} />
+      <FooterServer />
     </>
   );
 }

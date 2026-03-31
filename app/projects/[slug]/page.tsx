@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient, createStaticClient } from "@/lib/supabase/server";
 import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+import FooterServer from "../../components/FooterServer";
 import ProjectHero from "../../components/ProjectHero";
 import ProjectInfo from "../../components/ProjectInfo";
 import ProjectHouseSlider from "../../components/ProjectHouseSlider";
@@ -96,7 +96,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         <ProjectGallery images={galleryImages.length > 0 ? galleryImages : undefined} />
         <LoanCalculator />
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

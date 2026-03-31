@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import FooterServer from "../components/FooterServer";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
@@ -93,7 +93,7 @@ export default async function ProjectsPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

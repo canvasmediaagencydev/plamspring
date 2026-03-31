@@ -2,7 +2,7 @@ import Navbar from "../components/Navbar";
 import HeroSection from "../components/HeroSectionServer";
 import BlogHeader from "../components/BlogHeader";
 import BlogList from "../components/BlogList";
-import Footer from "../components/Footer";
+import FooterServer from "../components/FooterServer";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -13,15 +13,12 @@ export const metadata = {
 export default async function BlogPage() {
   const supabase = await createClient();
 
-  const [postsRes, footerRes] = await Promise.all([
-    supabase
-      .from("posts")
-      .select("id, title, slug, excerpt, cover_image_url")
-      .eq("type", "blog")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false }),
-    supabase.from("site_settings").select("value").eq("key", "footer").single(),
-  ]);
+  const { data: posts } = await supabase
+    .from("posts")
+    .select("id, title, slug, excerpt, cover_image_url")
+    .eq("type", "blog")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false });
 
   return (
     <>
@@ -29,9 +26,9 @@ export default async function BlogPage() {
       <main>
         <HeroSection />
         <BlogHeader />
-        <BlogList posts={postsRes.data ?? []} />
+        <BlogList posts={posts ?? []} />
       </main>
-      <Footer settings={footerRes.data?.value as Parameters<typeof Footer>[0]["settings"]} />
+      <FooterServer />
     </>
   );
 }

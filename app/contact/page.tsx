@@ -2,7 +2,7 @@ import Navbar from "../components/Navbar";
 import HeroSection from "../components/HeroSectionServer";
 import ContactHero from "../components/ContactHero";
 import ContactCards from "../components/ContactCards";
-import Footer from "../components/Footer";
+import FooterServer from "../components/FooterServer";
 
 export const metadata = {
   title: "Contact Us | Palm Springs",
@@ -18,7 +18,7 @@ export default function ContactPage() {
         <ContactHero />
         <ContactCards />
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

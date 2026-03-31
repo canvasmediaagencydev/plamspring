@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+import FooterServer from "../../components/FooterServer";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,9 +20,8 @@ export default async function BlogPostPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  const [postRes, footerRes] = await Promise.all([
+  const [postRes] = await Promise.all([
     supabase.from("posts").select("*").eq("slug", slug).eq("is_published", true).single(),
-    supabase.from("site_settings").select("value").eq("key", "footer").single(),
   ]);
 
   if (!postRes.data) notFound();
@@ -109,7 +108,7 @@ export default async function BlogPostPage({
         />
       </main>
 
-      <Footer settings={footerRes.data?.value as Parameters<typeof Footer>[0]["settings"]} />
+      <FooterServer />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import HeroSection from "../../components/HeroSectionServer";
 import LandSection from "../../components/LandSection";
-import Footer from "../../components/Footer";
+import FooterServer from "../../components/FooterServer";
 
 export const metadata = {
   title: "เสนอขายที่ดิน | Palm Springs",
@@ -16,7 +16,7 @@ export default function LandPage() {
         <HeroSection />
         <LandSection />
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import Navbar from "../../components/Navbar";
 import HeroSection from "../../components/HeroSectionServer";
-import Footer from "../../components/Footer";
+import FooterServer from "../../components/FooterServer";
 
 export const metadata = {
   title: "ส่งข้อมูลเรียบร้อย | Palm Springs",
@@ -60,7 +60,7 @@ export default function SuccessPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <FooterServer />
     </>
   );
 }
