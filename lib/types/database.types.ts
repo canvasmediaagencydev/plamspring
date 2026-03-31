@@ -347,6 +347,7 @@ export type Database = {
           id: string
           image_url: string
           is_published: boolean
+          linked_project_page_id: string | null
           logo_url: string | null
           name: string
           sort_order: number
@@ -358,6 +359,7 @@ export type Database = {
           id?: string
           image_url?: string
           is_published?: boolean
+          linked_project_page_id?: string | null
           logo_url?: string | null
           name: string
           sort_order?: number
@@ -369,13 +371,22 @@ export type Database = {
           id?: string
           image_url?: string
           is_published?: boolean
+          linked_project_page_id?: string | null
           logo_url?: string | null
           name?: string
           sort_order?: number
           subtitle?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_linked_project_page_id_fkey"
+            columns: ["linked_project_page_id"]
+            isOneToOne: false
+            referencedRelation: "project_pages"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       site_settings: {
         Row: {

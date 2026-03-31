@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface HomeTypeCard {
@@ -7,6 +8,7 @@ interface HomeTypeCard {
   name: string;
   image: string;
   logo: string;
+  slug: string | null;
 }
 
 const SKELETON_COUNT = 4;
@@ -22,7 +24,7 @@ function HomeCardSkeleton() {
   );
 }
 
-function HomeCard({ card }: { card: HomeTypeCard }) {
+function HomeCardContent({ card }: { card: HomeTypeCard }) {
   return (
     <div className="group flex cursor-pointer flex-col overflow-hidden rounded-3xl bg-white shadow-md transition-shadow duration-300 hover:shadow-xl">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -34,14 +36,21 @@ function HomeCard({ card }: { card: HomeTypeCard }) {
       {/* Logo area */}
       <div className="flex items-center justify-center px-4 py-5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={card.logo}
-          alt={card.name}
-          className="h-10 max-w-full object-contain"
-        />
+        <img src={card.logo} alt={card.name} className="h-10 max-w-full object-contain" />
       </div>
     </div>
   );
+}
+
+function HomeCard({ card }: { card: HomeTypeCard }) {
+  if (card.slug) {
+    return (
+      <Link href={`/projects/${card.slug}`}>
+        <HomeCardContent card={card} />
+      </Link>
+    );
+  }
+  return <HomeCardContent card={card} />;
 }
 
 interface DbProject {
@@ -52,6 +61,7 @@ interface DbProject {
   logo_url?: string | null;
   sort_order: number;
   is_published: boolean;
+  project_pages?: { slug: string | null } | null;
 }
 
 interface HomeTypeSectionProps {
@@ -64,9 +74,9 @@ export default function HomeTypeSection({ projects = [] }: HomeTypeSectionProps)
     name: p.name,
     image: p.image_url,
     logo: p.logo_url ?? "",
+    slug: p.project_pages?.slug ?? null,
   }));
-  const displayItems =
-    homeTypes.length > 0 ? homeTypes : Array(SKELETON_COUNT).fill(undefined);
+  const displayItems = homeTypes.length > 0 ? homeTypes : Array(SKELETON_COUNT).fill(undefined);
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 md:py-16 md:pb-30">
@@ -103,11 +113,7 @@ export default function HomeTypeSection({ projects = [] }: HomeTypeSectionProps)
       {/* Cards grid */}
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
         {displayItems.map((card, i) =>
-          card ? (
-            <HomeCard key={card.id} card={card} />
-          ) : (
-            <HomeCardSkeleton key={i} />
-          )
+          card ? <HomeCard key={card.id} card={card} /> : <HomeCardSkeleton key={i} />,
         )}
       </div>
     </section>
