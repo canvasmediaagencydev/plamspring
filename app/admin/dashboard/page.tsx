@@ -502,32 +502,36 @@ export default function DashboardPage() {
           sub="ตั้งแต่เริ่มต้น"
           accent
         />
-        <KpiCard
-          icon={<Mail size={20} />}
-          label="คนที่ติดต่อเข้ามา"
-          value={data.totalContactSubmissions}
-          sub={`รอดำเนินการ ${data.newContactSubmissions} รายการ`}
-          badge={
-            data.newContactSubmissions > 0 ? (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#09418C] px-1.5 text-[10px] font-bold text-white">
-                {data.newContactSubmissions}
-              </span>
-            ) : undefined
-          }
-        />
-        <KpiCard
-          icon={<Inbox size={20} />}
-          label="แบบฟอร์มที่ดิน"
-          value={data.totalLandInquiries}
-          sub={`รอดำเนินการ ${data.newLandInquiries} รายการ`}
-          badge={
-            data.newLandInquiries > 0 ? (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#09418C] px-1.5 text-[10px] font-bold text-white">
-                {data.newLandInquiries}
-              </span>
-            ) : undefined
-          }
-        />
+        <Link href="/admin/contact" className="block">
+          <KpiCard
+            icon={<Mail size={20} />}
+            label="คนที่ติดต่อเข้ามา"
+            value={data.totalContactSubmissions}
+            sub={`รอดำเนินการ ${data.newContactSubmissions} รายการ`}
+            badge={
+              data.newContactSubmissions > 0 ? (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#09418C] px-1.5 text-[10px] font-bold text-white">
+                  {data.newContactSubmissions}
+                </span>
+              ) : undefined
+            }
+          />
+        </Link>
+        <Link href="/admin/land-inquiries" className="block">
+          <KpiCard
+            icon={<Inbox size={20} />}
+            label="แบบฟอร์มที่ดิน"
+            value={data.totalLandInquiries}
+            sub={`รอดำเนินการ ${data.newLandInquiries} รายการ`}
+            badge={
+              data.newLandInquiries > 0 ? (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#09418C] px-1.5 text-[10px] font-bold text-white">
+                  {data.newLandInquiries}
+                </span>
+              ) : undefined
+            }
+          />
+        </Link>
         <KpiCard
           icon={<Calculator size={20} />}
           label="ติดต่อขอกู้"
