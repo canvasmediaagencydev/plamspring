@@ -131,7 +131,7 @@ export default function ProjectMap({ projectName, mapEmbedUrl, mapImageUrl }: Pr
             }`}
           >
             <div className="aspect-[16/7] w-full">
-              {showMap && (
+              {showMap && mapEmbedUrl && (
                 <iframe
                   src={mapEmbedUrl}
                   width="100%"
