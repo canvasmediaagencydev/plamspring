@@ -245,14 +245,9 @@ export default function Navbar() {
                         : "text-white/70 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <span className="text-[11px] font-semibold tabular-nums text-white/30">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="text-lg font-bold tracking-wide">
-                        {link.label}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold tracking-wide">
+                      {link.label}
+                    </span>
                     <svg
                       className={`h-4 w-4 transition-transform duration-200 group-hover:translate-x-1 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-60"}`}
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
