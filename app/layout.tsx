@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import PublicStickyContact from "./components/PublicStickyContact";
 import GoogleTranslateProvider from "./components/GoogleTranslateProvider";
+import NavigationLoader from "./components/NavigationLoader";
 import { createClient } from "@/lib/supabase/server";
 
 const montserrat = Montserrat({
@@ -43,6 +44,7 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet" />
       </head>
       <body className={`${montserrat.variable} antialiased`}>
+        <NavigationLoader />
         <GoogleTranslateProvider />
         {children}
         <PublicStickyContact

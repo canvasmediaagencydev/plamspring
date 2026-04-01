@@ -60,3 +60,77 @@ body {
   color: var(--foreground);
   font-family: "Noto Sans Thai", var(--font-montserrat), Arial, sans-serif;
 }
+
+/* ── Loading Screen ── */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: loading-fadein 0.2s ease both;
+}
+
+.loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #09418C 0%, #1a6fd4 50%, #09418C 100%);
+  background-size: 200% 100%;
+  border-radius: 0 2px 2px 0;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: loading-shimmer 1.6s linear infinite;
+  box-shadow: 0 0 12px rgba(9, 65, 140, 0.4);
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  animation: loading-rise 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.loading-logo {
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 16px rgba(9, 65, 140, 0.12));
+}
+
+.loading-dots {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.loading-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #09418C;
+  animation: loading-bounce 1.2s ease-in-out infinite both;
+}
+
+/* ── Keyframes ── */
+@keyframes loading-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes loading-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loading-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes loading-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%            { transform: scale(1);   opacity: 1;   }
+}
