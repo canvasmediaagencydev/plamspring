@@ -198,9 +198,7 @@ export default function Navbar() {
         }`}
       >
         {/* Decorative circles */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/10" />
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full border border-white/10" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full border border-white/10" />
+    
 
         <div className="relative flex h-full flex-col px-8 pt-6 pb-10">
           {/* Top row: logo + close */}
