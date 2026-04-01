@@ -19,8 +19,8 @@ const nextConfig: NextConfig = {
 
   async headers() {
     const csp = [
-      // Scripts — Google Translate requires unsafe-inline + unsafe-eval
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com",
+      // Scripts — Google Translate requires unsafe-inline + unsafe-eval; dotlottie WASM needs wasm-unsafe-eval
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com",
       // Styles
       "style-src 'self' 'unsafe-inline' https://translate.googleapis.com https://www.gstatic.com https://fonts.googleapis.com",
       // Fonts
@@ -29,8 +29,8 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https: http:",
       // Frames — Google Translate attribution iframe
       "frame-src 'self' https://translate.google.com https://translate.googleapis.com",
-      // XHR / fetch
-      "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://dkdrfftuvroetapqrqbf.supabase.co",
+      // XHR / fetch — includes CDNs used by @lottiefiles/dotlottie-react for WASM
+      "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://dkdrfftuvroetapqrqbf.supabase.co https://cdn.jsdelivr.net https://unpkg.com",
     ].join("; ");
 
     return [
