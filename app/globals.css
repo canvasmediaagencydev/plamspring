@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* ── Google Translate — hide widget UI, keep translation active ── */
+.goog-te-banner-frame,
+.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+}
+#google_translate_element {
+  display: none !important;
+}
+
 /* ── Site brand tokens ── */
 :root {
   --background: #ffffff;

@@ -1,0 +1,202 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Palm Springs Logo" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Palm Springs Logo" [ref=e5]
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "HOME" [ref=e8] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e9]:
+          - link "ABOUT US" [ref=e10] [cursor=pointer]:
+            - /url: /about
+        - listitem [ref=e11]:
+          - link "PROJECTS" [ref=e12] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e13]:
+          - link "OUR FAMILY" [ref=e14] [cursor=pointer]:
+            - /url: /our-family
+        - listitem [ref=e15]:
+          - link "BLOG" [ref=e16] [cursor=pointer]:
+            - /url: /blog
+        - listitem [ref=e17]:
+          - link "CONTACT US" [ref=e18] [cursor=pointer]:
+            - /url: /contact
+      - button "ไทย" [ref=e21]:
+        - text: ไทย
+        - img [ref=e22]
+  - main [ref=e24]:
+    - img "Palm Ville แยกข่วงสิงห์ - ถ.โชตนา" [ref=e27]
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - paragraph [ref=e32]: Project Information
+        - heading "ข้อมูลโครงการ" [level=2] [ref=e33]
+      - generic:
+        - paragraph
+    - generic [ref=e36]:
+      - img "Modish" [ref=e39]
+      - generic [ref=e40]:
+        - heading "Modish" [level=3] [ref=e41]
+        - list [ref=e42]:
+          - listitem [ref=e43]:
+            - generic [ref=e45]: Walk in closet
+          - listitem [ref=e46]:
+            - generic [ref=e48]: 4 ห้องนอน 3 ห้องน้ำ
+          - listitem [ref=e49]:
+            - generic [ref=e51]: ที่จอดรถ 3 คัน
+          - listitem [ref=e52]:
+            - generic [ref=e54]: ที่ดินเริ่มต้น 56. ตร.ว.
+          - listitem [ref=e55]:
+            - generic [ref=e57]: พื้นที่ใช้สอย 234.50 ตร.ม.
+    - generic [ref=e59]:
+      - heading "ทำเลที่ตั้งโครงการ" [level=2] [ref=e60]
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]: "6.3"
+            - generic [ref=e65]: กม.
+          - paragraph [ref=e66]: เซ็นทรัล เฟสติวัลฯ
+          - generic [ref=e67]: การเดินทาง
+          - list [ref=e68]:
+            - listitem [ref=e69]:
+              - generic [ref=e71]: ถ. ซูเปอร์ไฮเวย์เชียงใหม่
+            - listitem [ref=e72]:
+              - generic [ref=e74]: ถ.เชียงใหม่-ดอยสะเก็ด
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: "5.3"
+            - generic [ref=e78]: กม.
+          - paragraph [ref=e79]: เทสโก้โลตัส คำเที่ยง
+          - generic [ref=e80]: ไลฟ์สไตล์
+          - list [ref=e81]:
+            - listitem [ref=e82]:
+              - generic [ref=e84]: สนามกอล์ฟลานนา
+            - listitem [ref=e85]:
+              - generic [ref=e87]: มีโชค พลาซ่า
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]: "4"
+            - generic [ref=e91]: กม.
+          - paragraph [ref=e92]: รพ. นครพิงค์
+          - generic [ref=e93]: โรงเรียน
+          - list [ref=e94]:
+            - listitem [ref=e95]:
+              - generic [ref=e97]: รร. นานาชาตินครพิงค์
+            - listitem [ref=e98]:
+              - generic [ref=e100]: ม.ราชภัฎ เชียงใหม่
+            - listitem [ref=e101]:
+              - generic [ref=e103]: ม. พายัพ
+        - generic [ref=e104]:
+          - generic [ref=e105]:
+            - generic [ref=e106]: "2.9"
+            - generic [ref=e107]: กม.
+          - paragraph [ref=e108]: ศูนย์ราชการเชียงใหม่
+          - generic [ref=e109]: โรงพยาบาล
+          - list [ref=e110]:
+            - listitem [ref=e111]:
+              - generic [ref=e113]: รพ. กรุงเทพ
+    - generic [ref=e115]:
+      - generic [ref=e116]:
+        - heading [level=2]
+        - generic [ref=e117]:
+          - button "แผนที่โครงการ" [ref=e118]:
+            - img [ref=e119]
+            - generic [ref=e123]: แผนที่โครงการ
+          - button "Google Maps" [ref=e124]:
+            - img [ref=e125]
+            - generic [ref=e127]: Google Maps
+      - generic [ref=e131]:
+        - generic [ref=e140]: Palm Ville แยกข่วงสิงห์ - ถ.โชตนา
+        - generic [ref=e142]: CENTRAL FESTIVAL
+        - generic [ref=e143]: BIG C EXTRA
+        - generic [ref=e144]: TUBE TREK WATERPARK
+        - generic [ref=e145]: TESCO LOTUS
+        - generic [ref=e146]: โรงพยาบาล
+        - generic [ref=e147]: MAKRO
+        - generic [ref=e148]: ถนน สันกำแพงสายเก่า
+        - generic [ref=e149]: ถ.วงแหวน
+    - generic [ref=e150]:
+      - generic [ref=e151]:
+        - generic [ref=e165]: 1 / 8
+        - button "Previous image" [ref=e166]:
+          - img [ref=e167]
+        - button "Next image" [ref=e169]:
+          - img [ref=e170]
+      - generic [ref=e172]:
+        - button [ref=e173]
+        - button [ref=e175]
+        - button [ref=e177]
+        - button [ref=e179]
+    - generic [ref=e181]:
+      - generic [ref=e182]:
+        - heading "คำนวณวงเงินที่สามารถกู้ได้" [level=2] [ref=e183]
+        - paragraph [ref=e184]: ประมาณการยอดผ่อนชำระต่อเดือน ขึ้นอยู่กับวงเงินและระยะเวลาที่ขอกู้
+      - generic [ref=e187]:
+        - generic [ref=e188]:
+          - text: จำนวนเงินที่ขอกู้
+          - generic [ref=e189]:
+            - spinbutton [ref=e190]
+            - generic [ref=e191]: บาท
+        - generic [ref=e192]:
+          - text: ระยะเวลาที่ขอกู้
+          - generic [ref=e193]:
+            - spinbutton [ref=e194]
+            - generic [ref=e195]: ปี
+        - generic [ref=e196]:
+          - text: อัตราดอกเบี้ยตามประกาศ
+          - generic [ref=e197]:
+            - spinbutton [ref=e198]
+            - generic [ref=e199]: "%"
+        - button "รีเซ็ตค่า" [ref=e200]:
+          - img [ref=e201]
+          - text: รีเซ็ตค่า
+        - button "คำนวณ" [ref=e204]
+  - contentinfo [ref=e208]:
+    - generic [ref=e209]:
+      - generic [ref=e210]:
+        - img "Palm Springs logo" [ref=e211]
+        - link "ติดต่อเรา" [ref=e212] [cursor=pointer]:
+          - /url: /contact
+          - text: ติดต่อเรา
+          - img [ref=e214]
+      - generic [ref=e216]:
+        - paragraph [ref=e218]: Contact Information
+        - generic [ref=e219]:
+          - paragraph [ref=e220]: Follow Us
+          - generic [ref=e221]:
+            - link "Facebook" [ref=e222] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e223]
+            - link "Instagram" [ref=e225] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e226]
+            - link "Line" [ref=e228] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e229]
+            - link "TikTok" [ref=e231] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e232]
+            - link "YouTube" [ref=e234] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e235]
+      - generic [ref=e237]:
+        - paragraph [ref=e238]:
+          - text: “เลือกปาล์มสปริงส์
+          - text: เพื่อชีวิตที่ดีกว่า”
+        - paragraph [ref=e241]: © 2019 - 2023 palm springs place co., ltd. all rights reserved.
+  - generic [ref=e242]:
+    - generic:
+      - link:
+        - /url: ""
+        - img
+      - link:
+        - /url: ""
+        - img
+    - button "เปิดช่องทางติดต่อ" [ref=e243]:
+      - generic [ref=e244]:
+        - img [ref=e245]
+        - img
+  - button "Open Next.js Dev Tools" [ref=e252] [cursor=pointer]:
+    - img [ref=e253]
+  - alert [ref=e256]

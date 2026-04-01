@@ -1,0 +1,9 @@
+[    2194ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[    2444ms] [LOG] [HMR] connected @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[    2919ms] [WARNING] using deprecated parameters for the initialization function; pass a single object instead @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[  115159ms] [LOG] [Fast Refresh] rebuilding @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[  115234ms] [LOG] [Fast Refresh] done in 175ms @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[  172534ms] [LOG] [Fast Refresh] rebuilding @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[  172648ms] [LOG] [Fast Refresh] done in 214ms @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[  181026ms] [LOG] [Fast Refresh] rebuilding @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
+[  181359ms] [LOG] [Fast Refresh] done in 433ms @ http://192.168.1.113:3000/_next/static/chunks/08159_next_dist_370be0cc._.js:2297
