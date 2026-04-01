@@ -63,6 +63,12 @@ function deleteGoogtransCookie() {
 }
 
 function detectLang(): LangCode {
+  // localStorage is the source of truth — persists across Google Translate cookie changes
+  if (typeof localStorage !== "undefined") {
+    const saved = localStorage.getItem("palm_lang") as LangCode | null;
+    if (saved && ["th", "en", "zh"].includes(saved)) return saved;
+  }
+  // Fallback: read from cookie
   const val = getGoogtransCookie();
   if (!val) return "th";
   if (val.includes("/en")) return "en";
@@ -80,8 +86,6 @@ export default function Navbar() {
 
   useEffect(() => {
     setActiveLang(detectLang());
-    const id = setInterval(() => setActiveLang(detectLang()), 1500);
-    return () => clearInterval(id);
   }, []);
 
   // Lock body scroll when mobile menu is open
@@ -96,8 +100,10 @@ export default function Navbar() {
     setIsLangOpen(false);
     if (lang.code === "th") {
       deleteGoogtransCookie();
+      localStorage.removeItem("palm_lang");
     } else {
       setGoogtransCookie(`/th/${lang.googCode}`);
+      localStorage.setItem("palm_lang", lang.code);
     }
     setActiveLang(lang.code);
     setTimeout(() => {
@@ -133,10 +139,10 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {/* Right side: lang switcher + hamburger */}
+          {/* Right side: lang switcher (desktop only) + hamburger */}
           <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <div className="relative">
+            {/* Language Switcher — desktop only */}
+            <div className="relative hidden lg:block">
               <button
                 onClick={() => setIsLangOpen((prev) => !prev)}
                 className="flex items-center gap-1 rounded-full border border-primary px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
