@@ -56,7 +56,6 @@ export default function AdminSocialReelsPage() {
     load();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const debounceTimers = useRef<(ReturnType<typeof setTimeout> | null)[]>([null, null, null, null]);
   const reelsRef = useRef<SocialReel[]>(DEFAULT_REELS);
 
   const update = (index: number, field: keyof SocialReel, value: string) => {
@@ -100,14 +99,6 @@ export default function AdminSocialReelsPage() {
 
   const onVideoUrlChange = (index: number, value: string) => {
     update(index, "video_url", value);
-    const prev = debounceTimers.current[index];
-    if (prev) clearTimeout(prev);
-    debounceTimers.current[index] = setTimeout(() => {
-      const reel = reelsRef.current[index];
-      if (!reel.thumbnail_url) {
-        fetchThumbnail(value, reel.platform, index);
-      }
-    }, 800);
   };
 
   const autoThumbnail = (index: number) => {
@@ -210,7 +201,7 @@ export default function AdminSocialReelsPage() {
                   </Button>
                 </div>
                 <p className="text-[11px] text-gray-400">
-                  Thumbnail ดึงอัตโนมัติเมื่อ paste URL — กด <Wand2 size={10} className="inline" /> เพื่อดึงใหม่
+                  กด <Wand2 size={10} className="inline" /> เพื่อดึง Thumbnail จาก URL
                 </p>
               </div>
 

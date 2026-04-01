@@ -31,16 +31,6 @@ function getTikTokVideoId(url: string): string | null {
   return m ? m[1] : null;
 }
 
-/** Strip query params — TikTok embed requires a clean cite URL */
-function cleanTikTokUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    return `${u.origin}${u.pathname}`;
-  } catch {
-    return url.split("?")[0];
-  }
-}
-
 /** Strip query params from URL */
 function cleanUrl(url: string): string {
   try {
@@ -57,34 +47,17 @@ function getInstagramShortcode(url: string): string | null {
   return m ? m[1] : null;
 }
 
-/** Renders TikTok's official blockquote embed and loads their embed.js */
-function TikTokEmbed({ videoUrl, videoId }: { videoUrl: string; videoId: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const citeUrl = cleanUrl(videoUrl);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const existing = document.getElementById("tiktok-embed-script");
-    if (existing) existing.remove();
-    const script = document.createElement("script");
-    script.id = "tiktok-embed-script";
-    script.src = "https://www.tiktok.com/embed.js";
-    script.async = true;
-    document.body.appendChild(script);
-    return () => { script.remove(); };
-  }, [videoId]);
-
+/** Renders TikTok video via direct iframe embed (no embed.js required) */
+function TikTokEmbed({ videoId }: { videoId: string }) {
   return (
-    <div ref={containerRef} className="flex justify-center">
-      <blockquote
-        className="tiktok-embed"
-        cite={citeUrl}
-        data-video-id={videoId}
-        style={{ maxWidth: 605, minWidth: 325 }}
-      >
-        <section />
-      </blockquote>
-    </div>
+    <iframe
+      src={`https://www.tiktok.com/embed/v2/${videoId}`}
+      title="TikTok video"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+      style={{ width: 325, height: "min(740px, 85vh)", border: 0 }}
+      className="rounded-2xl block"
+    />
   );
 }
 
@@ -167,12 +140,12 @@ export function ReelModal({ videoUrl, platform, onClose }: ReelModalProps) {
           </div>
         </div>
       ) : tiktokVideoId ? (
-        /* ── TikTok: official blockquote embed ── */
+        /* ── TikTok: direct iframe embed ── */
         <div
-          className="max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+          className="rounded-2xl overflow-hidden shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <TikTokEmbed videoUrl={videoUrl} videoId={tiktokVideoId} />
+          <TikTokEmbed videoId={tiktokVideoId} />
         </div>
       ) : instagramShortcode ? (
         /* ── Instagram: official blockquote embed ── */
