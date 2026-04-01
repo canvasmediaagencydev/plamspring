@@ -29,8 +29,8 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https: http:",
       // Frames — Google Translate attribution iframe
       "frame-src 'self' https://translate.google.com https://translate.googleapis.com",
-      // XHR / fetch — includes CDNs used by @lottiefiles/dotlottie-react for WASM
-      "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://dkdrfftuvroetapqrqbf.supabase.co https://cdn.jsdelivr.net https://unpkg.com",
+      // XHR / fetch — includes CDNs used by @lottiefiles/dotlottie-react for WASM + animation files
+      "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://dkdrfftuvroetapqrqbf.supabase.co https://cdn.jsdelivr.net https://unpkg.com https://lottie.host",
     ].join("; ");
 
     return [
