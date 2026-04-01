@@ -16,81 +16,182 @@ export default async function ProjectsPage() {
     .eq("is_published", true)
     .order("sort_order");
 
+  const list = projects ?? [];
+  const featured = list[0];
+  const rest = list.slice(1);
+
   return (
     <>
       <Navbar />
-      <main>
-        {/* Hero banner */}
-        <section className="relative mt-16 flex h-[200px] items-center justify-center overflow-hidden bg-gradient-to-br from-primary/90 to-primary md:mt-20 md:h-[280px]">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute left-[10%] top-[15%] h-40 w-40 rounded-full bg-white/30" />
-            <div className="absolute bottom-[10%] right-[15%] h-56 w-56 rounded-full bg-white/20" />
-          </div>
-          <div className="relative z-10 text-center">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/60 md:text-sm">
-              Our Projects
+      <main className="bg-[#F8F7F4]">
+
+        {/* ── Hero ── */}
+        <section className="relative mt-16 overflow-hidden bg-[#09418C] md:mt-20">
+          {/* Decorative circles */}
+          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-64 w-64 rounded-full border border-white/10" />
+
+          <div className="relative mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-6 py-10 md:flex-row md:items-end md:px-12 md:py-20">
+            <div>
+              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/50">
+                Palm Springs · Chiang Mai
+              </p>
+              <h1 className="text-3xl font-bold leading-tight text-white md:text-6xl lg:text-7xl">
+                โครงการของเรา
+              </h1>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="h-px w-10 bg-white/40" />
+                <span className="text-sm text-white/60">
+                  {list.length} โครงการ
+                </span>
+              </div>
+            </div>
+
+            <p className="hidden max-w-xs text-sm leading-relaxed text-white/60 md:block md:text-right">
+              คัดสรรโครงการที่อยู่อาศัยคุณภาพสูง<br />
+              เพื่อชีวิตที่ดีกว่าในเชียงใหม่
             </p>
-            <h1 className="text-3xl font-bold text-white md:text-5xl">
-              โครงการของเรา
-            </h1>
           </div>
         </section>
 
-        {/* Projects grid */}
-        <section className="mx-auto max-w-6xl px-4 py-12 md:py-20">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {(projects ?? []).map((project) => (
-              <Link
-                key={project.id}
-                href={project.slug ? `/projects/${project.slug}` : "#"}
-                className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                {/* Project image */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden">
-                  {project.hero_image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={project.hero_image_url}
-                      alt={project.name}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg
-                          className="h-12 w-12 text-gray-300"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={1}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"
-                          />
-                        </svg>
+        {/* ── Projects ── */}
+        <section className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-20">
+
+          {list.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-32 text-center">
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm">
+                <svg className="h-9 w-9 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-400">ยังไม่มีโครงการในขณะนี้</p>
+            </div>
+          )}
+
+          {/* Mobile: all projects in 2-col grid */}
+          {list.length > 0 && (
+            <>
+              {/* Mobile grid (2 cols, all projects) */}
+              <div className="grid grid-cols-2 gap-3 md:hidden">
+                {list.map((project) => (
+                  <Link
+                    key={project.id}
+                    href={project.slug ? `/projects/${project.slug}` : "#"}
+                    className="group block"
+                  >
+                    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
+                      {project.hero_image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={project.hero_image_url}
+                          alt={project.name}
+                          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gradient-to-br from-[#09418C]/20 to-[#09418C]/40" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        {project.subtitle && (
+                          <p className="mb-0.5 text-[9px] font-medium uppercase tracking-[0.2em] text-white/60">
+                            {project.subtitle}
+                          </p>
+                        )}
+                        <h3 className="text-sm font-bold leading-snug text-white">
+                          {project.name}
+                        </h3>
                       </div>
-                    </>
-                  )}
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-primary/0 transition-colors duration-300 group-hover:bg-primary/10" />
-                </div>
-                {/* Card content */}
-                <div className="flex flex-1 flex-col items-center justify-center px-4 py-5 text-center md:py-6">
-                  <h3 className="text-lg font-bold tracking-wide text-primary md:text-xl">
-                    {project.name}
-                  </h3>
-                  {project.subtitle && (
-                    <p className="mt-1 text-xs font-medium tracking-[0.2em] text-gray-400">
-                      {project.subtitle}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Desktop: featured full-width + rest in 3-col grid */}
+              <div className="hidden md:block">
+                {featured && (
+                  <Link
+                    href={featured.slug ? `/projects/${featured.slug}` : "#"}
+                    className="group mb-6 block"
+                  >
+                    <div className="relative aspect-[21/9] w-full overflow-hidden rounded-3xl">
+                      {featured.hero_image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={featured.hero_image_url}
+                          alt={featured.name}
+                          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gradient-to-br from-[#09418C]/20 to-[#09418C]/40" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute left-8 top-8 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+                        Featured
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-8">
+                        <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.25em] text-white/60">
+                          {featured.subtitle || "Palm Springs"}
+                        </p>
+                        <h2 className="text-4xl font-bold text-white">
+                          {featured.name}
+                        </h2>
+                        <div className="mt-4 flex items-center gap-2 text-sm font-medium text-white/80 transition-all duration-300 group-hover:text-white">
+                          <span>ดูโครงการ</span>
+                          <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
+                {rest.length > 0 && (
+                  <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
+                    {rest.map((project) => (
+                      <Link
+                        key={project.id}
+                        href={project.slug ? `/projects/${project.slug}` : "#"}
+                        className="group block"
+                      >
+                        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl">
+                          {project.hero_image_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={project.hero_image_url}
+                              alt={project.name}
+                              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="h-full w-full bg-gradient-to-br from-[#09418C]/20 to-[#09418C]/40" />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                          <div className="absolute bottom-0 left-0 right-0 p-5">
+                            {project.subtitle && (
+                              <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.25em] text-white/60">
+                                {project.subtitle}
+                              </p>
+                            )}
+                            <h3 className="text-lg font-bold leading-snug text-white">
+                              {project.name}
+                            </h3>
+                            <div className="mt-3 flex items-center gap-2 text-xs font-medium text-white/70 transition-all duration-300 group-hover:text-white">
+                              <span>ดูโครงการ</span>
+                              <svg className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
         </section>
       </main>
       <FooterServer />
