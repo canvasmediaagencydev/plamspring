@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-const MIN_SHOW_MS = 700; // loading screen shows at least this long (ms)
-const FADE_MS = 350;     // fade-out duration
+const FADE_MS = 350; // fade-out duration
 
 /**
  * Wraps the entire app (in layout.tsx) and shows a full-screen loading overlay
@@ -14,7 +13,7 @@ const FADE_MS = 350;     // fade-out duration
  * Flow:
  *   click <Link> → show overlay immediately
  *   server fetches new page
- *   pathname changes (page is ready) → wait for MIN_SHOW_MS, then fade out
+ *   pathname changes (page is ready) → fade out
  */
 export default function TransitionProvider({
   children,
@@ -27,7 +26,6 @@ export default function TransitionProvider({
   const [phase, setPhase] = useState<"hidden" | "visible" | "fading">("hidden");
   const [progress, setProgress] = useState(0);
 
-  const showAt = useRef(0);
   const progressTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // ── helpers ──────────────────────────────────────────────────────────────
@@ -39,7 +37,6 @@ export default function TransitionProvider({
 
   function show() {
     clearProgressTimers();
-    showAt.current = Date.now();
     setProgress(0);
     setPhase("visible");
 
@@ -58,19 +55,14 @@ export default function TransitionProvider({
 
   function hide() {
     clearProgressTimers();
-    const elapsed = Date.now() - showAt.current;
-    const wait = Math.max(0, MIN_SHOW_MS - elapsed);
-
+    setProgress(100);
     setTimeout(() => {
-      setProgress(100);
+      setPhase("fading");
       setTimeout(() => {
-        setPhase("fading");
-        setTimeout(() => {
-          setPhase("hidden");
-          setProgress(0);
-        }, FADE_MS);
-      }, 200); // let bar reach 100% before fade
-    }, wait);
+        setPhase("hidden");
+        setProgress(0);
+      }, FADE_MS);
+    }, 200); // let bar reach 100% before fade
   }
 
   // ── detect pathname change (navigation complete) ─────────────────────────
