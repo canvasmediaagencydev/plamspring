@@ -16,17 +16,11 @@ const SKELETON_COUNT = 5;
 function SkeletonCard({ active }: { active: boolean }) {
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-3xl transition-all duration-500 ${
+      className={`overflow-hidden rounded-3xl  transition-all duration-500 ${
         active ? "shadow-2xl" : "shadow-md"
       }`}
     >
-      <div
-        className="h-96 w-full animate-pulse bg-gray-300 md:h-[480px]"
-      />
-      <div className="flex gap-2 bg-white px-3 py-3">
-        <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
-        <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200" />
-      </div>
+      <div className="h-96 w-full animate-pulse bg-gray-300 md:h-[480px]" />
     </div>
   );
 }
@@ -35,26 +29,16 @@ function SkeletonCard({ active }: { active: boolean }) {
 function SlideCardItem({ card, active }: { card: SlideCard; active: boolean }) {
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-3xl transition-all duration-500 ${
-        active ? "shadow-2xl" : "shadow-md"
+      className={`overflow-hidden rounded-3xl  transition-all duration-500 
+        
       }`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={card.image}
         alt="lifestyle"
-        className="h-96 w-full object-cover transition-all duration-500 md:h-[480px]"
+        className="h-96 w-full object-cover transition-all duration-500 md:h-[520px]"
       />
-      <div className="flex flex-wrap gap-2 bg-white px-3 py-3">
-        {card.tags.map((tag) => (
-          <span
-            key={tag}
-            className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }
@@ -98,7 +82,7 @@ export default function LifestyleSlider({ slides = [] }: LifestyleSliderProps) {
 
   return (
     <section className="overflow-hidden py-16">
-      <h2 className="mb-12 text-center text-2xl font-bold text-primary md:text-4xl">
+      <h2 className="mb-2 md:mb-12 text-center text-2xl font-bold text-primary md:text-4xl">
         ทำเลศักยภาพ ตอบโจทย์ทุกไลฟ์สไตล์
       </h2>
 
@@ -107,7 +91,7 @@ export default function LifestyleSlider({ slides = [] }: LifestyleSliderProps) {
         <button
           onClick={prev}
           aria-label="Previous"
-          className="absolute top-[42%] left-2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:bg-gray-100 sm:left-6"
+          className="absolute top-[42%] left-2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full sm:left-6"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5 fill-primary">
             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
