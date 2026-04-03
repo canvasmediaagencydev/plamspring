@@ -534,7 +534,7 @@ export default function DashboardPage() {
         </Link>
         <KpiCard
           icon={<Calculator size={20} />}
-          label="ติดต่อขอกู้"
+          label="จำนวน click ปุ่มติดต่อขอกู้"
           value={data.loanContactClicks}
           sub={`${loanPct}% ของการติดต่อ`}
         />
@@ -566,7 +566,7 @@ export default function DashboardPage() {
             {[
               { Icon: FaFacebookMessenger, label: "Facebook Messenger", value: data.facebookClicks, pct: fbPct, color: "text-[#0084FF]", bg: "bg-[#0084FF]/8" },
               { Icon: FaLine, label: "LINE", value: data.lineClicks, pct: linePct, color: "text-[#06C755]", bg: "bg-[#06C755]/8" },
-              { Icon: Calculator, label: "ติดต่อขอกู้", value: data.loanContactClicks, pct: loanPct, color: "text-[#09418C]", bg: "bg-[#09418C]/8" },
+              { Icon: Calculator, label: "จำนวน click ปุ่มติดต่อขอกู้", value: data.loanContactClicks, pct: loanPct, color: "text-[#09418C]", bg: "bg-[#09418C]/8" },
             ].map(({ Icon, label, value, pct, color, bg }) => (
               <div key={label} className="flex items-center gap-3">
                 <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bg}`}>

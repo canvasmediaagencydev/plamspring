@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { RotateCcw } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
@@ -148,6 +149,21 @@ export default function LoanCalculator() {
             >
               คำนวณ
             </button>
+
+            {/* Contact button with tracking */}
+            <Link
+              href="/contact/lead"
+              onClick={() => {
+                fetch("/api/track-click", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ type: "loan_contact" }),
+                }).catch(() => {});
+              }}
+              className="block w-full rounded-xl border border-primary py-3.5 text-center text-base font-semibold text-primary transition hover:bg-primary/5 active:scale-[0.98]"
+            >
+              ติดต่อขอกู้
+            </Link>
 
             {/* Result */}
             {result !== null && result.monthly > 0 && (
