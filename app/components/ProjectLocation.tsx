@@ -34,20 +34,20 @@ export default function ProjectLocation({ places }: ProjectLocationProps) {
                   {place.distance}
                 </span>
                 {place.unit && (
-                  <span className="mt-1 text-sm font-medium text-gray-500">
+                  <span className="mt-1 text-md font-medium text-gray-500">
                     {place.unit}
                   </span>
                 )}
               </div>
 
               {/* Place name */}
-              <p className="mb-3 text-sm font-bold uppercase leading-snug tracking-wide text-white md:text-base">
+              <p className="mb-3 text-sm font-bold uppercase leading-snug tracking-wide text-white md:text-lg">
                 {place.name}
               </p>
 
               {/* Category badge */}
               {place.category && (
-                <span className="mb-4 inline-block rounded-full border border-white/50 px-4 py-1 text-xs font-medium text-white">
+                <span className="mb-4 inline-block rounded-full border border-white/50 px-4 py-1 text-md font-medium text-white">
                   {place.category}
                 </span>
               )}
@@ -58,7 +58,7 @@ export default function ProjectLocation({ places }: ProjectLocationProps) {
                   {place.details.map((detail, j) => (
                     <li
                       key={j}
-                      className="flex items-start gap-2 text-xs text-white/80 md:text-sm"
+                      className="flex items-start gap-2 text-md text-white/80 md:text-lg"
                     >
                       <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/60" />
                       <span>{detail}</span>
