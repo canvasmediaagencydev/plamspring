@@ -82,7 +82,7 @@ export default function AdminSocialReelsPage() {
 
     if (platform === "tiktok") {
       try {
-        const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
+        const res = await fetch(`/api/tiktok-oembed?url=${encodeURIComponent(url)}`);
         const json = await res.json();
         if (json.thumbnail_url) update(index, "thumbnail_url", json.thumbnail_url);
       } catch { /* user uploads manually */ }
