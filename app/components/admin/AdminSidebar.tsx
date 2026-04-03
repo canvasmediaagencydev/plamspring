@@ -98,7 +98,8 @@ export function AdminSidebar() {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    // Hard redirect to clear Next.js router cache and all server component state
+    window.location.href = "/admin/login";
   };
 
   return (
