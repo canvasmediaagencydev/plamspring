@@ -82,8 +82,8 @@ export default function LifestyleSlider({ slides = [] }: LifestyleSliderProps) {
 
   return (
     <section className="overflow-hidden py-16">
-      <h2 className="mb-2 md:mb-12 text-center text-2xl font-bold text-primary md:text-4xl">
-        ทำเลศักยภาพ ตอบโจทย์ทุกไลฟ์สไตล์
+      <h2 className="mb-0 md:mb-12 text-center text-2xl font-bold text-primary md:text-4xl">
+        ทำเลศักยภาพ <br className="block md:hidden"></br> ตอบโจทย์ทุกไลฟ์สไตล์
       </h2>
 
       <div className="relative px-4">

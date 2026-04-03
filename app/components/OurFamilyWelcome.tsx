@@ -16,7 +16,7 @@ export default function OurFamilyWelcome() {
           <p className="max-w-sm text-base leading-relaxed text-primary/70 md:text-lg">
             ขอขอบพระคุณลูกค้า โครงการในการโอนกรรมสิทธิ์
             <br />
-            และรับอบน้ำไปปัจจุบันประ หลาย...
+            และรับมอบบ้านไปเรียบร้อยแล้ว…
           </p>
         </div>
 
