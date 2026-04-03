@@ -152,7 +152,7 @@ export default function LoanCalculator() {
 
             {/* Contact button with tracking */}
             <Link
-              href="/contact/lead"
+              href="/contact/form"
               onClick={() => {
                 fetch("/api/track-click", {
                   method: "POST",
@@ -162,7 +162,7 @@ export default function LoanCalculator() {
               }}
               className="block w-full rounded-xl border border-primary py-3.5 text-center text-base font-semibold text-primary transition hover:bg-primary/5 active:scale-[0.98]"
             >
-              ติดต่อขอกู้
+              ลงทะเบียนรับสิทธิพิเศษ
             </Link>
 
             {/* Result */}
