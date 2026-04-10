@@ -152,7 +152,7 @@ export default function LoanCalculator() {
 
             {/* Contact button with tracking */}
             <Link
-              href="/contact/form"
+              href="/contact/lead"
               onClick={() => {
                 fetch("/api/track-click", {
                   method: "POST",
