@@ -36,6 +36,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: <FileText size={16} />,
     children: [
       { label: "ข้อมูลติดต่อ", href: "/admin/contact" },
+      { label: "ข้อมูล Lead", href: "/admin/lead" },
       { label: "แบบฟอร์มที่ดิน", href: "/admin/land-inquiries" },
     ],
   },

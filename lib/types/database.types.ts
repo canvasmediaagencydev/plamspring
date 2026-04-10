@@ -92,6 +92,48 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_submissions: {
+        Row: {
+          budget: string | null
+          created_at: string
+          detail: string | null
+          email: string
+          id: string
+          line_id: string | null
+          name: string
+          phone: string
+          status: string
+          visit_date: string | null
+          visit_time: string | null
+        }
+        Insert: {
+          budget?: string | null
+          created_at?: string
+          detail?: string | null
+          email: string
+          id?: string
+          line_id?: string | null
+          name: string
+          phone: string
+          status?: string
+          visit_date?: string | null
+          visit_time?: string | null
+        }
+        Update: {
+          budget?: string | null
+          created_at?: string
+          detail?: string | null
+          email?: string
+          id?: string
+          line_id?: string | null
+          name?: string
+          phone?: string
+          status?: string
+          visit_date?: string | null
+          visit_time?: string | null
+        }
+        Relationships: []
+      }
       land_inquiries: {
         Row: {
           area_ngan: number | null

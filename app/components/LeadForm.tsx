@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 const BUDGET_OPTIONS = [
   "น้อยกว่า 1 ล้านบาท",
@@ -98,6 +99,8 @@ export default function LeadForm() {
     date: "",
     time: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -105,9 +108,29 @@ export default function LeadForm() {
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire up actual submission logic here
+    setLoading(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from("lead_submissions").insert({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      line_id: form.lineId || null,
+      budget: form.budget || null,
+      detail: form.detail || null,
+      visit_date: form.date || null,
+      visit_time: form.time || null,
+    });
+
+    if (dbError) {
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setLoading(false);
+      return;
+    }
+
     router.push("/contact/success");
   };
 
@@ -170,12 +193,17 @@ export default function LeadForm() {
             </div>
           </div>
 
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
           <div className="flex justify-center pt-2">
             <button
               type="submit"
-              className="rounded-full bg-primary px-16 py-3.5 text-base font-semibold text-white transition hover:opacity-90 md:text-lg"
+              disabled={loading}
+              className="rounded-full bg-primary px-16 py-3.5 text-base font-semibold text-white transition hover:opacity-90 disabled:opacity-60 md:text-lg"
             >
-              ส่งข้อมูล
+              {loading ? "กำลังส่ง..." : "ส่งข้อมูล"}
             </button>
           </div>
         </form>
