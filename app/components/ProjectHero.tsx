@@ -30,7 +30,7 @@ export default function ProjectHero({
   return (
     <section className="relative mt-16 w-full overflow-hidden md:mt-20">
       {/* Hero image */}
-      <div className="relative h-[320px] w-full sm:h-[420px] md:h-[520px] lg:h-[620px]">
+      <div className="relative h-[380px] w-full sm:h-[480px] md:h-[580px] lg:h-[700px]">
         {heroImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -51,8 +51,8 @@ export default function ProjectHero({
         )}
 
         {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent" />
 
       </div>
     </section>

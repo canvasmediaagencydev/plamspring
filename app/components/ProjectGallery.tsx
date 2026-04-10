@@ -24,7 +24,7 @@ export default function ProjectGallery({ images, count = 8 }: ProjectGalleryProp
     <section className="mx-auto max-w-6xl px-4 py-12 md:py-20">
       {/* Main image area */}
       <div className="relative overflow-hidden rounded-2xl shadow-lg">
-        <div className="aspect-[16/9] w-full">
+        <div className="aspect-[16/10] w-full">
           {hasImages ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

@@ -16,7 +16,7 @@ const SKELETON_COUNT = 4;
 function HomeCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-3xl bg-white shadow-md">
-      <div className="aspect-[4/3] w-full animate-pulse bg-gray-200" />
+      <div className="aspect-3/4 w-full animate-pulse bg-gray-200" />
       <div className="flex items-center justify-center px-4 py-5">
         <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
       </div>
@@ -31,7 +31,7 @@ function HomeCardContent({ card }: { card: HomeTypeCard }) {
       <img
         src={card.image}
         alt={card.name}
-        className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        className="aspect-3/4 w-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
       {/* Logo area */}
       <div className="flex items-center justify-center px-4 py-5">
