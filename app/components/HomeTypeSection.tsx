@@ -34,9 +34,9 @@ function HomeCardContent({ card }: { card: HomeTypeCard }) {
         className="aspect-3/4 w-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
       {/* Logo area */}
-      <div className="flex items-center justify-center px-4 py-5">
+      <div className="flex h-20 items-center justify-center px-3 py-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={card.logo} alt={card.name} className="h-10 max-w-full object-contain" />
+        <img src={card.logo} alt={card.name} className="h-full w-full object-contain" />
       </div>
     </div>
   );

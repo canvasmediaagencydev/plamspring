@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Mail, Phone, MessageSquare, User, ChevronDown, ChevronUp } from "lucide-react";
+import { downloadExcelFile } from "@/lib/export-excel";
+import { Mail, Phone, MessageSquare, User, ChevronDown, ChevronUp, Download } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -38,6 +39,10 @@ function formatDate(iso: string): string {
   });
 }
 
+function formatFilenameDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export default function ContactSubmissionsClient({ submissions: initial }: { submissions: Submission[] }) {
   const [submissions, setSubmissions] = useState(initial);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -54,6 +59,23 @@ export default function ContactSubmissionsClient({ submissions: initial }: { sub
     setUpdating(null);
   };
 
+  const exportAllToExcel = () => {
+    downloadExcelFile({
+      rows: submissions,
+      title: "ข้อมูลติดต่อทั้งหมด",
+      filename: `contact-submissions-${formatFilenameDate()}.xls`,
+      columns: [
+        { header: "ลำดับ", getValue: (_sub, index) => index + 1 },
+        { header: "วันที่ส่งข้อมูล", getValue: (sub) => formatDate(sub.created_at) },
+        { header: "ชื่อ", getValue: (sub) => sub.name },
+        { header: "อีเมล", getValue: (sub) => sub.email },
+        { header: "เบอร์โทร", getValue: (sub) => sub.phone },
+        { header: "ข้อความ", getValue: (sub) => sub.message },
+        { header: "สถานะ", getValue: (sub) => STATUS_MAP[sub.status]?.label ?? sub.status },
+      ],
+    });
+  };
+
   if (submissions.length === 0) {
     return (
       <div className="px-6 py-12 text-center text-sm text-gray-400">
@@ -64,6 +86,15 @@ export default function ContactSubmissionsClient({ submissions: initial }: { sub
 
   return (
     <div className="px-6 py-6 space-y-3">
+      <div className="flex justify-end">
+        <button
+          onClick={exportAllToExcel}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#09418C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#07346f]"
+        >
+          <Download size={16} />
+          Export Excel ทั้งหมด
+        </button>
+      </div>
       {submissions.map((sub) => {
         const isOpen = expanded === sub.id;
         return (

@@ -6,6 +6,10 @@ import { usePathname } from "next/navigation";
 
 const FADE_MS = 350; // fade-out duration
 
+function isAdminPath(path: string | null) {
+  return path === "/admin" || path?.startsWith("/admin/");
+}
+
 /**
  * Wraps the entire app (in layout.tsx) and shows a full-screen loading overlay
  * on every internal-link navigation.
@@ -22,6 +26,7 @@ export default function TransitionProvider({
 }) {
   const pathname = usePathname();
   const prevPath = useRef(pathname);
+  const isAdmin = isAdminPath(pathname);
 
   const [phase, setPhase] = useState<"hidden" | "visible" | "fading">("hidden");
   const [progress, setProgress] = useState(0);
@@ -70,14 +75,22 @@ export default function TransitionProvider({
   useEffect(() => {
     if (pathname !== prevPath.current) {
       prevPath.current = pathname;
+      if (isAdmin) {
+        clearProgressTimers();
+        setPhase("hidden");
+        setProgress(0);
+        return;
+      }
       if (phase === "visible") hide();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, isAdmin]);
 
   // ── detect link click (navigation start) ────────────────────────────────
 
   useEffect(() => {
+    if (isAdmin) return;
+
     function handleClick(e: MouseEvent) {
       const anchor = (e.target as HTMLElement).closest("a");
       if (!anchor) return;
@@ -95,6 +108,7 @@ export default function TransitionProvider({
       // Same page — skip
       const targetPath = href.split("?")[0];
       if (targetPath === pathname) return;
+      if (isAdminPath(targetPath)) return;
 
       show();
     }
@@ -102,7 +116,7 @@ export default function TransitionProvider({
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, isAdmin]);
 
   // ── render ───────────────────────────────────────────────────────────────
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { downloadExcelFile } from "@/lib/export-excel";
 import {
   Mail,
   Phone,
@@ -13,6 +14,7 @@ import {
   Clock,
   Wallet,
   AtSign,
+  Download,
 } from "lucide-react";
 
 interface LeadSubmission {
@@ -56,6 +58,10 @@ function formatDate(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatFilenameDate(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function DetailRow({
@@ -103,6 +109,27 @@ export default function LeadSubmissionsClient({
     setUpdating(null);
   };
 
+  const exportAllToExcel = () => {
+    downloadExcelFile({
+      rows: submissions,
+      title: "ข้อมูล Lead ทั้งหมด",
+      filename: `lead-submissions-${formatFilenameDate()}.xls`,
+      columns: [
+        { header: "ลำดับ", getValue: (_sub, index) => index + 1 },
+        { header: "วันที่ส่งข้อมูล", getValue: (sub) => formatDate(sub.created_at) },
+        { header: "ชื่อ", getValue: (sub) => sub.name },
+        { header: "อีเมล", getValue: (sub) => sub.email },
+        { header: "เบอร์โทร", getValue: (sub) => sub.phone },
+        { header: "LINE ID", getValue: (sub) => sub.line_id },
+        { header: "งบประมาณ", getValue: (sub) => sub.budget },
+        { header: "รายละเอียด", getValue: (sub) => sub.detail },
+        { header: "วันนัดชม", getValue: (sub) => sub.visit_date },
+        { header: "เวลา", getValue: (sub) => sub.visit_time },
+        { header: "สถานะ", getValue: (sub) => STATUS_MAP[sub.status]?.label ?? sub.status },
+      ],
+    });
+  };
+
   if (submissions.length === 0) {
     return (
       <div className="px-6 py-12 text-center text-sm text-gray-400">
@@ -113,6 +140,15 @@ export default function LeadSubmissionsClient({
 
   return (
     <div className="px-6 py-6 space-y-3">
+      <div className="flex justify-end">
+        <button
+          onClick={exportAllToExcel}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#09418C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#07346f]"
+        >
+          <Download size={16} />
+          Export Excel ทั้งหมด
+        </button>
+      </div>
       {submissions.map((sub) => {
         const isOpen = expanded === sub.id;
         return (
