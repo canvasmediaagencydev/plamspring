@@ -32,6 +32,56 @@ interface FacilityDB {
   label?: string;
 }
 
+interface FacilityCardDB {
+  linkedHouseName: string;
+  image1: string;
+  image2: string;
+  facilities: FacilityDB[];
+}
+
+/**
+ * Reads the `project_pages.facilities` JSON. Old rows stored a flat
+ * `FacilityDB[]` plus `facility_image_1/2`; we wrap those into one unlinked
+ * card so the admin can re-link them to specific house types.
+ */
+function normalizeFacilityCards(
+  raw: unknown,
+  legacyImage1: string | null,
+  legacyImage2: string | null,
+): FacilityCardDB[] {
+  const arr = Array.isArray(raw) ? raw : [];
+  const first = arr[0];
+  const isNewShape =
+    typeof first === "object" && first !== null && "facilities" in first;
+
+  if (isNewShape) {
+    return (arr as FacilityCardDB[]).map((c) => ({
+      linkedHouseName: c.linkedHouseName ?? "",
+      image1: c.image1 ?? "",
+      image2: c.image2 ?? "",
+      facilities: (c.facilities ?? []).map((f) => ({
+        icon: f.icon,
+        name: f.name ?? f.label ?? "",
+      })),
+    }));
+  }
+
+  const hasLegacy = arr.length > 0 || legacyImage1 || legacyImage2;
+  if (!hasLegacy) return [];
+
+  return [
+    {
+      linkedHouseName: "",
+      image1: legacyImage1 ?? "",
+      image2: legacyImage2 ?? "",
+      facilities: (arr as FacilityDB[]).map((f) => ({
+        icon: f.icon,
+        name: f.name ?? f.label ?? "",
+      })),
+    },
+  ];
+}
+
 const FACILITY_OPTIONS: { key: string; label: string; Icon: LucideIcon }[] = [
   { key: "pool",      label: "สระว่ายน้ำส่วนกลาง", Icon: Waves },
   { key: "park",      label: "สวนสาธารณะ",          Icon: TreePine },
@@ -126,13 +176,14 @@ export function ProjectDetailClient({
   const [expandedHouse, setExpandedHouse] = useState<number | null>(null);
 
   // ── Facilities tab state ──
-  const [facilityImage1, setFacilityImage1] = useState(project.facility_image_1 ?? "");
-  const [facilityImage2, setFacilityImage2] = useState(project.facility_image_2 ?? "");
-  const [facilities, setFacilities] = useState<FacilityDB[]>(() => {
-    const raw = (project.facilities as unknown as FacilityDB[]) ?? [];
-    // normalize: prefer name field, fallback to label
-    return raw.map((f) => ({ icon: f.icon, name: f.name ?? f.label ?? "" }));
-  });
+  const [facilityCards, setFacilityCards] = useState<FacilityCardDB[]>(() =>
+    normalizeFacilityCards(
+      project.facilities,
+      project.facility_image_1,
+      project.facility_image_2,
+    ),
+  );
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
   // ── Location tab state ──
   const [nearbyPlaces, setNearbyPlaces] = useState<NearbyPlaceDB[]>(
@@ -200,9 +251,11 @@ export function ProjectDetailClient({
 
   const saveFacilities = () =>
     save({
-      facility_image_1: facilityImage1 || null,
-      facility_image_2: facilityImage2 || null,
-      facilities: facilities as unknown as Json,
+      // The card shape holds its own images; drop the legacy columns so they
+      // don't render stale data on the public page.
+      facility_image_1: null,
+      facility_image_2: null,
+      facilities: facilityCards as unknown as Json,
     });
 
   const saveLocation = () =>
@@ -510,109 +563,191 @@ export function ProjectDetailClient({
     </div>
   );
 
-  const toggleFacility = (key: string, defaultLabel: string) => {
-    const active = facilities.some((f) => f.icon === key);
-    if (active) {
-      setFacilities(facilities.filter((f) => f.icon !== key));
-    } else {
-      setFacilities([...facilities, { icon: key, name: defaultLabel }]);
-    }
+  // ── Facility card helpers ──
+
+  const updateCard = (i: number, patch: Partial<FacilityCardDB>) => {
+    const next = [...facilityCards];
+    next[i] = { ...next[i], ...patch };
+    setFacilityCards(next);
+  };
+
+  const toggleCardFacility = (ci: number, key: string, defaultLabel: string) => {
+    const card = facilityCards[ci];
+    const active = card.facilities.some((f) => f.icon === key);
+    updateCard(ci, {
+      facilities: active
+        ? card.facilities.filter((f) => f.icon !== key)
+        : [...card.facilities, { icon: key, name: defaultLabel }],
+    });
+  };
+
+  const updateCardFacilityName = (ci: number, key: string, name: string) => {
+    const card = facilityCards[ci];
+    updateCard(ci, {
+      facilities: card.facilities.map((f) =>
+        f.icon === key ? { ...f, name } : f,
+      ),
+    });
   };
 
   const renderFacilities = () => (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-        <div className="grid grid-cols-1 divide-y md:grid-cols-2 md:divide-x md:divide-y-0">
-
-          {/* Left — floor plan images */}
-          <div className="p-6">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">
-              แปลนบ้าน
-            </p>
-            <div className="flex gap-3">
-              {/* Image slot 1 */}
-              <div className="flex-1 space-y-1.5">
-                <p className="text-[11px] text-gray-400">รูปที่ 1</p>
-                <div className="overflow-hidden rounded-xl border border-dashed border-gray-200 bg-gray-50">
-                  <ImageUploader
-                    bucket="project-detail-images"
-                    value={facilityImage1}
-                    onChange={setFacilityImage1}
-                    onClear={() => setFacilityImage1("")}
-                    label="อัปโหลด"
-                  />
-                </div>
-              </div>
-              {/* Image slot 2 */}
-              <div className="flex-1 space-y-1.5">
-                <p className="text-[11px] text-gray-400">รูปที่ 2</p>
-                <div className="overflow-hidden rounded-xl border border-dashed border-gray-200 bg-gray-50">
-                  <ImageUploader
-                    bucket="project-detail-images"
-                    value={facilityImage2}
-                    onChange={setFacilityImage2}
-                    onClear={() => setFacilityImage2("")}
-                    label="อัปโหลด"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right — facility selector */}
-          <div className="p-6">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400">
-              สิ่งอำนวยความสะดวก
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {FACILITY_OPTIONS.map(({ key, label, Icon }) => {
-                const isActive = facilities.some((f) => f.icon === key);
-                const activeFac = facilities.find((f) => f.icon === key);
-                return (
-                  <div key={key} className="flex flex-col gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleFacility(key, label)}
-                      className={`group relative flex flex-col items-center gap-2.5 rounded-xl p-3 transition-all duration-200 ${
-                        isActive
-                          ? "bg-primary/8 ring-2 ring-primary/30 text-primary shadow-sm"
-                          : "bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                      }`}
-                    >
-                      {isActive && (
-                        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-white">
-                          <Check size={10} strokeWidth={3} />
-                        </span>
-                      )}
-                      <Icon size={26} strokeWidth={1.25} />
-                      <span className="text-center text-[10px] font-medium leading-tight">
-                        {label}
-                      </span>
-                    </button>
-                    {isActive && (
-                      <input
-                        value={activeFac?.name ?? label}
-                        onChange={(e) =>
-                          setFacilities(
-                            facilities.map((f) =>
-                              f.icon === key ? { ...f, name: e.target.value } : f
-                            )
-                          )
-                        }
-                        placeholder={label}
-                        className="w-full rounded-lg border border-primary/20 bg-primary/5 px-2 py-1 text-center text-[10px] text-primary outline-none focus:border-primary/50"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <p className="mt-3 text-[11px] text-gray-400">
-              กดการ์ดเพื่อเลือก • แก้ชื่อได้ใต้การ์ด
-            </p>
-          </div>
-        </div>
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const newIdx = facilityCards.length;
+            setFacilityCards([
+              ...facilityCards,
+              { linkedHouseName: "", image1: "", image2: "", facilities: [] },
+            ]);
+            setExpandedCard(newIdx);
+          }}
+        >
+          <Plus size={14} /> เพิ่ม Card
+        </Button>
       </div>
+
+      {facilityCards.length === 0 && (
+        <p className="text-sm text-gray-400 text-center py-8">
+          ยังไม่มี card สิ่งอำนวยความสะดวก
+        </p>
+      )}
+
+      {facilityCards.map((card, ci) => (
+        <Card key={ci}>
+          <CardHeader
+            className="cursor-pointer select-none"
+            onClick={() => setExpandedCard(expandedCard === ci ? null : ci)}
+          >
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold">
+                Card {ci + 1}
+                {card.linkedHouseName && (
+                  <span className="ml-2 text-xs font-normal text-gray-400">
+                    → {card.linkedHouseName}
+                  </span>
+                )}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFacilityCards(facilityCards.filter((_, j) => j !== ci));
+                  }}
+                  className="rounded p-1 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                >
+                  <Trash2 size={14} />
+                </button>
+                {expandedCard === ci ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
+            </div>
+          </CardHeader>
+
+          {expandedCard === ci && (
+            <CardContent className="space-y-4 pt-0">
+              {/* Linked house dropdown */}
+              <div className="space-y-1.5">
+                <Label>ลิงก์กับแบบบ้าน</Label>
+                <select
+                  value={card.linkedHouseName}
+                  onChange={(e) => updateCard(ci, { linkedHouseName: e.target.value })}
+                  className="flex h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-sm shadow-xs outline-none focus:border-primary"
+                >
+                  <option value="">— ไม่ระบุ —</option>
+                  {houses.map((h, hi) => (
+                    <option key={hi} value={h.name}>
+                      {h.name || `แบบบ้าน ${hi + 1}`}
+                    </option>
+                  ))}
+                </select>
+                {houses.length === 0 && (
+                  <p className="text-xs text-gray-400">
+                    * เพิ่มแบบบ้านก่อนในแท็บ &quot;แบบบ้าน&quot;
+                  </p>
+                )}
+              </div>
+
+              {/* Floor plan images */}
+              <div className="space-y-1.5">
+                <Label>แปลนบ้าน</Label>
+                <div className="flex gap-3">
+                  <div className="flex-1 space-y-1">
+                    <p className="text-[11px] text-gray-400">รูปที่ 1</p>
+                    <ImageUploader
+                      bucket="project-detail-images"
+                      value={card.image1}
+                      onChange={(url) => updateCard(ci, { image1: url })}
+                      onClear={() => updateCard(ci, { image1: "" })}
+                      label="อัปโหลด"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-[11px] text-gray-400">รูปที่ 2</p>
+                    <ImageUploader
+                      bucket="project-detail-images"
+                      value={card.image2}
+                      onChange={(url) => updateCard(ci, { image2: url })}
+                      onClear={() => updateCard(ci, { image2: "" })}
+                      label="อัปโหลด"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Facility icon picker */}
+              <div className="space-y-1.5">
+                <Label>สิ่งอำนวยความสะดวก</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {FACILITY_OPTIONS.map(({ key, label, Icon }) => {
+                    const isActive = card.facilities.some((f) => f.icon === key);
+                    const activeFac = card.facilities.find((f) => f.icon === key);
+                    return (
+                      <div key={key} className="flex flex-col gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => toggleCardFacility(ci, key, label)}
+                          className={`group relative flex flex-col items-center gap-2.5 rounded-xl p-3 transition-all duration-200 ${
+                            isActive
+                              ? "bg-primary/8 ring-2 ring-primary/30 text-primary shadow-sm"
+                              : "bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                          }`}
+                        >
+                          {isActive && (
+                            <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-white">
+                              <Check size={10} strokeWidth={3} />
+                            </span>
+                          )}
+                          <Icon size={26} strokeWidth={1.25} />
+                          <span className="text-center text-[10px] font-medium leading-tight">
+                            {label}
+                          </span>
+                        </button>
+                        {isActive && (
+                          <input
+                            value={activeFac?.name ?? label}
+                            onChange={(e) =>
+                              updateCardFacilityName(ci, key, e.target.value)
+                            }
+                            placeholder={label}
+                            className="w-full rounded-lg border border-primary/20 bg-primary/5 px-2 py-1 text-center text-[10px] text-primary outline-none focus:border-primary/50"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-gray-400">
+                  กดการ์ดเพื่อเลือก • แก้ชื่อได้ใต้การ์ด
+                </p>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      ))}
 
       <SaveRow saving={saving} onSave={saveFacilities} />
     </div>

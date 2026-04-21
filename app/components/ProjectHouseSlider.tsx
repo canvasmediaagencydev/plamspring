@@ -11,10 +11,22 @@ export interface HouseType {
 
 interface ProjectHouseSliderProps {
   houses: HouseType[];
+  current?: number;
+  onCurrentChange?: (next: number) => void;
 }
 
-export default function ProjectHouseSlider({ houses }: ProjectHouseSliderProps) {
-  const [current, setCurrent] = useState(0);
+export default function ProjectHouseSlider({
+  houses,
+  current: controlledCurrent,
+  onCurrentChange,
+}: ProjectHouseSliderProps) {
+  const [internalCurrent, setInternalCurrent] = useState(0);
+  const isControlled = controlledCurrent !== undefined;
+  const current = isControlled ? controlledCurrent! : internalCurrent;
+  const setCurrent = (next: number) => {
+    if (isControlled) onCurrentChange?.(next);
+    else setInternalCurrent(next);
+  };
   const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
   const total = houses.length;
 
@@ -38,8 +50,8 @@ export default function ProjectHouseSlider({ houses }: ProjectHouseSliderProps) 
 
   const house = houses[current];
 
-  const prev = () => setCurrent((c) => (c - 1 + total) % total);
-  const next = () => setCurrent((c) => (c + 1) % total);
+  const prev = () => setCurrent((current - 1 + total) % total);
+  const next = () => setCurrent((current + 1) % total);
 
   return (
     <section className="bg-gradient-to-br from-[#e8eef6] to-[#dce5f0] py-12 md:py-20">

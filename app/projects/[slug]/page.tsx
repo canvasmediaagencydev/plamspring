@@ -4,8 +4,9 @@ import Navbar from "../../components/Navbar";
 import FooterServer from "../../components/FooterServer";
 import ProjectHero from "../../components/ProjectHero";
 import ProjectInfo from "../../components/ProjectInfo";
-import ProjectHouseSlider from "../../components/ProjectHouseSlider";
-import ProjectFacilities from "../../components/ProjectFacilities";
+import ProjectHousesAndFacilities, {
+  type FacilityCard,
+} from "../../components/ProjectHousesAndFacilities";
 import ProjectGallery from "../../components/ProjectGallery";
 import ProjectLocation from "../../components/ProjectLocation";
 import ProjectMap from "../../components/ProjectMap";
@@ -13,6 +14,40 @@ import LoanCalculator from "../../components/LoanCalculator";
 import type { HouseType } from "../../components/ProjectHouseSlider";
 import type { Facility } from "../../components/ProjectFacilities";
 import type { NearbyPlace } from "../../components/ProjectLocation";
+
+/**
+ * Reads `project_pages.facilities` and normalizes to the card-per-house shape.
+ * Legacy rows stored a flat `Facility[]` with images on `facility_image_1/2`;
+ * wrap them as a single unlinked card so the public page keeps working until
+ * an admin re-saves the project.
+ */
+function normalizeFacilityCards(
+  raw: unknown,
+  legacyImage1: string | null,
+  legacyImage2: string | null,
+): FacilityCard[] {
+  const arr = Array.isArray(raw) ? raw : [];
+  const first = arr[0];
+  const isNewShape =
+    typeof first === "object" && first !== null && "facilities" in first;
+
+  if (isNewShape) return arr as FacilityCard[];
+
+  const hasLegacy = arr.length > 0 || legacyImage1 || legacyImage2;
+  if (!hasLegacy) return [];
+
+  return [
+    {
+      linkedHouseName: "",
+      image1: legacyImage1 ?? "",
+      image2: legacyImage2 ?? "",
+      facilities: (arr as Facility[]).map((f) => ({
+        icon: f.icon,
+        name: f.name ?? f.label,
+      })),
+    },
+  ];
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -57,7 +92,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   if (!project) notFound();
 
   const houseTypes = (project.house_types as unknown as HouseType[]) ?? [];
-  const facilities = (project.facilities as unknown as Facility[]) ?? [];
+  const facilityCards = normalizeFacilityCards(
+    project.facilities,
+    project.facility_image_1,
+    project.facility_image_2,
+  );
   const nearbyPlaces = (project.nearby_places as unknown as NearbyPlace[]) ?? [];
   const galleryImages = (project.gallery_images as unknown as string[]) ?? [];
 
@@ -81,12 +120,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           highlights={(project.highlights as unknown as string[]) ?? []}
           downloadUrl={project.brochure_url ?? undefined}
         />
-        <ProjectHouseSlider houses={houseTypes} />
-        <ProjectFacilities
-          facilities={facilities}
-          image1={project.facility_image_1 ?? undefined}
-          image2={project.facility_image_2 ?? undefined}
-        />
+        <ProjectHousesAndFacilities houses={houseTypes} cards={facilityCards} />
         <ProjectLocation places={nearbyPlaces} />
         <ProjectMap
           projectName={project.name}
