@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiChevronLeft, FiChevronRight, FiMaximize2, FiX } from "react-icons/fi";
 
 export interface HouseType {
   name: string;
@@ -15,7 +15,24 @@ interface ProjectHouseSliderProps {
 
 export default function ProjectHouseSlider({ houses }: ProjectHouseSliderProps) {
   const [current, setCurrent] = useState(0);
+  const [previewImage, setPreviewImage] = useState<{ url: string; alt: string } | null>(null);
   const total = houses.length;
+
+  useEffect(() => {
+    if (!previewImage) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPreviewImage(null);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [previewImage]);
 
   if (total === 0) return null;
 
@@ -33,12 +50,25 @@ export default function ProjectHouseSlider({ houses }: ProjectHouseSliderProps) 
           <div className="relative w-full md:w-1/2">
             <div className="aspect-[4/3] w-full md:aspect-auto md:h-full">
               {house.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={house.imageUrl}
-                  alt={house.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    house.imageUrl &&
+                    setPreviewImage({ url: house.imageUrl, alt: `แปลนบ้าน ${house.name}` })
+                  }
+                  className="group absolute inset-0 cursor-zoom-in overflow-hidden text-left"
+                  aria-label={`ดูแปลนบ้าน ${house.name} แบบเต็มจอ`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={house.imageUrl}
+                    alt={house.name}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  />
+                  <span className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/45 text-white opacity-0 shadow-md backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+                    <FiMaximize2 className="h-5 w-5" />
+                  </span>
+                </button>
               ) : (
                 <>
                   <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-250 to-gray-300" />
@@ -118,6 +148,37 @@ export default function ProjectHouseSlider({ houses }: ProjectHouseSliderProps) 
           </div>
         )}
       </div>
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm md:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label={previewImage.alt}
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewImage(null)}
+            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow-lg transition-colors hover:bg-white md:right-6 md:top-6"
+            aria-label="ปิดรูปแปลนบ้าน"
+          >
+            <FiX className="h-6 w-6" />
+          </button>
+
+          <div
+            className="relative flex max-h-[90vh] w-full max-w-6xl items-center justify-center"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewImage.url}
+              alt={previewImage.alt}
+              className="max-h-[90vh] w-auto max-w-full rounded-lg object-contain shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
