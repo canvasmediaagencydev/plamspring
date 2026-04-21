@@ -17,7 +17,7 @@ interface OurFamilySliderProps {
 
 function SkeletonSlide() {
   return (
-    <div className="relative h-80 w-full shrink-0 overflow-hidden bg-gray-200 md:h-[480px]">
+    <div className="relative h-[300px] w-full shrink-0 overflow-hidden bg-gray-200 md:h-[450px]">
       <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
     </div>
   );
@@ -84,7 +84,7 @@ export default function OurFamilySlider({ images = [] }: OurFamilySliderProps) {
           ? images.map((img) => (
               <div key={img.id} className="w-full shrink-0" style={{ scrollSnapAlign: "start" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.image_url} alt={img.alt_text ?? ""} className="h-80 w-full object-cover md:h-[480px]" />
+                <img src={img.image_url} alt={img.alt_text ?? ""} className="block h-[300px] w-full object-cover md:h-[720px]" />
               </div>
             ))
           : Array.from({ length: slideCount }).map((_, i) => (
