@@ -57,9 +57,9 @@ function CsrCard({ post }: { post?: CsrPost }) {
       <a href={`/blog/${post.slug}`} className="flex flex-col gap-3 group">
         {post.cover_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={post.cover_image_url} alt={post.title} className="h-44 w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-105" />
+          <img src={post.cover_image_url} alt={post.title} className="aspect-square w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-105" />
         ) : (
-          <div className="h-44 w-full rounded-xl bg-gray-200" />
+          <div className="aspect-square w-full rounded-xl bg-gray-200" />
         )}
         <h3 className="font-medium text-primary group-hover:underline">{post.title}</h3>
         {post.excerpt && <p className="text-sm leading-relaxed text-gray-500">{post.excerpt}</p>}
@@ -68,7 +68,7 @@ function CsrCard({ post }: { post?: CsrPost }) {
   }
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative h-44 w-full overflow-hidden rounded-xl bg-gray-200">
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-200">
         <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
       </div>
       <div className="space-y-2">

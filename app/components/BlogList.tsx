@@ -14,7 +14,7 @@ interface BlogListProps {
 
 function SkeletonImage() {
   return (
-    <div className="relative h-52 w-full overflow-hidden rounded-xl bg-gray-200 md:h-64">
+    <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-200">
       <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
     </div>
   );
@@ -30,7 +30,7 @@ function BlogRow({ post }: { post: BlogPost }) {
           <img
             src={post.cover_image_url}
             alt={post.title}
-            className="h-52 w-full rounded-xl object-cover md:h-64"
+            className="aspect-square w-full rounded-xl object-cover"
           />
         ) : (
           <SkeletonImage />

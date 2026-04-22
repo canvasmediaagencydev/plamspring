@@ -49,14 +49,20 @@ export default async function BlogPostPage({
 
       {/* Hero cover */}
       {post.cover_image_url && (
-        <div className="relative h-72 w-full overflow-hidden md:h-[420px]">
+        <div className="relative flex w-full items-center justify-center overflow-hidden bg-gray-50 py-10 md:pt-30 md:py-16">
+          {/* Blurred background to act as dynamic gradient padding */}
+          <div 
+            className="absolute inset-0 scale-110 bg-cover bg-center blur-3xl opacity-60" 
+            style={{ backgroundImage: `url(${post.cover_image_url})` }} 
+          />
+          
+          {/* 1:1 Image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={post.cover_image_url}
             alt={post.title}
-            className="h-full w-full object-cover"
+            className="relative z-10 aspect-square w-11/12 max-w-[360px] rounded-xl object-cover shadow-2xl md:max-w-[480px]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
       )}
 
