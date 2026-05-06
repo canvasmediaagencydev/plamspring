@@ -11,8 +11,9 @@ interface ProjectGalleryProps {
 }
 
 export default function ProjectGallery({ images, count = 8 }: ProjectGalleryProps) {
-  const hasImages = images && images.length > 0;
-  const total = hasImages ? images.length : count;
+  const imageUrls = images?.map((image) => image.trim()).filter(Boolean) ?? [];
+  const hasImages = imageUrls.length > 0;
+  const total = hasImages ? imageUrls.length : count;
   const [active, setActive] = useState(0);
 
   const prev = () => setActive((c) => (c - 1 + total) % total);
@@ -28,7 +29,7 @@ export default function ProjectGallery({ images, count = 8 }: ProjectGalleryProp
           {hasImages ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={images[active]}
+              src={imageUrls[active]}
               alt={`รูปภาพโครงการ ${active + 1}`}
               className="h-full w-full object-cover"
             />
@@ -99,10 +100,10 @@ export default function ProjectGallery({ images, count = 8 }: ProjectGalleryProp
                   : "opacity-70 hover:opacity-100"
               }`}
             >
-              {hasImages && images[thumbIndex] ? (
+              {hasImages ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={images[thumbIndex]}
+                  src={imageUrls[thumbIndex]}
                   alt={`thumbnail ${thumbIndex + 1}`}
                   className="absolute inset-0 h-full w-full object-cover"
                 />

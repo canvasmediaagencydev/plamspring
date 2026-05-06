@@ -268,7 +268,11 @@ export function ProjectDetailClient({
     });
 
   const saveGallery = () =>
-    save({ gallery_images: galleryImages as unknown as Json });
+    save({
+      gallery_images: galleryImages
+        .map((image) => image.trim())
+        .filter(Boolean) as unknown as Json,
+    });
 
   // ── House helpers ──
 
