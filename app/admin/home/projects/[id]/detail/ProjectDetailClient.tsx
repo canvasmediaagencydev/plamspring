@@ -11,10 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, Save, Waves, TreePine, Home, Shield, Camera, Dumbbell, Check, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, Save, Waves, TreePine, Home, Shield, Camera, Dumbbell, Check, GripVertical, type LucideIcon } from "lucide-react";
 import { revalidatePages } from "@/lib/revalidate";
 import type { Tables } from "@/lib/types/database.types";
 import type { Json } from "@/lib/types/database.types";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Project = Tables<"project_pages">;
 
@@ -135,6 +138,59 @@ function SaveSuccess({ msg }: { msg: string }) {
   return <p className="mt-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md">{msg}</p>;
 }
 
+// ─── Sortable gallery item ────────────────────────────────────────────────────
+
+function SortableGalleryItem({
+  id,
+  index,
+  url,
+  onChange,
+  onRemove,
+}: {
+  id: string;
+  index: number;
+  url: string;
+  onChange: (url: string) => void;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
+      className="space-y-1.5"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="cursor-grab rounded p-0.5 text-gray-400 hover:text-gray-600 active:cursor-grabbing"
+          >
+            <GripVertical size={14} />
+          </button>
+          <Label className="text-xs text-gray-500">รูปที่ {index + 1}</Label>
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="rounded p-0.5 text-gray-400 hover:text-red-500"
+        >
+          <Trash2 size={12} />
+        </button>
+      </div>
+      <ImageUploader
+        bucket="project-detail-images"
+        value={url}
+        onChange={onChange}
+        onClear={() => onChange("")}
+        label="อัปโหลด"
+      />
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ProjectDetailClient({
@@ -198,6 +254,12 @@ export function ProjectDetailClient({
   // ── Gallery tab state ──
   const [galleryImages, setGalleryImages] = useState<string[]>(
     (project.gallery_images as unknown as string[]) ?? []
+  );
+
+  // ── DnD sensors ──
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
   // ── Shared save state ──
@@ -912,58 +974,60 @@ export function ProjectDetailClient({
     </div>
   );
 
-  const renderGallery = () => (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setGalleryImages([...galleryImages, ""])}
-        >
-          <Plus size={14} /> เพิ่มรูป
-        </Button>
-      </div>
+  const renderGallery = () => {
+    const sortableIds = galleryImages.map((_, i) => String(i));
 
-      {galleryImages.length === 0 && (
-        <p className="text-sm text-gray-400 text-center py-8">ยังไม่มีรูปแกลเลอรี่</p>
-      )}
+    const handleDragEnd = (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        const oldIndex = parseInt(String(active.id));
+        const newIndex = parseInt(String(over.id));
+        setGalleryImages(arrayMove(galleryImages, oldIndex, newIndex));
+      }
+    };
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {galleryImages.map((url, i) => (
-          <div key={i} className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs text-gray-500">รูปที่ {i + 1}</Label>
-              <button
-                type="button"
-                onClick={() => setGalleryImages(galleryImages.filter((_, j) => j !== i))}
-                className="rounded p-0.5 text-gray-400 hover:text-red-500"
-              >
-                <Trash2 size={12} />
-              </button>
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setGalleryImages([...galleryImages, ""])}
+          >
+            <Plus size={14} /> เพิ่มรูป
+          </Button>
+        </div>
+
+        {galleryImages.length === 0 && (
+          <p className="text-sm text-gray-400 text-center py-8">ยังไม่มีรูปแกลเลอรี่</p>
+        )}
+
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {galleryImages.map((url, i) => (
+                <SortableGalleryItem
+                  key={String(i)}
+                  id={String(i)}
+                  index={i}
+                  url={url}
+                  onChange={(newUrl) => {
+                    const next = [...galleryImages];
+                    next[i] = newUrl;
+                    setGalleryImages(next);
+                  }}
+                  onRemove={() => setGalleryImages(galleryImages.filter((_, j) => j !== i))}
+                />
+              ))}
             </div>
-            <ImageUploader
-              bucket="project-detail-images"
-              value={url}
-              onChange={(newUrl) => {
-                const next = [...galleryImages];
-                next[i] = newUrl;
-                setGalleryImages(next);
-              }}
-              onClear={() => {
-                const next = [...galleryImages];
-                next[i] = "";
-                setGalleryImages(next);
-              }}
-              label="อัปโหลด"
-            />
-          </div>
-        ))}
-      </div>
+          </SortableContext>
+        </DndContext>
 
-      <SaveRow saving={saving} onSave={saveGallery} />
-    </div>
-  );
+        <SaveRow saving={saving} onSave={saveGallery} />
+      </div>
+    );
+  };
 
   const tabContent: Record<TabId, () => React.ReactNode> = {
     hero: renderHero,

@@ -15,8 +15,8 @@ const SKELETON_COUNT = 4;
 
 function HomeCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-3xl bg-white shadow-md">
-      <div className="aspect-3/4 w-full animate-pulse bg-gray-200" />
+    <div className="flex w-full flex-col overflow-hidden rounded-3xl bg-white shadow-md">
+      <div className="aspect-square w-full animate-pulse bg-gray-200" />
       <div className="flex items-center justify-center px-4 py-5">
         <div className="h-8 w-3/4 animate-pulse rounded bg-gray-200" />
       </div>
@@ -26,12 +26,12 @@ function HomeCardSkeleton() {
 
 function HomeCardContent({ card }: { card: HomeTypeCard }) {
   return (
-    <div className="group flex cursor-pointer flex-col overflow-hidden rounded-3xl bg-white shadow-md transition-shadow duration-300 hover:shadow-xl">
+    <div className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-3xl bg-white shadow-md transition-shadow duration-300 hover:shadow-xl">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={card.image}
         alt={card.name}
-        className="aspect-3/4 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        className="aspect-square w-full scale-102 object-cover transition-transform duration-300 group-hover:scale-110"
       />
       {/* Logo area */}
       <div className="flex h-20 items-center justify-center px-3 py-4">
@@ -79,7 +79,7 @@ export default function HomeTypeSection({ projects = [] }: HomeTypeSectionProps)
   const displayItems = homeTypes.length > 0 ? homeTypes : Array(SKELETON_COUNT).fill(undefined);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 md:py-16 md:pb-30">
+    <section className="mx-auto max-w-7xl px-4 py-10 md:py-16 md:pb-30">
       {/* Section header */}
       <div className="mb-8 flex items-center justify-between md:mb-10">
         <div>
