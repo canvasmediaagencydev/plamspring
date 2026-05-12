@@ -228,7 +228,7 @@ export default function LandSection() {
             className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-500 file:mr-4 file:rounded-md file:border file:border-gray-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700"
           />
           <p className="mt-1.5 text-xs text-gray-400">
-            กรุณาอัพโหลดไฟล์ รูปภาพที่ดิน, แผนที่, โฉนด ขนาดไฟล์ละไม่เกิน 3 MB (ไฟล์ประเภท jpg, jpeg, png, pdf, zip, rar)
+            กรุณาอัพโหลดไฟล์ รูปภาพที่ดิน, แผนที่, โฉนด ขนาดไฟล์ละไม่เกิน 50 MB (ไฟล์ประเภท jpg, jpeg, png, pdf, zip, rar)
           </p>
         </div>
 

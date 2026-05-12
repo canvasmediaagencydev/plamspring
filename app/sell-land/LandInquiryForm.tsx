@@ -320,7 +320,7 @@ export default function LandInquiryForm() {
 
         {/* PDF Upload */}
         <div className="space-y-1.5">
-          <Label>เอกสารประกอบ <span className="text-gray-400 font-normal">(PDF ไม่เกิน 10 MB)</span></Label>
+          <Label>เอกสารประกอบ <span className="text-gray-400 font-normal">(PDF ไม่เกิน 50 MB)</span></Label>
           {pdfUrl && pdfName ? (
             <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
               <FileText size={18} className="shrink-0 text-red-500" />

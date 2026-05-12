@@ -41,8 +41,8 @@ export function ImageUploader({
       setError("กรุณาเลือกไฟล์รูปภาพ");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError("ขนาดไฟล์ต้องไม่เกิน 10 MB");
+    if (file.size > 50 * 1024 * 1024) {
+      setError("ขนาดไฟล์ต้องไม่เกิน 50 MB");
       return;
     }
 
@@ -127,7 +127,7 @@ export function ImageUploader({
                 <span className="font-medium text-[#09418C]">{label}</span>{" "}
                 หรือลากไฟล์มาวางที่นี่
               </p>
-              <p className="text-xs text-gray-400">PNG, JPG, WEBP สูงสุด 10 MB</p>
+              <p className="text-xs text-gray-400">PNG, JPG, WEBP สูงสุด 50 MB</p>
             </>
           )}
         </div>
