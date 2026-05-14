@@ -178,7 +178,7 @@ export default function Footer({ settings }: FooterProps) {
           {s.hours && <p className="text-sm text-white/80">{s.hours}</p>}
 
           <a
-            href="/contact"
+            href="/contact/form"
             className="flex w-fit items-center gap-3 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition hover:opacity-90"
           >
             ติดต่อเรา
