@@ -10,9 +10,26 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Flag } from "lucide-react";
+import { Plus, Pencil, Trash2, Flag, GripVertical } from "lucide-react";
 import { revalidatePages, REVALIDATE_PATHS } from "@/lib/revalidate";
 import type { Tables } from "@/lib/types/database.types";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Milestone = Tables<"milestones">;
 
@@ -21,10 +38,68 @@ interface FormState {
   title: string;
   description: string;
   image_url: string;
-  sort_order: number;
 }
 
-const EMPTY: FormState = { year: "", title: "", description: "", image_url: "", sort_order: 0 };
+const EMPTY: FormState = { year: "", title: "", description: "", image_url: "" };
+
+function SortableMilestoneRow({
+  milestone,
+  onEdit,
+  onDelete,
+}: {
+  milestone: Milestone;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: milestone.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+      }}
+      className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/70"
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="ลากเพื่อจัดลำดับ"
+        className="-ml-1 flex h-8 w-6 cursor-grab items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing"
+      >
+        <GripVertical size={18} />
+      </button>
+      <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-[#09418C]/8">
+        <span className="text-sm font-bold text-[#09418C]">{milestone.year}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-gray-900">{milestone.title}</p>
+        {milestone.description && (
+          <p className="truncate text-xs text-gray-500">{milestone.description}</p>
+        )}
+      </div>
+      <div className="flex items-center">
+        <button
+          onClick={onEdit}
+          className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+        >
+          <Pencil size={15} />
+        </button>
+        <button
+          onClick={onDelete}
+          className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+        >
+          <Trash2 size={15} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminMilestonesPage() {
   const supabase = createClient();
@@ -45,19 +120,21 @@ export default function AdminMilestonesPage() {
   const openNew = () => { setForm(EMPTY); setModal({ mode: "new" }); };
   const openEdit = (item: Milestone) => {
     setForm({ year: item.year, title: item.title, description: item.description ?? "",
-      image_url: item.image_url ?? "", sort_order: item.sort_order ?? 0 });
+      image_url: item.image_url ?? "" });
     setModal({ mode: "edit", item });
   };
 
   const handleSave = async () => {
     if (!form.year.trim() || !form.title.trim()) return;
     setSaving(true);
-    const payload = { year: form.year, title: form.title, description: form.description || null,
-      image_url: form.image_url || null, sort_order: form.sort_order };
     if (modal?.mode === "new") {
+      const payload = { year: form.year, title: form.title, description: form.description || null,
+        image_url: form.image_url || null, sort_order: milestones.length };
       const { data } = await supabase.from("milestones").insert(payload).select().single();
       if (data) setMilestones((prev) => [...prev, data]);
     } else {
+      const payload = { year: form.year, title: form.title, description: form.description || null,
+        image_url: form.image_url || null };
       await supabase.from("milestones").update(payload).eq("id", modal!.item!.id);
       setMilestones((prev) => prev.map((m) => m.id === modal!.item!.id ? { ...m, ...payload } : m));
     }
@@ -70,6 +147,33 @@ export default function AdminMilestonesPage() {
     if (!confirm("ต้องการลบ Milestone นี้?")) return;
     await supabase.from("milestones").delete().eq("id", id);
     setMilestones((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = milestones.findIndex((m) => m.id === active.id);
+    const newIndex = milestones.findIndex((m) => m.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(milestones, oldIndex, newIndex).map((m, i) => ({
+      ...m,
+      sort_order: i,
+    }));
+    setMilestones(reordered);
+
+    await Promise.all(
+      reordered.map((m) =>
+        supabase.from("milestones").update({ sort_order: m.sort_order }).eq("id", m.id),
+      ),
+    );
+    await revalidatePages([...REVALIDATE_PATHS.about]);
   };
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((prev) => ({ ...prev, [k]: v }));
@@ -93,44 +197,29 @@ export default function AdminMilestonesPage() {
         </CardContent></Card>
       ) : (
         <Card><CardContent className="p-0">
-          <div className="divide-y divide-gray-100">
-            {milestones.map((m) => (
-              <div key={m.id} className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/70">
-                <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-[#09418C]/8">
-                  <span className="text-sm font-bold text-[#09418C]">{m.year}</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-gray-900">{m.title}</p>
-                  {m.description && <p className="truncate text-xs text-gray-500">{m.description}</p>}
-                </div>
-                <div className="flex items-center">
-                  <button onClick={() => openEdit(m)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <Pencil size={15} />
-                  </button>
-                  <button onClick={() => handleDelete(m.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={milestones.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+              <div className="divide-y divide-gray-100">
+                {milestones.map((m) => (
+                  <SortableMilestoneRow
+                    key={m.id}
+                    milestone={m}
+                    onEdit={() => openEdit(m)}
+                    onDelete={() => handleDelete(m.id)}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         </CardContent></Card>
       )}
 
       <Dialog open={!!modal} onClose={() => setModal(null)}
         title={modal?.mode === "new" ? "เพิ่ม Milestone" : "แก้ไข Milestone"}>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>ปี <span className="text-red-500">*</span></Label>
-              <Input value={form.year} onChange={(e) => set("year", e.target.value)} placeholder="2024" />
-            </div>
-            <div className="space-y-1.5">
-              <Label>ลำดับการแสดง</Label>
-              <Input type="number" value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} />
-            </div>
+          <div className="space-y-1.5">
+            <Label>ปี <span className="text-red-500">*</span></Label>
+            <Input value={form.year} onChange={(e) => set("year", e.target.value)} placeholder="2024" />
           </div>
           <div className="space-y-1.5">
             <Label>หัวข้อ <span className="text-red-500">*</span></Label>

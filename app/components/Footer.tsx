@@ -85,7 +85,7 @@ export default function Footer({ settings }: FooterProps) {
 
         {/* CTA Button */}
         <a
-          href="/contact"
+          href="/contact/form"
           className="mt-5 flex items-center gap-3 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg ring-2 ring-white/30 transition hover:opacity-90"
         >
           ติดต่อเรา
