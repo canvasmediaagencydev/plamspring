@@ -8,6 +8,7 @@ import TransitionProvider from "./components/TransitionProvider";
 import { createClient } from "@/lib/supabase/server";
 
 const GTM_ID = "GTM-NQBJT65K";
+const GA_ID = "G-KCQ9ZW5JLT";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -51,6 +52,17 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','${GTM_ID}');`}
+        </Script>
+        <Script
+          id="ga-loader"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}');`}
         </Script>
       </head>
       <body className={`${montserrat.variable} antialiased`}>
