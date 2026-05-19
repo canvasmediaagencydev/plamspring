@@ -17,6 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://palmspringscm.com"),
   title: "Palm Springs",
   description: "Palm Springs — เลือกปาล์มสปริงส์ เพื่อชีวิตที่ดีกว่า",
 };
