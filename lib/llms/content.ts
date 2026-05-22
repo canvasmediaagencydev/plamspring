@@ -66,6 +66,16 @@ export function buildLlmsFull(
         "**Highlights:**\n" + p.highlights.map((h) => `- ${h}`).join("\n"),
       );
     }
+    if (p.houseTypes.length > 0) {
+      parts.push(
+        "**House types / แบบบ้าน:**\n" + p.houseTypes.map((h) => `- ${h}`).join("\n"),
+      );
+    }
+    if (p.nearbyPlaces.length > 0) {
+      parts.push(
+        "**Nearby / สถานที่ใกล้เคียง:**\n" + p.nearbyPlaces.map((n) => `- ${n}`).join("\n"),
+      );
+    }
     return parts.join("\n\n");
   });
 

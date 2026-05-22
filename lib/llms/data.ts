@@ -9,6 +9,8 @@ export interface LlmsProject {
   description: string | null;
   slug: string;
   highlights: string[];
+  houseTypes: string[];
+  nearbyPlaces: string[];
 }
 
 export interface LlmsPost {
@@ -24,7 +26,7 @@ export async function getProjects(): Promise<LlmsProject[]> {
   const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("project_pages")
-    .select("name, subtitle, description, slug, highlights")
+    .select("name, subtitle, description, slug, highlights, house_types, nearby_places")
     .eq("is_published", true)
     .not("slug", "is", null);
 
@@ -36,6 +38,23 @@ export async function getProjects(): Promise<LlmsProject[]> {
     description: p.description ?? null,
     slug: p.slug as string,
     highlights: Array.isArray(p.highlights) ? (p.highlights as string[]) : [],
+    houseTypes: Array.isArray(p.house_types)
+      ? (p.house_types as Array<{ name?: string }>)
+          .map((h) => h?.name)
+          .filter((n): n is string => !!n)
+      : [],
+    nearbyPlaces: Array.isArray(p.nearby_places)
+      ? (p.nearby_places as Array<{ name?: string; distance?: number | string; unit?: string }>)
+          .map((pl) => {
+            if (!pl?.name) return "";
+            const dist =
+              pl.distance != null
+                ? ` — ${pl.distance}${pl.unit ? ` ${pl.unit}` : ""}`
+                : "";
+            return `${pl.name}${dist}`;
+          })
+          .filter((s) => s.length > 0)
+      : [],
   }));
 }
 
