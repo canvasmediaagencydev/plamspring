@@ -10,6 +10,12 @@ function firstLine(text: string | null): string {
   return text.split("\n").map((l) => l.trim()).find((l) => l.length > 0) ?? "";
 }
 
+/** Collapse newlines/whitespace and escape "]" so a value is safe inside a
+ *  single Markdown line (link text, list item, or "## heading"). */
+function inline(text: string): string {
+  return text.replace(/\s+/g, " ").trim().replace(/]/g, "\\]");
+}
+
 function header(): string {
   return `# ${SITE_NAME}\n\n> ${SITE_SUMMARY}\n`;
 }
@@ -20,6 +26,12 @@ function section(heading: string, lines: string[]): string {
   return `\n## ${heading}\n\n${lines.join("\n")}\n`;
 }
 
+/** Render a single index-list line for a blog/CSR post. */
+function postLine(p: LlmsPost): string {
+  const suffix = p.excerpt ? `: ${inline(p.excerpt)}` : "";
+  return `- [${inline(p.title)}](${SITE_URL}/blog/${p.slug})${suffix}`;
+}
+
 export function buildLlmsIndex(
   projects: LlmsProject[],
   posts: LlmsPost[],
@@ -28,21 +40,15 @@ export function buildLlmsIndex(
   const csr = posts.filter((p) => p.type === "csr");
 
   const mainLines = STATIC_PAGES.map(
-    (p) => `- [${p.description}](${SITE_URL}${p.path})`,
+    (p) => `- [${inline(p.description)}](${SITE_URL}${p.path})`,
   );
   const projectLines = projects.map((p) => {
     const desc = p.subtitle?.trim() || firstLine(p.description);
-    const suffix = desc ? `: ${desc}` : "";
-    return `- [${p.name}](${SITE_URL}/projects/${p.slug})${suffix}`;
+    const suffix = desc ? `: ${inline(desc)}` : "";
+    return `- [${inline(p.name)}](${SITE_URL}/projects/${p.slug})${suffix}`;
   });
-  const blogLines = blog.map((p) => {
-    const suffix = p.excerpt ? `: ${p.excerpt.trim()}` : "";
-    return `- [${p.title}](${SITE_URL}/blog/${p.slug})${suffix}`;
-  });
-  const csrLines = csr.map((p) => {
-    const suffix = p.excerpt ? `: ${p.excerpt.trim()}` : "";
-    return `- [${p.title}](${SITE_URL}/blog/${p.slug})${suffix}`;
-  });
+  const blogLines = blog.map(postLine);
+  const csrLines = csr.map(postLine);
 
   return (
     header() +
@@ -58,8 +64,8 @@ export function buildLlmsFull(
   posts: LlmsPost[],
 ): string {
   const projectBlocks = projects.map((p) => {
-    const parts = [`## ${p.name}`, `URL: ${SITE_URL}/projects/${p.slug}`];
-    if (p.subtitle?.trim()) parts.push(`_${p.subtitle.trim()}_`);
+    const parts = [`## ${inline(p.name)}`, `URL: ${SITE_URL}/projects/${p.slug}`];
+    if (p.subtitle?.trim()) parts.push(`_${inline(p.subtitle.trim())}_`);
     if (p.description?.trim()) parts.push(p.description.trim());
     if (p.highlights.length > 0) {
       parts.push(
@@ -80,7 +86,7 @@ export function buildLlmsFull(
   });
 
   const postBlocks = posts.map((p) => {
-    const parts = [`## ${p.title}`, `URL: ${SITE_URL}/blog/${p.slug}`];
+    const parts = [`## ${inline(p.title)}`, `URL: ${SITE_URL}/blog/${p.slug}`];
     if (p.publishedAt) parts.push(`Published: ${p.publishedAt}`);
     if (p.excerpt?.trim()) parts.push(p.excerpt.trim());
     const body = htmlToMarkdown(p.content);

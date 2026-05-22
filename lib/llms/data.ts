@@ -30,14 +30,20 @@ export async function getProjects(): Promise<LlmsProject[]> {
     .eq("is_published", true)
     .not("slug", "is", null);
 
-  if (error || !data) return [];
+  if (error) {
+    console.error("[llms/data] getProjects error:", error.message);
+    return [];
+  }
+  if (!data) return [];
 
   return data.map((p) => ({
     name: p.name,
     subtitle: p.subtitle ?? null,
     description: p.description ?? null,
     slug: p.slug as string,
-    highlights: Array.isArray(p.highlights) ? (p.highlights as string[]) : [],
+    highlights: Array.isArray(p.highlights)
+      ? (p.highlights as unknown[]).filter((h): h is string => typeof h === "string")
+      : [],
     houseTypes: Array.isArray(p.house_types)
       ? (p.house_types as Array<{ name?: string }>)
           .map((h) => h?.name)
@@ -66,7 +72,11 @@ export async function getPosts(): Promise<LlmsPost[]> {
     .eq("is_published", true)
     .not("slug", "is", null);
 
-  if (error || !data) return [];
+  if (error) {
+    console.error("[llms/data] getPosts error:", error.message);
+    return [];
+  }
+  if (!data) return [];
 
   return data.map((p) => ({
     title: p.title,
