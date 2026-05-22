@@ -113,16 +113,16 @@ Same H1 + summary header, then the complete content of every entry:
 
 ## Testing
 
-The project has **no test runner** today. Choose at spec review:
+The project has **no test runner** today; no new test tooling will be added. Verify
+manually: run `next dev`, then `curl http://localhost:3000/llms.txt` and
+`curl http://localhost:3000/llms-full.txt`. Confirm against the llmstxt.org spec:
 
-- **(a)** Add `vitest` and unit-test the pure functions: `htmlToMarkdown` (HTML →
-  expected Markdown), `buildLlmsIndex` and `buildLlmsFull` (sample data → expected
-  structure: H1 present, blockquote present, sections in order, links well-formed).
-- **(b)** No new tooling — run `next dev`, `curl http://localhost:3000/llms.txt` and
-  `/llms-full.txt`, validate output against the llmstxt.org spec by inspection.
-
-Recommendation: **(a)** — the builders are pure and the project's CLAUDE.md asks for
-thorough testing; vitest is the lightest fit for a Next.js + TS project.
+- `/llms.txt`: starts with a single `# ` H1, followed by a `> ` blockquote summary,
+  then `##` sections in order (Main Pages, Projects, Blog & News, CSR); every entry is a
+  well-formed Markdown link; published projects/posts appear, unpublished do not.
+- `/llms-full.txt`: same header; each project and post present with full body; blog HTML
+  rendered as readable Markdown (headings, lists, links preserved, no raw tags).
+- Both return `Content-Type: text/plain; charset=utf-8`.
 
 ## Out of scope
 
