@@ -8,6 +8,72 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, Trash2, GripVertical } from "lucide-react";
 import { revalidatePages } from "@/lib/revalidate";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+function SortableHeroRow({
+  id,
+  url,
+  index,
+  onRemove,
+}: {
+  id: string;
+  url: string;
+  index: number;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+      }}
+      className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2"
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="ลากเพื่อจัดลำดับ"
+        className="flex h-8 w-6 shrink-0 cursor-grab items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing"
+      >
+        <GripVertical size={16} />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={`Hero ${index + 1}`}
+        className="h-16 w-28 shrink-0 rounded object-cover"
+      />
+      <span className="flex-1 truncate text-xs text-gray-500">{url}</span>
+      <button
+        onClick={onRemove}
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full hover:bg-red-50"
+      >
+        <Trash2 size={14} className="text-red-500" />
+      </button>
+    </div>
+  );
+}
 
 export default function AdminHeroPage() {
   const supabase = createClient();
@@ -45,6 +111,23 @@ export default function AdminHeroPage() {
     }
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  // Build stable DnD ids — pair URL with its current index to disambiguate duplicates.
+  const items = images.map((url, i) => ({ id: `${i}-${url}`, url }));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = items.findIndex((it) => it.id === active.id);
+    const newIndex = items.findIndex((it) => it.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    setImages((prev) => arrayMove(prev, oldIndex, newIndex));
+  };
+
   return (
     <div>
       <AdminHeader
@@ -66,31 +149,31 @@ export default function AdminHeroPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Image list */}
             {images.length > 0 && (
-              <div className="space-y-3">
-                {images.map((url, i) => (
-                  <div key={i} className="flex items-center gap-3 rounded-lg border border-gray-200 p-2">
-                    <GripVertical size={16} className="shrink-0 text-gray-400" />
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt={`Hero ${i + 1}`}
-                      className="h-16 w-28 rounded object-cover shrink-0"
-                    />
-                    <span className="flex-1 truncate text-xs text-gray-500">{url}</span>
-                    <button
-                      onClick={() => removeImage(i)}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full hover:bg-red-50"
-                    >
-                      <Trash2 size={14} className="text-red-500" />
-                    </button>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={items.map((it) => it.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-3">
+                    {items.map((it, i) => (
+                      <SortableHeroRow
+                        key={it.id}
+                        id={it.id}
+                        url={it.url}
+                        index={i}
+                        onRemove={() => removeImage(i)}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             )}
 
-            {/* Upload new */}
             <ImageUploader
               bucket="hero-images"
               onChange={addImage}
@@ -98,7 +181,7 @@ export default function AdminHeroPage() {
             />
 
             <p className="text-xs text-gray-400">
-              แนะนำขนาดรูป: 1920×570px • รองรับหลายรูป (auto slideshow)
+              แนะนำขนาดรูป: 1920×570px • รองรับหลายรูป (auto slideshow) • ลากเพื่อจัดลำดับ
             </p>
           </CardContent>
         </Card>
