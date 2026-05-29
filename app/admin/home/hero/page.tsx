@@ -75,42 +75,23 @@ function SortableHeroRow({
   );
 }
 
-export default function AdminHeroPage() {
-  const supabase = createClient();
-  const [images, setImages] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "hero_images")
-      .single()
-      .then(({ data }) => {
-        if (Array.isArray(data?.value)) setImages(data.value as string[]);
-      });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const addImage = (url: string) => setImages((prev) => [...prev, url]);
-
-  const removeImage = (index: number) =>
-    setImages((prev) => prev.filter((_, i) => i !== index));
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await supabase
-        .from("site_settings")
-        .upsert({ key: "hero_images", value: toJson(images) });
-      await revalidatePages(["/"]);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } finally {
-      setSaving(false);
-    }
-  };
-
+/**
+ * One managed, reorderable list of hero images with its own uploader.
+ * Reused for the desktop and mobile image sets.
+ */
+function HeroImageList({
+  title,
+  images,
+  setImages,
+  uploaderLabel,
+  note,
+}: {
+  title: string;
+  images: string[];
+  setImages: React.Dispatch<React.SetStateAction<string[]>>;
+  uploaderLabel: string;
+  note: string;
+}) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -119,6 +100,9 @@ export default function AdminHeroPage() {
   // Build stable DnD ids — pair URL with its current index to disambiguate duplicates.
   const items = images.map((url, i) => ({ id: `${i}-${url}`, url }));
 
+  const removeImage = (index: number) =>
+    setImages((prev) => prev.filter((_, i) => i !== index));
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -126,6 +110,81 @@ export default function AdminHeroPage() {
     const newIndex = items.findIndex((it) => it.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
     setImages((prev) => arrayMove(prev, oldIndex, newIndex));
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">
+          {title} ({images.length} รูป)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {images.length > 0 && (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={items.map((it) => it.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-3">
+                {items.map((it, i) => (
+                  <SortableHeroRow
+                    key={it.id}
+                    id={it.id}
+                    url={it.url}
+                    index={i}
+                    onRemove={() => removeImage(i)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+
+        <ImageUploader
+          bucket="hero-images"
+          onChange={(url) => setImages((prev) => [...prev, url])}
+          label={uploaderLabel}
+        />
+
+        <p className="text-xs text-gray-400">{note}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function AdminHeroPage() {
+  const supabase = createClient();
+  const [images, setImages] = useState<string[]>([]);
+  const [mobileImages, setMobileImages] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["hero_images", "hero_images_mobile"])
+      .then(({ data }) => {
+        const read = (key: string) => {
+          const value = data?.find((row) => row.key === key)?.value;
+          return Array.isArray(value) ? (value as string[]) : [];
+        };
+        setImages(read("hero_images"));
+        setMobileImages(read("hero_images_mobile"));
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await supabase.from("site_settings").upsert([
+        { key: "hero_images", value: toJson(images) },
+        { key: "hero_images_mobile", value: toJson(mobileImages) },
+      ]);
+      await revalidatePages(["/"]);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -141,50 +200,22 @@ export default function AdminHeroPage() {
         }
       />
 
-      <div className="max-w-2xl space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              รูปภาพ Slideshow ({images.length} รูป)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {images.length > 0 && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={items.map((it) => it.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-3">
-                    {items.map((it, i) => (
-                      <SortableHeroRow
-                        key={it.id}
-                        id={it.id}
-                        url={it.url}
-                        index={i}
-                        onRemove={() => removeImage(i)}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
+      <div className="max-w-2xl space-y-6">
+        <HeroImageList
+          title="รูป Desktop"
+          images={images}
+          setImages={setImages}
+          uploaderLabel="เพิ่มรูป Hero (Desktop)"
+          note="แนะนำขนาดรูป: 1920×570px (อัตราส่วน 1920:570) • ไฟล์ JPG/PNG ไม่เกิน 50MB • รองรับหลายรูป (auto slideshow) • ลากเพื่อจัดลำดับ"
+        />
 
-            <ImageUploader
-              bucket="hero-images"
-              onChange={addImage}
-              label="เพิ่มรูป Hero"
-            />
-
-            <p className="text-xs text-gray-400">
-              แนะนำขนาดรูป: 1920×570px • รองรับหลายรูป (auto slideshow) • ลากเพื่อจัดลำดับ
-            </p>
-          </CardContent>
-        </Card>
+        <HeroImageList
+          title="รูป Mobile"
+          images={mobileImages}
+          setImages={setMobileImages}
+          uploaderLabel="เพิ่มรูป Hero (Mobile)"
+          note="แนะนำขนาดรูป: 1080×810px (อัตราส่วน 4:3) • ไฟล์ JPG/PNG ไม่เกิน 50MB • ถ้าไม่ใส่รูป Mobile ระบบจะใช้รูป Desktop แทนโดยอัตโนมัติ • ลากเพื่อจัดลำดับ"
+        />
       </div>
     </div>
   );

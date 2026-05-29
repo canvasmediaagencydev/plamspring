@@ -2,21 +2,25 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import PalmTreeIcon from "./PalmTreeIcon";
 
 const AUTO_SLIDE_INTERVAL = 5000;
 const FALLBACK_IMAGE = "/img/Home/Hero.svg";
 
 interface HeroSectionProps {
+  /** Desktop hero images (wide banner, 1920×570). */
   images?: string[];
+  /** Mobile hero images (4:3, 1080×810). Falls back to desktop images when empty. */
+  mobileImages?: string[];
 }
 
-export default function HeroSection({ images = [] }: HeroSectionProps) {
-  const slides = images.length > 0 ? images : [FALLBACK_IMAGE];
+/**
+ * Self-contained fading slideshow. Owns its own active-slide state and
+ * auto-rotation so multiple instances (desktop / mobile) run independently.
+ */
+function Slideshow({ slides, aspectClassName }: { slides: string[]; aspectClassName: string }) {
   const count = slides.length;
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Auto-slide
   useEffect(() => {
     if (count <= 1) return;
     const id = setInterval(() => setActiveSlide((prev) => (prev + 1) % count), AUTO_SLIDE_INTERVAL);
@@ -24,7 +28,7 @@ export default function HeroSection({ images = [] }: HeroSectionProps) {
   }, [count]);
 
   return (
-    <section className="relative mt-16 h-[280px] w-full overflow-hidden sm:h-[380px] md:mt-20 md:h-[480px] lg:h-[570px]">
+    <section className={`relative mt-16 w-full overflow-hidden md:mt-20 ${aspectClassName}`}>
       {/* Slides */}
       {slides.map((src, i) => (
         <div
@@ -42,12 +46,6 @@ export default function HeroSection({ images = [] }: HeroSectionProps) {
         </div>
       ))}
 
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-l from-white/50 via-white/10 to-transparent" />
-
-      {/* Branding overlay */}
-     
-
       {/* Dots — only show if more than 1 slide */}
       {count > 1 && (
         <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2">
@@ -64,5 +62,25 @@ export default function HeroSection({ images = [] }: HeroSectionProps) {
         </div>
       )}
     </section>
+  );
+}
+
+export default function HeroSection({ images = [], mobileImages = [] }: HeroSectionProps) {
+  const desktopSlides = images.length > 0 ? images : [FALLBACK_IMAGE];
+  // Mobile falls back to the desktop images when no mobile-specific images are set.
+  const mobileSlides = mobileImages.length > 0 ? mobileImages : desktopSlides;
+
+  return (
+    <>
+      {/* Mobile — 4:3 (1080×810) */}
+      <div className="md:hidden">
+        <Slideshow slides={mobileSlides} aspectClassName="aspect-4/3" />
+      </div>
+
+      {/* Desktop — wide banner (1920×570) */}
+      <div className="hidden md:block">
+        <Slideshow slides={desktopSlides} aspectClassName="aspect-1920/570 max-h-142.5" />
+      </div>
+    </>
   );
 }
