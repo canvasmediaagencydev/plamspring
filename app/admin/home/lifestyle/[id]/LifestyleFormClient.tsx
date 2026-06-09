@@ -1,8 +1,8 @@
 "use client";
 
 import { LifestyleForm } from "../LifestyleForm";
-import type { Tables } from "@/lib/types/database.types";
+import type { LifestyleSlide } from "@/lib/types";
 
-export function LifestyleFormClient({ initial }: { initial: Tables<"lifestyle_slides"> }) {
+export function LifestyleFormClient({ initial }: { initial: LifestyleSlide }) {
   return <LifestyleForm mode="edit" initial={initial} />;
 }

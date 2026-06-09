@@ -1,7 +1,8 @@
 import Navbar from "../components/Navbar";
 import FooterServer from "../components/FooterServer";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { ProjectPage } from "@/lib/models";
 
 export const metadata = {
   title: "โครงการของเรา | Palm Springs",
@@ -9,14 +10,15 @@ export const metadata = {
 };
 
 export default async function ProjectsPage() {
-  const supabase = await createClient();
-  const { data: projects } = await supabase
-    .from("project_pages")
-    .select("id, name, subtitle, hero_image_url, slug")
-    .eq("is_published", true)
-    .order("sort_order");
+  await connectDB();
+  const raw = await ProjectPage.find({ is_published: true })
+    .select("_id name subtitle hero_image_url slug")
+    .sort({ sort_order: 1 })
+    .lean();
 
-  const list = projects ?? [];
+  const projects = JSON.parse(JSON.stringify(raw)).map((p: Record<string, unknown>) => ({ ...p, id: p._id }));
+
+  const list = projects;
   const featured = list[0];
   const rest = list.slice(1);
 
@@ -74,7 +76,7 @@ export default async function ProjectsPage() {
             <>
               {/* Mobile grid (2 cols, all projects) */}
               <div className="grid grid-cols-2 gap-3 md:hidden">
-                {list.map((project) => (
+                {list.map((project: { id: string; name: string; hero_image_url?: string; subtitle?: string; slug?: string }) => (
                   <Link
                     key={project.id}
                     href={project.slug ? `/projects/${project.slug}` : "#"}
@@ -149,7 +151,7 @@ export default async function ProjectsPage() {
 
                 {rest.length > 0 && (
                   <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
-                    {rest.map((project) => (
+                    {rest.map((project: { id: string; name: string; hero_image_url?: string; subtitle?: string; slug?: string }) => (
                       <Link
                         key={project.id}
                         href={project.slug ? `/projects/${project.slug}` : "#"}

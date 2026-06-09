@@ -8,31 +8,34 @@ import FeaturedVideoSection from "./components/FeaturedVideoSection";
 import HomeCommunitySection from "./components/HomeCommunitySection";
 import LoanCalculator from "./components/LoanCalculator";
 import FooterServer from "./components/FooterServer";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { SiteSetting, Project, ProjectPage, LifestyleSlide } from "@/lib/models";
 
 export default async function Home() {
-  const supabase = await createClient();
+  await connectDB();
 
-  const [settingsRes, projectsRes, lifestyleRes] = await Promise.all([
-    supabase.from("site_settings").select("key, value"),
-    supabase
-      .from("projects")
-      .select("*, project_pages(slug)")
-      .eq("is_published", true)
-      .order("sort_order"),
-    supabase.from("lifestyle_slides").select("*").eq("is_published", true).order("sort_order"),
+  const [settings, projects, lifestyleSlides] = await Promise.all([
+    SiteSetting.find({ key: { $in: ["home_videos", "featured_video"] } }).lean(),
+    Project.find({ is_published: true }).sort({ sort_order: 1 }).lean(),
+    LifestyleSlide.find({ is_published: true }).sort({ sort_order: 1 }).lean(),
   ]);
 
-  const settings = settingsRes.data ?? [];
+  // Resolve linked project page slugs
+  const pageIds = projects.map((p) => p.linked_project_page_id).filter(Boolean);
+  const projectPages = pageIds.length
+    ? await ProjectPage.find({ _id: { $in: pageIds } }).select("_id slug").lean()
+    : [];
+  const slugById: Record<string, string | null> = {};
+  for (const pp of projectPages) {
+    slugById[String(pp._id)] = pp.slug ?? null;
+  }
+
   const getSetting = (key: string) => settings.find((s) => s.key === key)?.value as Record<string, unknown> | undefined;
 
   const homeVideosSetting = getSetting("home_videos") as { video1?: { youtube_url?: string; title?: string }; video2?: { youtube_url?: string; title?: string } } | undefined;
   const featuredVideoSetting = getSetting("featured_video") as { youtube_url?: string; title?: string } | undefined;
-  // Map to component-expected shape
-  const homeVideos = [
-    homeVideosSetting?.video1,
-    homeVideosSetting?.video2,
-  ]
+
+  const homeVideos = [homeVideosSetting?.video1, homeVideosSetting?.video2]
     .filter((v) => v?.youtube_url)
     .map((v, i) => ({
       id: String(i + 1),
@@ -40,13 +43,17 @@ export default async function Home() {
       youtubeId: extractYouTubeId(v!.youtube_url!),
     }));
 
-  const featuredVideo =
-    featuredVideoSetting?.youtube_url
-      ? {
-          youtubeId: extractYouTubeId(featuredVideoSetting.youtube_url),
-          title: featuredVideoSetting.title ?? "",
-        }
-      : null;
+  const featuredVideo = featuredVideoSetting?.youtube_url
+    ? { youtubeId: extractYouTubeId(featuredVideoSetting.youtube_url), title: featuredVideoSetting.title ?? "" }
+    : null;
+
+  const projectsData = JSON.parse(JSON.stringify(projects)).map((p: Record<string, unknown>) => ({
+    ...p,
+    id: p._id,
+    project_pages: p.linked_project_page_id ? { slug: slugById[String(p.linked_project_page_id)] ?? null } : null,
+  }));
+
+  const slidesData = JSON.parse(JSON.stringify(lifestyleSlides)).map((s: Record<string, unknown>) => ({ ...s, id: s._id }));
 
   return (
     <>
@@ -54,9 +61,9 @@ export default async function Home() {
       <main>
         <HeroSection />
         <VideoSection videos={homeVideos} />
-        <HomeTypeSection projects={projectsRes.data ?? []} />
+        <HomeTypeSection projects={projectsData} />
         <CoverSection />
-        <LifestyleSlider slides={lifestyleRes.data ?? []} />
+        <LifestyleSlider slides={slidesData} />
         <FeaturedVideoSection video={featuredVideo} />
         <HomeCommunitySection />
         <LoanCalculator />
@@ -78,5 +85,5 @@ function extractYouTubeId(input: string): string {
     const match = input.match(pattern);
     if (match) return match[1];
   }
-  return input.trim(); // assume it's already an ID
+  return input.trim();
 }

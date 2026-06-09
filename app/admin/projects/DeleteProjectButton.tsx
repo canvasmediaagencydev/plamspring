@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Trash2 } from "lucide-react";
 
 export function DeleteProjectButton({ id, name }: { id: string; name: string }) {
@@ -12,8 +11,7 @@ export function DeleteProjectButton({ id, name }: { id: string; name: string }) 
   const handleDelete = async () => {
     if (!confirm(`ลบโครงการ "${name}" ใช่ไหม? ไม่สามารถกู้คืนได้`)) return;
     setLoading(true);
-    const supabase = createClient();
-    await supabase.from("project_pages").delete().eq("id", id);
+    await fetch(`/api/admin/project-pages/${id}`, { method: "DELETE" });
     router.refresh();
   };
 

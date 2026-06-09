@@ -1,22 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { ProjectPage } from "@/lib/models";
 import { notFound } from "next/navigation";
 import { ProjectDetailClient } from "@/app/admin/home/projects/[id]/detail/ProjectDetailClient";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default async function AdminProjectDetailPage({ params }: PageProps) {
+export default async function AdminProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const { data } = await supabase
-    .from("project_pages")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (!data) notFound();
-
-  return <ProjectDetailClient project={data} backHref="/admin/projects" />;
+  await connectDB();
+  const doc = await ProjectPage.findById(id).lean();
+  if (!doc) notFound();
+  return <ProjectDetailClient project={JSON.parse(JSON.stringify(doc))} backHref="/admin/projects" />;
 }

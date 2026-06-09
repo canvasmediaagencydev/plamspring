@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { createClient, createStaticClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { ProjectPage } from "@/lib/models";
 import Navbar from "../../components/Navbar";
 import FooterServer from "../../components/FooterServer";
 import ProjectHero from "../../components/ProjectHero";
@@ -54,42 +55,32 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const supabase = createStaticClient();
-  const { data } = await supabase
-    .from("project_pages")
+  await connectDB();
+  const pages = await ProjectPage.find({ is_published: true, slug: { $ne: null } })
     .select("slug")
-    .eq("is_published", true)
-    .not("slug", "is", null);
-  return (data ?? []).map((p) => ({ slug: p.slug! }));
+    .lean();
+  return pages.map((p) => ({ slug: p.slug! }));
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = createStaticClient();
-  const { data } = await supabase
-    .from("project_pages")
-    .select("name, description")
-    .eq("slug", slug)
-    .single();
-  if (!data) return {};
+  await connectDB();
+  const page = await ProjectPage.findOne({ slug }).select("name description").lean();
+  if (!page) return {};
   return {
-    title: `${data.name} | Palm Springs`,
-    description: (data.description ?? "").replace(/\n/g, " "),
+    title: `${page.name} | Palm Springs`,
+    description: ((page.description ?? "") as string).replace(/\n/g, " "),
   };
 }
 
 export default async function ProjectDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
+  await connectDB();
 
-  const { data: project } = await supabase
-    .from("project_pages")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .single();
+  const raw = await ProjectPage.findOne({ slug, is_published: true }).lean();
+  if (!raw) notFound();
 
-  if (!project) notFound();
+  const project = JSON.parse(JSON.stringify(raw));
 
   const houseTypes = (project.house_types as unknown as HouseType[]) ?? [];
   const facilityCards = normalizeFacilityCards(

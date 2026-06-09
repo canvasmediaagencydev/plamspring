@@ -1,8 +1,8 @@
 "use client";
 
 import { ProjectForm } from "../ProjectForm";
-import type { Tables } from "@/lib/types/database.types";
+import type { Project } from "@/lib/types";
 
-export function ProjectFormClient({ initial }: { initial: Tables<"projects"> }) {
+export function ProjectFormClient({ initial }: { initial: Project }) {
   return <ProjectForm mode="edit" initial={initial} />;
 }

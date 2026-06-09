@@ -2,14 +2,15 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import FooterServer from "../../components/FooterServer";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { Post } from "@/lib/models";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase.from("posts").select("title, excerpt").eq("slug", slug).single();
-  if (!data) return {};
-  return { title: `${data.title} | Palm Springs`, description: data.excerpt };
+  await connectDB();
+  const post = await Post.findOne({ slug }).select("title excerpt").lean();
+  if (!post) return {};
+  return { title: `${post.title} | Palm Springs`, description: post.excerpt };
 }
 
 export default async function BlogPostPage({
@@ -18,14 +19,10 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const supabase = await createClient();
+  await connectDB();
 
-  const [postRes] = await Promise.all([
-    supabase.from("posts").select("*").eq("slug", slug).eq("is_published", true).single(),
-  ]);
-
-  if (!postRes.data) notFound();
-  const post = postRes.data;
+  const post = await Post.findOne({ slug, is_published: true }).lean();
+  if (!post) notFound();
 
   const isCsr = post.type === "csr";
   const backHref = isCsr ? "/about" : "/blog";
@@ -51,11 +48,11 @@ export default async function BlogPostPage({
       {post.cover_image_url && (
         <div className="relative flex w-full items-center justify-center overflow-hidden bg-gray-50 py-10 md:pt-30 md:py-16">
           {/* Blurred background to act as dynamic gradient padding */}
-          <div 
-            className="absolute inset-0 scale-110 bg-cover bg-center blur-3xl opacity-60" 
-            style={{ backgroundImage: `url(${post.cover_image_url})` }} 
+          <div
+            className="absolute inset-0 scale-110 bg-cover bg-center blur-3xl opacity-60"
+            style={{ backgroundImage: `url(${post.cover_image_url})` }}
           />
-          
+
           {/* 1:1 Image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -110,7 +107,7 @@ export default async function BlogPostPage({
             prose-blockquote:border-primary prose-blockquote:text-gray-500
             prose-ul:text-gray-700 prose-ol:text-gray-700
             prose-strong:text-gray-900"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: post.content ?? "" }}
         />
       </main>
 

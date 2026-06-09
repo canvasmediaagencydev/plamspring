@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { SiteSetting } from "@/lib/models";
 import HomeCommunityReels from "./HomeCommunityReels";
 
 type Platform = "tiktok" | "youtube" | "instagram";
@@ -21,13 +22,9 @@ const DEFAULT_REELS: SocialReel[] = [
 export default async function HomeCommunitySection() {
   let reels: SocialReel[] = DEFAULT_REELS;
   try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "social_reels")
-      .single();
-    if (data?.value) reels = data.value as unknown as SocialReel[];
+    await connectDB();
+    const doc = await SiteSetting.findOne({ key: "social_reels" }).lean();
+    if (doc?.value) reels = doc.value as unknown as SocialReel[];
   } catch {
     // use defaults
   }

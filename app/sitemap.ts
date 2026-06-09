@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { createStaticClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { ProjectPage, Post } from "@/lib/models";
 
 const SITE_URL = "https://palmspringscm.com";
 
@@ -24,33 +25,28 @@ const staticRoutes: Array<{
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createStaticClient();
+  await connectDB();
   const now = new Date();
 
-  const [projectsRes, postsRes] = await Promise.all([
-    supabase
-      .from("project_pages")
-      .select("slug, updated_at")
-      .eq("is_published", true)
-      .not("slug", "is", null),
-    supabase
-      .from("posts")
-      .select("slug, updated_at, published_at")
-      .eq("is_published", true),
+  const [projectPages, posts] = await Promise.all([
+    ProjectPage.find({ is_published: true, slug: { $ne: null } })
+      .select("slug updated_at")
+      .lean(),
+    Post.find({ is_published: true })
+      .select("slug updated_at published_at")
+      .lean(),
   ]);
 
-  const projectEntries: MetadataRoute.Sitemap = (projectsRes.data ?? []).map(
-    (p) => ({
-      url: `${SITE_URL}/projects/${p.slug}`,
-      lastModified: p.updated_at ? new Date(p.updated_at) : now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }),
-  );
+  const projectEntries: MetadataRoute.Sitemap = projectPages.map((p) => ({
+    url: `${SITE_URL}/projects/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at as string) : now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
 
-  const blogEntries: MetadataRoute.Sitemap = (postsRes.data ?? []).map((p) => ({
+  const blogEntries: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${SITE_URL}/blog/${p.slug}`,
-    lastModified: new Date(p.updated_at ?? p.published_at ?? now),
+    lastModified: new Date((p.updated_at ?? p.published_at ?? now.toISOString()) as string),
     changeFrequency: "monthly",
     priority: 0.6,
   }));

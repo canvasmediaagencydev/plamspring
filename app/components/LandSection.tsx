@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -31,32 +30,28 @@ export default function LandSection() {
     setSubmitting(true);
     setError(null);
 
-    const supabase = createClient();
-
-    // Upload files
+    // Upload files to R2 via /api/upload
     const imageUrls: string[] = [];
     let pdfUrl: string | null = null;
 
     if (files && files.length > 0) {
       for (const file of Array.from(files)) {
-        const ext = file.name.split(".").pop();
-        const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("land-inquiry-images")
-          .upload(path, file, { cacheControl: "3600", upsert: false });
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", "land-inquiry-images");
 
-        if (upErr) {
+        const upRes = await fetch("/api/upload", { method: "POST", body: formData });
+        if (!upRes.ok) {
           setError("อัปโหลดไฟล์ไม่สำเร็จ กรุณาลองใหม่");
           setSubmitting(false);
           return;
         }
 
-        const { data } = supabase.storage.from("land-inquiry-images").getPublicUrl(path);
+        const { url } = await upRes.json();
         if (IMAGE_TYPES.includes(file.type)) {
-          imageUrls.push(data.publicUrl);
+          imageUrls.push(url);
         } else if (!pdfUrl) {
-          // First non-image file (PDF, zip, rar) stored as pdf_url
-          pdfUrl = data.publicUrl;
+          pdfUrl = url;
         }
       }
     }
@@ -69,25 +64,29 @@ export default function LandSection() {
     const saleLabel = form.saleType === "split" ? "แบ่งขาย" : form.saleType === "whole" ? "ขายเหมา" : "";
     const notes = saleLabel ? `ประเภทการขาย: ${saleLabel}` : null;
 
-    const { error: insertError } = await supabase.from("land_inquiries").insert({
-      first_name: firstName,
-      last_name: lastName,
-      phone: form.phone.trim(),
-      email: form.email.trim() || null,
-      land_address: form.location.trim() || null,
-      area_rai: form.rai ? Number(form.rai) : null,
-      area_ngan: form.ngan ? Number(form.ngan) : null,
-      area_wa: form.sqWa ? Number(form.sqWa) : null,
-      asking_price: form.price ? Number(form.price.replace(/[^0-9]/g, "")) : null,
-      images: imageUrls,
-      pdf_url: pdfUrl,
-      notes,
-      status: "new",
+    const res = await fetch("/api/land-inquiry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        phone: form.phone.trim(),
+        email: form.email.trim() || null,
+        land_address: form.location.trim() || null,
+        area_rai: form.rai ? Number(form.rai) : null,
+        area_ngan: form.ngan ? Number(form.ngan) : null,
+        area_wa: form.sqWa ? Number(form.sqWa) : null,
+        asking_price: form.price ? Number(form.price.replace(/[^0-9]/g, "")) : null,
+        images: imageUrls,
+        pdf_url: pdfUrl,
+        notes,
+        status: "new",
+      }),
     });
 
     setSubmitting(false);
 
-    if (insertError) {
+    if (!res.ok) {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       return;
     }

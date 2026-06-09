@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Tables } from "@/lib/types/database.types";
-import { createClient } from "@/lib/supabase/client";
+import type { LandInquiry } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Download,
@@ -18,8 +17,6 @@ import {
   X,
   ExternalLink,
 } from "lucide-react";
-
-type LandInquiry = Tables<"land_inquiries">;
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 
@@ -279,8 +276,11 @@ function InquiryCard({ inquiry: initial }: { inquiry: LandInquiry }) {
     e.stopPropagation();
     const next = inquiry.status === "new" ? "contacted" : "new";
     setUpdatingStatus(true);
-    const supabase = createClient();
-    await supabase.from("land_inquiries").update({ status: next }).eq("id", inquiry.id);
+    await fetch(`/api/admin/land-inquiries/${inquiry.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next }),
+    });
     setInquiry((prev) => ({ ...prev, status: next }));
     setUpdatingStatus(false);
   };

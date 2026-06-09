@@ -4,7 +4,8 @@ import AboutContent from "../components/AboutContent";
 import MilestoneSection from "../components/MilestoneSection";
 import AwardsSection from "../components/AwardsSection";
 import FooterServer from "../components/FooterServer";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { Milestone, Award, Post, SiteSetting } from "@/lib/models";
 
 export const metadata = {
   title: "About Us | Palm Springs",
@@ -12,26 +13,27 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const supabase = await createClient();
+  await connectDB();
 
-  const [milestonesRes, awardsRes, csrPostsRes, aboutRes] = await Promise.all([
-    supabase.from("milestones").select("*").order("sort_order"),
-    supabase.from("awards").select("*").eq("is_published", true).order("sort_order"),
-    supabase.from("posts").select("id, title, slug, cover_image_url, excerpt").eq("type", "csr").eq("is_published", true).order("published_at", { ascending: false }),
-    supabase.from("site_settings").select("value").eq("key", "about_content").single(),
+  const [milestones, awards, csrPosts, aboutSetting] = await Promise.all([
+    Milestone.find().sort({ sort_order: 1 }).lean(),
+    Award.find({ is_published: true }).sort({ sort_order: 1 }).lean(),
+    Post.find({ type: "csr", is_published: true }).select("id title slug cover_image_url excerpt").sort({ published_at: -1 }).lean(),
+    SiteSetting.findOne({ key: "about_content" }).lean(),
   ]);
+
+  const ms = JSON.parse(JSON.stringify(milestones)).map((d: Record<string, unknown>) => ({ ...d, id: d._id }));
+  const aw = JSON.parse(JSON.stringify(awards)).map((d: Record<string, unknown>) => ({ ...d, id: d._id }));
+  const posts = JSON.parse(JSON.stringify(csrPosts)).map((d: Record<string, unknown>) => ({ ...d, id: d._id }));
 
   return (
     <>
       <Navbar />
       <main>
         <HeroSection />
-        <AboutContent data={aboutRes.data?.value as Parameters<typeof AboutContent>[0]["data"]} />
-        <MilestoneSection milestones={milestonesRes.data ?? []} />
-        <AwardsSection
-          awards={awardsRes.data ?? []}
-          csrPosts={csrPostsRes.data ?? []}
-        />
+        <AboutContent data={aboutSetting?.value as Parameters<typeof AboutContent>[0]["data"]} />
+        <MilestoneSection milestones={ms} />
+        <AwardsSection awards={aw} csrPosts={posts} />
       </main>
       <FooterServer />
     </>

@@ -1,10 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { Post } from "@/lib/models";
 import { notFound } from "next/navigation";
 import { PostFormClient } from "./PostFormClient";
+
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase.from("posts").select("*").eq("id", id).single();
-  if (!data) notFound();
-  return <PostFormClient initial={data} />;
+  await connectDB();
+  const doc = await Post.findById(id).lean();
+  if (!doc) notFound();
+  return <PostFormClient initial={JSON.parse(JSON.stringify(doc))} />;
 }

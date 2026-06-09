@@ -1,15 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { LifestyleSlide } from "@/lib/models";
 import { notFound } from "next/navigation";
 import { LifestyleFormClient } from "./LifestyleFormClient";
 
-export default async function EditLifestyleslidePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditLifestyleslidePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase.from("lifestyle_slides").select("*").eq("id", id).single();
-  if (!data) notFound();
-  return <LifestyleFormClient initial={data} />;
+  await connectDB();
+  const doc = await LifestyleSlide.findById(id).lean();
+  if (!doc) notFound();
+  return <LifestyleFormClient initial={JSON.parse(JSON.stringify(doc))} />;
 }

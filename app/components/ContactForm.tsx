@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 export default function ContactForm() {
   const router = useRouter();
@@ -19,15 +18,13 @@ export default function ContactForm() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error: dbError } = await supabase.from("contact_submissions").insert({
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      message: form.message,
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
     });
 
-    if (dbError) {
+    if (!res.ok) {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       setLoading(false);
       return;

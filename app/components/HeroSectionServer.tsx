@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { SiteSetting } from "@/lib/models";
 import HeroSection from "./HeroSection";
 
 /**
@@ -10,14 +11,11 @@ import HeroSection from "./HeroSection";
  * back to the desktop images (handled in HeroSection) when unset.
  */
 export default async function HeroSectionServer() {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("site_settings")
-    .select("key, value")
-    .in("key", ["hero_images", "hero_images_mobile"]);
+  await connectDB();
+  const docs = await SiteSetting.find({ key: { $in: ["hero_images", "hero_images_mobile"] } }).lean();
 
   const read = (key: string): string[] => {
-    const value = data?.find((row) => row.key === key)?.value;
+    const value = docs.find((row) => row.key === key)?.value;
     return Array.isArray(value) ? (value as string[]) : [];
   };
 

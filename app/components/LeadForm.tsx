@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 const BUDGET_OPTIONS = [
   "น้อยกว่า 1 ล้านบาท",
@@ -113,19 +112,22 @@ export default function LeadForm() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error: dbError } = await supabase.from("lead_submissions").insert({
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      line_id: form.lineId || null,
-      budget: form.budget || null,
-      detail: form.detail || null,
-      visit_date: form.date || null,
-      visit_time: form.time || null,
+    const res = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        line_id: form.lineId || null,
+        budget: form.budget || null,
+        detail: form.detail || null,
+        visit_date: form.date || null,
+        visit_time: form.time || null,
+      }),
     });
 
-    if (dbError) {
+    if (!res.ok) {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       setLoading(false);
       return;
@@ -137,9 +139,6 @@ export default function LeadForm() {
   return (
     <section className="w-full bg-white py-12 md:py-16">
       <div className="mx-auto max-w-xl px-6 md:px-12">
-
-        {/* ── Social login ── */}
-
 
         {/* ── Form ── */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-7">

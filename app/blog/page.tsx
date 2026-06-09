@@ -3,7 +3,8 @@ import HeroSection from "../components/HeroSectionServer";
 import BlogHeader from "../components/BlogHeader";
 import BlogList from "../components/BlogList";
 import FooterServer from "../components/FooterServer";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { Post } from "@/lib/models";
 
 export const metadata = {
   title: "Blog | Palm Springs",
@@ -11,14 +12,14 @@ export const metadata = {
 };
 
 export default async function BlogPage() {
-  const supabase = await createClient();
+  await connectDB();
 
-  const { data: posts } = await supabase
-    .from("posts")
-    .select("id, title, slug, excerpt, cover_image_url")
-    .eq("type", "blog")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false });
+  const posts = await Post.find({ type: "blog", is_published: true })
+    .select("_id title slug excerpt cover_image_url")
+    .sort({ published_at: -1 })
+    .lean();
+
+  const postsData = JSON.parse(JSON.stringify(posts)).map((p: Record<string, unknown>) => ({ ...p, id: p._id }));
 
   return (
     <>
@@ -26,7 +27,7 @@ export default async function BlogPage() {
       <main>
         <HeroSection />
         <BlogHeader />
-        <BlogList posts={posts ?? []} />
+        <BlogList posts={postsData} />
       </main>
       <FooterServer />
     </>

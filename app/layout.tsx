@@ -5,7 +5,8 @@ import "./globals.css";
 import PublicStickyContact from "./components/PublicStickyContact";
 import GoogleTranslateProvider from "./components/GoogleTranslateProvider";
 import TransitionProvider from "./components/TransitionProvider";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { SiteSetting } from "@/lib/models";
 
 const GTM_ID = "GTM-NQBJT65K";
 const GA_ID = "G-KCQ9ZW5JLT";
@@ -30,13 +31,9 @@ export default async function RootLayout({
   // Fetch sticky contact settings (non-blocking — graceful fallback on error)
   let stickySettings: { facebook_messenger_url?: string; line_url?: string } = {};
   try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "sticky_contact")
-      .single();
-    if (data?.value) stickySettings = data.value as typeof stickySettings;
+    await connectDB();
+    const doc = await SiteSetting.findOne({ key: "sticky_contact" }).lean();
+    if (doc?.value) stickySettings = doc.value as typeof stickySettings;
   } catch {
     // use defaults
   }

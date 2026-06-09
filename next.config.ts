@@ -3,11 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      // Supabase Storage CDN
+      // Cloudflare R2 public CDN
       {
         protocol: "https",
-        hostname: "dkdrfftuvroetapqrqbf.supabase.co",
-        pathname: "/storage/v1/object/public/**",
+        hostname: "pub-8ebc60b60d064b778b90395754b8ff54.r2.dev",
       },
       // YouTube thumbnails (used in VideoSection and FeaturedVideoSection)
       {
@@ -25,12 +24,12 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline' https://translate.googleapis.com https://www.gstatic.com https://fonts.googleapis.com",
       // Fonts
       "font-src 'self' https://fonts.gstatic.com",
-      // Images — allow data URIs, blob, and any https (covers Supabase, YouTube, Google Translate flags)
+      // Images — allow data URIs, blob, and any https
       "img-src 'self' data: blob: https: http:",
       // Frames — Google Translate attribution iframe
       "frame-src 'self' https://translate.google.com https://translate.googleapis.com https://www.tiktok.com https://www.instagram.com https://www.youtube.com https://www.google.com https://maps.google.com",
       // XHR / fetch — includes CDNs used by @lottiefiles/dotlottie-react for WASM + animation files; GA4 beacon endpoints
-      "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://dkdrfftuvroetapqrqbf.supabase.co https://cdn.jsdelivr.net https://unpkg.com https://lottie.host https://www.tiktok.com https://www.instagram.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://stats.g.doubleclick.net",
+      "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://pub-8ebc60b60d064b778b90395754b8ff54.r2.dev https://cdn.jsdelivr.net https://unpkg.com https://lottie.host https://www.tiktok.com https://www.instagram.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://stats.g.doubleclick.net",
     ].join("; ");
 
     return [

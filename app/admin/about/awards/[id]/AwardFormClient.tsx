@@ -1,6 +1,6 @@
 "use client";
 import { AwardForm } from "../AwardForm";
-import type { Tables } from "@/lib/types/database.types";
-export function AwardFormClient({ initial }: { initial: Tables<"awards"> }) {
+import type { Award } from "@/lib/types";
+export function AwardFormClient({ initial }: { initial: Award }) {
   return <AwardForm mode="edit" initial={initial} />;
 }

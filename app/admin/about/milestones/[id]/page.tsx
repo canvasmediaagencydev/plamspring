@@ -1,10 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { Milestone } from "@/lib/models";
 import { notFound } from "next/navigation";
 import { MilestoneFormClient } from "./MilestoneFormClient";
+
 export default async function EditMilestonePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase.from("milestones").select("*").eq("id", id).single();
-  if (!data) notFound();
-  return <MilestoneFormClient initial={data} />;
+  await connectDB();
+  const doc = await Milestone.findById(id).lean();
+  if (!doc) notFound();
+  return <MilestoneFormClient initial={JSON.parse(JSON.stringify(doc))} />;
 }

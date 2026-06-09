@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { downloadExcelFile } from "@/lib/export-excel";
 import { Mail, Phone, MessageSquare, User, ChevronDown, ChevronUp, Download } from "lucide-react";
 
@@ -53,8 +52,11 @@ export default function ContactSubmissionsClient({ submissions: initial }: { sub
   const toggleStatus = async (sub: Submission) => {
     const next = sub.status === "new" ? "contacted" : "new";
     setUpdating(sub.id);
-    const supabase = createClient();
-    await supabase.from("contact_submissions").update({ status: next }).eq("id", sub.id);
+    await fetch(`/api/admin/contact-submissions/${sub.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next }),
+    });
     setSubmissions((prev) => prev.map((s) => (s.id === sub.id ? { ...s, status: next } : s)));
     setUpdating(null);
   };

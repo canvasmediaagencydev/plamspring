@@ -1,7 +1,8 @@
 // lib/llms/data.ts
-// Published-only Supabase fetch for the llms.txt files. Mirrors the filters
+// Published-only MongoDB fetch for the llms.txt files. Mirrors the filters
 // used by app/sitemap.ts. Errors degrade to empty arrays so the routes never 500.
-import { createStaticClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { ProjectPage, Post } from "@/lib/models";
 
 export interface LlmsProject {
   name: string;
@@ -23,67 +24,61 @@ export interface LlmsPost {
 }
 
 export async function getProjects(): Promise<LlmsProject[]> {
-  const supabase = createStaticClient();
-  const { data, error } = await supabase
-    .from("project_pages")
-    .select("name, subtitle, description, slug, highlights, house_types, nearby_places")
-    .eq("is_published", true)
-    .not("slug", "is", null);
+  try {
+    await connectDB();
+    const data = await ProjectPage.find({ is_published: true, slug: { $ne: null } })
+      .select("name subtitle description slug highlights house_types nearby_places")
+      .lean();
 
-  if (error) {
-    console.error("[llms/data] getProjects error:", error.message);
+    return data.map((p) => ({
+      name: p.name,
+      subtitle: p.subtitle ?? null,
+      description: p.description ?? null,
+      slug: p.slug as string,
+      highlights: Array.isArray(p.highlights)
+        ? (p.highlights as unknown[]).filter((h): h is string => typeof h === "string")
+        : [],
+      houseTypes: Array.isArray(p.house_types)
+        ? (p.house_types as Array<{ name?: string }>)
+            .map((h) => h?.name)
+            .filter((n): n is string => !!n)
+        : [],
+      nearbyPlaces: Array.isArray(p.nearby_places)
+        ? (p.nearby_places as Array<{ name?: string; distance?: number | string; unit?: string }>)
+            .map((pl) => {
+              if (!pl?.name) return "";
+              const dist =
+                pl.distance != null
+                  ? ` — ${pl.distance}${pl.unit ? ` ${pl.unit}` : ""}`
+                  : "";
+              return `${pl.name}${dist}`;
+            })
+            .filter((s) => s.length > 0)
+        : [],
+    }));
+  } catch (error) {
+    console.error("[llms/data] getProjects error:", error);
     return [];
   }
-  if (!data) return [];
-
-  return data.map((p) => ({
-    name: p.name,
-    subtitle: p.subtitle ?? null,
-    description: p.description ?? null,
-    slug: p.slug as string,
-    highlights: Array.isArray(p.highlights)
-      ? (p.highlights as unknown[]).filter((h): h is string => typeof h === "string")
-      : [],
-    houseTypes: Array.isArray(p.house_types)
-      ? (p.house_types as Array<{ name?: string }>)
-          .map((h) => h?.name)
-          .filter((n): n is string => !!n)
-      : [],
-    nearbyPlaces: Array.isArray(p.nearby_places)
-      ? (p.nearby_places as Array<{ name?: string; distance?: number | string; unit?: string }>)
-          .map((pl) => {
-            if (!pl?.name) return "";
-            const dist =
-              pl.distance != null
-                ? ` — ${pl.distance}${pl.unit ? ` ${pl.unit}` : ""}`
-                : "";
-            return `${pl.name}${dist}`;
-          })
-          .filter((s) => s.length > 0)
-      : [],
-  }));
 }
 
 export async function getPosts(): Promise<LlmsPost[]> {
-  const supabase = createStaticClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("title, excerpt, content, slug, type, published_at")
-    .eq("is_published", true)
-    .not("slug", "is", null);
+  try {
+    await connectDB();
+    const data = await Post.find({ is_published: true, slug: { $ne: null } })
+      .select("title excerpt content slug type published_at")
+      .lean();
 
-  if (error) {
-    console.error("[llms/data] getPosts error:", error.message);
+    return data.map((p) => ({
+      title: p.title,
+      excerpt: p.excerpt ?? null,
+      content: p.content ?? null,
+      slug: p.slug as string,
+      type: p.type ?? null,
+      publishedAt: p.published_at ?? null,
+    }));
+  } catch (error) {
+    console.error("[llms/data] getPosts error:", error);
     return [];
   }
-  if (!data) return [];
-
-  return data.map((p) => ({
-    title: p.title,
-    excerpt: p.excerpt ?? null,
-    content: p.content ?? null,
-    slug: p.slug as string,
-    type: p.type ?? null,
-    publishedAt: p.published_at ?? null,
-  }));
 }

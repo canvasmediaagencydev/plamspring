@@ -1,0 +1,3 @@
+id,name,email,phone,line_id,budget,detail,visit_date,visit_time,status,created_at
+053b7266-acec-4c90-b11a-1b935c5030aa,test,test@mail,030303030,test,3 - 5 ล้านบาท,สอบถามราคา,2026-04-15,13:00 - 14:00,contacted,2026-04-10 04:35:12.140657+00
+bfbf3898-36f2-4bf9-949a-3ac6023e70e1,GG hh,seller11@seller,040400404040,,1 - 2 ล้านบาท,สอบถามราคา,2026-04-17,13:00 - 14:00,contacted,2026-04-20 10:44:45.745044+00

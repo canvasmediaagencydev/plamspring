@@ -5,7 +5,8 @@ import OurFamilySlider from "../components/OurFamilySlider";
 import OurFamilyVideos from "../components/OurFamilyVideos";
 import OurFamilyGrid from "../components/OurFamilyGrid";
 import FooterServer from "../components/FooterServer";
-import { createClient } from "@/lib/supabase/server";
+import { connectDB } from "@/lib/mongodb";
+import { SiteSetting, OurFamilyImage } from "@/lib/models";
 
 export const metadata = {
   title: "Our Family | Palm Springs",
@@ -13,16 +14,18 @@ export const metadata = {
 };
 
 export default async function OurFamilyPage() {
-  const supabase = await createClient();
+  await connectDB();
 
-  const [settingsRes, sliderImagesRes, gridImagesRes] = await Promise.all([
-    supabase.from("site_settings").select("key, value").eq("key", "our_family_videos"),
-    supabase.from("our_family_images").select("*").eq("section", "slider").order("sort_order"),
-    supabase.from("our_family_images").select("*").eq("section", "grid").order("sort_order"),
+  const [settings, sliderImages, gridImages] = await Promise.all([
+    SiteSetting.findOne({ key: "our_family_videos" }).lean(),
+    OurFamilyImage.find({ section: "slider" }).sort({ sort_order: 1 }).lean(),
+    OurFamilyImage.find({ section: "grid" }).sort({ sort_order: 1 }).lean(),
   ]);
 
-  const settings = settingsRes.data ?? [];
-  const familyVideos = settings.find((s) => s.key === "our_family_videos")?.value as { video1?: { youtube_url?: string; title?: string }; video2?: { youtube_url?: string; title?: string } } | undefined;
+  const familyVideos = settings?.value as { video1?: { youtube_url?: string; title?: string }; video2?: { youtube_url?: string; title?: string } } | undefined;
+
+  const sliderData = JSON.parse(JSON.stringify(sliderImages)).map((d: Record<string, unknown>) => ({ ...d, id: d._id }));
+  const gridData = JSON.parse(JSON.stringify(gridImages)).map((d: Record<string, unknown>) => ({ ...d, id: d._id }));
 
   return (
     <>
@@ -30,12 +33,12 @@ export default async function OurFamilyPage() {
       <main>
         <HeroSection />
         <OurFamilyWelcome />
-        <OurFamilySlider images={sliderImagesRes.data ?? []} />
+        <OurFamilySlider images={sliderData} />
         <OurFamilyVideos
           video1={familyVideos?.video1}
           video2={familyVideos?.video2}
         />
-        <OurFamilyGrid images={gridImagesRes.data ?? []} />
+        <OurFamilyGrid images={gridData} />
       </main>
       <FooterServer />
     </>

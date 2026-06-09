@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { AdminHeader } from "@/app/components/admin/AdminHeader";
 import { ImageUploader } from "@/app/components/admin/ImageUploader";
 import { FileUploader } from "@/app/components/admin/FileUploader";
@@ -13,13 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, Save, Waves, TreePine, Home, Shield, Camera, Dumbbell, Check, GripVertical, type LucideIcon } from "lucide-react";
 import { revalidatePages } from "@/lib/revalidate";
-import type { Tables } from "@/lib/types/database.types";
-import type { Json } from "@/lib/types/database.types";
+import type { ProjectPage } from "@/lib/types";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-type Project = Tables<"project_pages">;
+type Project = ProjectPage;
 
 // ─── JSONB domain types ────────────────────────────────────────────────────────
 
@@ -200,7 +198,6 @@ export function ProjectDetailClient({
   project: Project;
   backHref?: string;
 }) {
-  const supabase = createClient();
   const [tab, setTab] = useState<TabId>("hero");
 
   // ── Basic info state ──
@@ -272,15 +269,16 @@ export function ProjectDetailClient({
     await revalidatePages(paths);
   };
 
-  const save = async (payload: Partial<Tables<"project_pages">>) => {
+  const save = async (payload: Partial<ProjectPage>) => {
     setSaving(true);
     setSaveMsg(null);
     try {
-      const { error } = await supabase
-        .from("project_pages")
-        .update({ ...payload, updated_at: new Date().toISOString() })
-        .eq("id", project.id);
-      if (error) throw error;
+      const res = await fetch(`/api/admin/project-pages/${project.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, updated_at: new Date().toISOString() }),
+      });
+      if (!res.ok) throw new Error();
       await revalidate();
       setSaveMsg({ type: "ok", text: "บันทึกสำเร็จ" });
     } catch {
@@ -304,12 +302,12 @@ export function ProjectDetailClient({
   const saveInfo = () =>
     save({
       description: description || null,
-      highlights: highlights as unknown as Json,
+      highlights,
       brochure_url: brochureUrl || null,
     });
 
   const saveHouses = () =>
-    save({ house_types: houses as unknown as Json });
+    save({ house_types: houses });
 
   const saveFacilities = () =>
     save({
@@ -317,11 +315,11 @@ export function ProjectDetailClient({
       // don't render stale data on the public page.
       facility_image_1: null,
       facility_image_2: null,
-      facilities: facilityCards as unknown as Json,
+      facilities: facilityCards,
     });
 
   const saveLocation = () =>
-    save({ nearby_places: nearbyPlaces as unknown as Json });
+    save({ nearby_places: nearbyPlaces });
 
   const saveMap = () =>
     save({
@@ -333,7 +331,7 @@ export function ProjectDetailClient({
     save({
       gallery_images: galleryImages
         .map((image) => image.trim())
-        .filter(Boolean) as unknown as Json,
+        .filter(Boolean),
     });
 
   // ── House helpers ──

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +33,7 @@ const INITIAL: FormValues = {
   asking_price: "", title_deed_type: "", notes: "",
 };
 
-// ── Image uploader (anonymous, public bucket) ─────────────────────────────────
+// ── Image uploader ────────────────────────────────────────────────────────────
 
 function ImageUploadField({
   images,
@@ -113,8 +112,6 @@ export default function LandInquiryForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -122,20 +119,19 @@ export default function LandInquiryForm() {
 
   const handleAddImage = async (file: File) => {
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from("land-inquiry-images")
-      .upload(path, file, { cacheControl: "3600", upsert: false });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "land-inquiry-images");
 
-    if (upErr) {
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) {
       setError("อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่");
       setUploading(false);
       return;
     }
 
-    const { data } = supabase.storage.from("land-inquiry-images").getPublicUrl(path);
-    setImages((prev) => [...prev, data.publicUrl]);
+    const { url } = await res.json();
+    setImages((prev) => [...prev, url]);
     setUploading(false);
   };
 
@@ -143,19 +139,19 @@ export default function LandInquiryForm() {
 
   const handleAddPdf = async (file: File) => {
     setUploadingPdf(true);
-    const path = `pdf/${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
-    const { error: upErr } = await supabase.storage
-      .from("land-inquiry-images")
-      .upload(path, file, { cacheControl: "3600", upsert: false });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "land-inquiry-pdfs");
 
-    if (upErr) {
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) {
       setError("อัปโหลด PDF ไม่สำเร็จ กรุณาลองใหม่");
       setUploadingPdf(false);
       return;
     }
 
-    const { data } = supabase.storage.from("land-inquiry-images").getPublicUrl(path);
-    setPdfUrl(data.publicUrl);
+    const { url } = await res.json();
+    setPdfUrl(url);
     setPdfName(file.name);
     setUploadingPdf(false);
   };
@@ -165,28 +161,32 @@ export default function LandInquiryForm() {
     setLoading(true);
     setError(null);
 
-    const { error: insertError } = await supabase.from("land_inquiries").insert({
-      first_name: values.first_name.trim(),
-      last_name: values.last_name.trim(),
-      phone: values.phone.trim(),
-      email: values.email.trim() || null,
-      province: values.province.trim() || null,
-      district: values.district.trim() || null,
-      land_address: values.land_address.trim() || null,
-      area_rai: values.area_rai ? Number(values.area_rai) : null,
-      area_ngan: values.area_ngan ? Number(values.area_ngan) : null,
-      area_wa: values.area_wa ? Number(values.area_wa) : null,
-      asking_price: values.asking_price ? Number(values.asking_price) : null,
-      title_deed_type: values.title_deed_type || null,
-      notes: values.notes.trim() || null,
-      images: images,
-      pdf_url: pdfUrl,
-      status: "new",
+    const res = await fetch("/api/land-inquiry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: values.first_name.trim(),
+        last_name: values.last_name.trim(),
+        phone: values.phone.trim(),
+        email: values.email.trim() || null,
+        province: values.province.trim() || null,
+        district: values.district.trim() || null,
+        land_address: values.land_address.trim() || null,
+        area_rai: values.area_rai ? Number(values.area_rai) : null,
+        area_ngan: values.area_ngan ? Number(values.area_ngan) : null,
+        area_wa: values.area_wa ? Number(values.area_wa) : null,
+        asking_price: values.asking_price ? Number(values.asking_price) : null,
+        title_deed_type: values.title_deed_type || null,
+        notes: values.notes.trim() || null,
+        images,
+        pdf_url: pdfUrl,
+        status: "new",
+      }),
     });
 
     setLoading(false);
 
-    if (insertError) {
+    if (!res.ok) {
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
       return;
     }
