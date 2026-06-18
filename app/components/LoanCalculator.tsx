@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { RotateCcw } from "lucide-react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import dynamic from "next/dynamic";
+
+const DotLottieReact = dynamic(
+  () => import("@lottiefiles/dotlottie-react").then((m) => m.DotLottieReact),
+  { ssr: false }
+);
 
 // ── Calculation ───────────────────────────────────────────────────────────────
 // M = P × [r(1+r)^n] / [(1+r)^n − 1]
@@ -185,11 +190,14 @@ export default function LoanCalculator() {
 
         {/* ── Right: Lottie ── */}
         <div className="flex w-full items-center justify-center md:w-3/5">
-          <DotLottieReact
-            src="https://lottie.host/e8cfe9a9-4914-438b-a857-989330f6021f/un25PSzTR9.lottie"
-            loop
-            autoplay
-          />
+          <div style={{ width: "600px", maxWidth: "100%" }}>
+            <DotLottieReact
+              src="/lottie/loan-calculator.lottie"
+              loop
+              autoplay
+              style={{ width: "100%", height: "100%" }}
+            />
+          </div>
         </div>
       </div>
     </section>

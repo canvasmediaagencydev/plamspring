@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import dynamic from "next/dynamic";
+
+const DotLottieReact = dynamic(
+  () => import("@lottiefiles/dotlottie-react").then((m) => m.DotLottieReact),
+  { ssr: false }
+);
 
 interface HomeTypeCard {
   id: string;

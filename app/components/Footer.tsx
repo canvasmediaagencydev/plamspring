@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import dynamic from "next/dynamic";
+
+const DotLottieReact = dynamic(
+  () => import("@lottiefiles/dotlottie-react").then((m) => m.DotLottieReact),
+  { ssr: false }
+);
 import {
   FaFacebookF,
   FaInstagram,
@@ -142,11 +147,7 @@ export default function Footer({ settings }: FooterProps) {
 
         {/* Lottie — smaller on mobile */}
         <div className="w-48 mt-2">
-          <DotLottieReact
-            src="https://lottie.host/02a7a704-14af-40fb-95d1-1b2e6cfa3029/kOD28GwRIf.lottie"
-            loop
-            autoplay
-          />
+          <DotLottieReact src="/lottie/footer.lottie" loop autoplay />
         </div>
 
         {/* Copyright */}
@@ -242,11 +243,7 @@ export default function Footer({ settings }: FooterProps) {
           <p className="absolute right-0 top-0 z-10 text-right text-xl font-bold italic leading-snug text-white">
             &ldquo;เลือกปาล์มสปริงส์<br />เพื่อชีวิตที่ดีกว่า&rdquo;
           </p>
-          <DotLottieReact
-            src="https://lottie.host/02a7a704-14af-40fb-95d1-1b2e6cfa3029/kOD28GwRIf.lottie"
-            loop
-            autoplay
-          />
+          <DotLottieReact src="/lottie/footer.lottie" loop autoplay />
           <p className="mt-1 text-xs text-white/50">
             &copy; 2019 - 2023 palm springs place co., ltd. all rights reserved.
           </p>
