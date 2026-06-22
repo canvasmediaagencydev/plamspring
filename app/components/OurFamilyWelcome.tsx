@@ -1,11 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const DotLottieReact = dynamic(
-  () => import("@lottiefiles/dotlottie-react").then((m) => m.DotLottieReact),
-  { ssr: false }
-);
+import Image from "next/image";
 
 export default function OurFamilyWelcome() {
   return (
@@ -25,13 +20,13 @@ export default function OurFamilyWelcome() {
           </p>
         </div>
 
-        {/* Right — Lottie */}
-        <div className="aspect-square w-64 shrink-0 md:w-96">
-          <DotLottieReact
-            src="https://lottie.host/2c340b61-cfcb-4b3c-b1d4-9e21779c0eb1/fNKmzGxlt6.lottie"
-            loop
-            autoplay
-            className="h-full w-full"
+        {/* Right — Image */}
+        <div className="relative aspect-square w-64 shrink-0 md:w-96">
+          <Image
+            src="/girl.png"
+            alt="Welcome to Family"
+            fill
+            className="object-contain"
           />
         </div>
       </div>
