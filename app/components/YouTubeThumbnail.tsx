@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image, { type ImageProps } from "next/image";
 
-const THUMBNAIL_VARIANTS = ["maxresdefault", "hqdefault", "mqdefault", "default"] as const;
+const THUMBNAIL_VARIANTS = ["hqdefault", "maxresdefault", "mqdefault", "default"] as const;
 
 function getThumbnailUrl(videoId: string, variant: (typeof THUMBNAIL_VARIANTS)[number]) {
   return `https://img.youtube.com/vi/${videoId}/${variant}.jpg`;

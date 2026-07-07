@@ -94,10 +94,10 @@ export default function HomeTypeSection({ projects = [] }: HomeTypeSectionProps)
           <h2 className="text-3xl font-bold text-primary md:text-5xl">โครงการของเรา</h2>
         </div>
 
-        {/* Lottie icons — hidden on mobile */}
-        <div className="relative hidden h-32 w-56 shrink-0 md:block">
+        {/* Lottie icons */}
+        <div className="relative h-20 w-32 shrink-0 md:h-32 md:w-56">
           {/* Left animation */}
-          <div className="absolute -bottom-10 -left-30 h-59 w-59">
+          <div className="absolute -bottom-6 -left-16 h-32 w-32 md:-bottom-10 md:-left-30 md:h-59 md:w-59">
             <DotLottieReact
               src="https://lottie.host/a01bf9c9-be42-446d-8838-c013066bff97/jXBBBuCOpS.lottie"
               loop
@@ -105,7 +105,7 @@ export default function HomeTypeSection({ projects = [] }: HomeTypeSectionProps)
             />
           </div>
           {/* House animation */}
-          <div className="absolute -bottom-10 right-0 h-60 w-60">
+          <div className="absolute -bottom-6 right-0 h-36 w-36 md:-bottom-10 md:h-60 md:w-60">
             <DotLottieReact
               src="https://lottie.host/8f23d53b-69e8-41e5-8b50-776b5520178b/beTZAPmn09.lottie"
               loop
