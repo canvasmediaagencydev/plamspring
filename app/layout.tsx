@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const GTM_ID = "GTM-NQBJT65K";
 const GA_ID = "G-KCQ9ZW5JLT";
-const AEO_GEO_KEY = "ps_da050734e184dfb599d147a0";
+const AEO_GEO_KEY = process.env.NEXT_PUBLIC_AEO_GEO_KEY!;
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
