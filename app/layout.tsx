@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const GTM_ID = "GTM-NQBJT65K";
 const GA_ID = "G-KCQ9ZW5JLT";
+const AEO_GEO_KEY = process.env.NEXT_PUBLIC_AEO_GEO_KEY!;
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -65,6 +66,11 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '${GA_ID}');`}
         </Script>
+        <Script
+          id="aeo-geo-snippet"
+          src={`https://api.ansio.dev/snippet/aeo.js?key=${AEO_GEO_KEY}`}
+          strategy="afterInteractive"
+        />
       </head>
       <body className={`${montserrat.variable} antialiased`}>
         <noscript>
